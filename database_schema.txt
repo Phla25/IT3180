@@ -114,9 +114,9 @@ CREATE TABLE dich_vu (
 
 -- Bảng đăng ký dịch vụ
 CREATE TABLE dang_ky_dich_vu (
-    ma_dang_ky INTEGER PRIMARY KEY,
+    ma_dang_ky SERIAL PRIMARY KEY,
     cccd_nguoi_dung VARCHAR(12) NOT NULL,
-    ma_dich_vu VARCHAR(20) NOT NULL,
+    ma_dich_vu INTEGER NOT NULL,
     mo_ta_yeu_cau TEXT,
     ngay_dang_ky TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ngay_bat_dau_su_dung DATE,

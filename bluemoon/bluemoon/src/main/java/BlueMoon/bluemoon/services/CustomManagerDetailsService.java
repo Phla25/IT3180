@@ -1,0 +1,60 @@
+package BlueMoon.bluemoon.services;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import BlueMoon.bluemoon.daos.DoiTuongRepository;
+import BlueMoon.bluemoon.entities.DoiTuong;
+import BlueMoon.bluemoon.utils.AccountStatus;
+import BlueMoon.bluemoon.utils.UserRole;
+
+// Thay đổi tên class cho mỗi file: CustomManagerDetailsService, CustomAccountantDetailsService, v.v.
+// @Service (Chỉ cần 1 trong 4 file có @Service nếu bạn dùng @Bean trong SecurityConfig)
+public class CustomManagerDetailsService implements UserDetailsService {
+
+    private final DoiTuongRepository doiTuongRepository;
+    
+    public CustomManagerDetailsService(DoiTuongRepository doiTuongRepository) {
+        this.doiTuongRepository = doiTuongRepository;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        
+        // 1. Lấy vai trò cụ thể cho Service này
+        final UserRole REQUIRED_ROLE = UserRole.BAN_QUAN_TRI; // <--- THAY ĐỔI VAI TRÒ Ở ĐÂY
+
+        // 2. Tìm Entity (tìm bằng CCCD trước, sau đó là Email)
+        DoiTuong user = doiTuongRepository.findById(username)
+            .orElseGet(() -> doiTuongRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Tài khoản " + username + " không tồn tại.")));
+
+        // 3. KIỂM TRA VAI TRÒ PHÙ HỢP
+        if (user.getVaiTro() != REQUIRED_ROLE) {
+            // Ném lỗi để ProviderManager chuyển sang Provider tiếp theo
+            throw new UsernameNotFoundException("Tài khoản không phải là " + REQUIRED_ROLE.getDbValue()); 
+        }
+        
+        // 4. KIỂM TRA TRẠNG THÁI
+        if (user.getTrangThaiTaiKhoan() != AccountStatus.HOAT_DONG) {
+             throw new UsernameNotFoundException("Tài khoản đã bị khóa hoặc không hoạt động.");
+        }
+        
+        // 5. Trả về đối tượng UserDetails của Spring Security
+        List<GrantedAuthority> authorities = Collections.singletonList(
+             new SimpleGrantedAuthority("ROLE_" + REQUIRED_ROLE.name())
+        );
+
+        return new org.springframework.security.core.userdetails.User(
+            user.getCccd(), 
+            user.getMatKhau(), // Đảm bảo đây là mật khẩu đã BĂM (hashed)
+            authorities         
+        );
+    }
+}
