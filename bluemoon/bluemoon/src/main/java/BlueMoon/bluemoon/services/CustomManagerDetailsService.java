@@ -8,20 +8,22 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-import BlueMoon.bluemoon.daos.DoiTuongRepository;
+import BlueMoon.bluemoon.daos.DoiTuongDAO;
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.utils.AccountStatus;
 import BlueMoon.bluemoon.utils.UserRole;
 
 // Thay đổi tên class cho mỗi file: CustomManagerDetailsService, CustomAccountantDetailsService, v.v.
 // @Service (Chỉ cần 1 trong 4 file có @Service nếu bạn dùng @Bean trong SecurityConfig)
+@Service
 public class CustomManagerDetailsService implements UserDetailsService {
 
-    private final DoiTuongRepository doiTuongRepository;
+    private final DoiTuongDAO doiTuongDAO;
     
-    public CustomManagerDetailsService(DoiTuongRepository doiTuongRepository) {
-        this.doiTuongRepository = doiTuongRepository;
+    public CustomManagerDetailsService(DoiTuongDAO doiTuongDAO) {
+        this.doiTuongDAO = doiTuongDAO;
     }
 
     @Override
@@ -31,8 +33,8 @@ public class CustomManagerDetailsService implements UserDetailsService {
         final UserRole REQUIRED_ROLE = UserRole.BAN_QUAN_TRI; // <--- THAY ĐỔI VAI TRÒ Ở ĐÂY
 
         // 2. Tìm Entity (tìm bằng CCCD trước, sau đó là Email)
-        DoiTuong user = doiTuongRepository.findById(username)
-            .orElseGet(() -> doiTuongRepository.findByEmail(username)
+        DoiTuong user = doiTuongDAO.findByCccd(username)
+            .orElseGet(() -> doiTuongDAO.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Tài khoản " + username + " không tồn tại.")));
 
         // 3. KIỂM TRA VAI TRÒ PHÙ HỢP

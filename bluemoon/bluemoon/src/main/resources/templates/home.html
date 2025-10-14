@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trang Chủ BlueMoon</title>
+</head>
+<body>
+    <h1>Chào mừng bạn đã đăng nhập thành công!</h1>
+    <p>Bạn đã truy cập vào trang chủ an toàn.</p>
+    
+    <p>Kiểm tra quyền truy cập Hóa đơn: <a href="/api/hoadon/check">Đi tới Hóa đơn</a></p>
+    
+    <form th:action="@{/logout}" method="post">
+        <input type="submit" value="Đăng xuất">
+    </form>
+</body>
+</html>

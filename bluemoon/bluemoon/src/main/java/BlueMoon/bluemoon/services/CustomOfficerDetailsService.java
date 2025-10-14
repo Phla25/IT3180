@@ -1,27 +1,27 @@
 package BlueMoon.bluemoon.services;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import BlueMoon.bluemoon.daos.DoiTuongRepository;
+import BlueMoon.bluemoon.daos.DoiTuongDAO;
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.utils.AccountStatus;
 import BlueMoon.bluemoon.utils.UserRole;
 
-import java.util.Collections;
-import java.util.List;
-
 @Service
 public class CustomOfficerDetailsService implements UserDetailsService {
 
-    private final DoiTuongRepository doiTuongRepository;
+    private final DoiTuongDAO doiTuongDAO;
     
-    public CustomOfficerDetailsService(DoiTuongRepository doiTuongRepository) {
-        this.doiTuongRepository = doiTuongRepository;
+    public CustomOfficerDetailsService(DoiTuongDAO doiTuongDAO) {
+        this.doiTuongDAO = doiTuongDAO;
     }
 
     @Override
@@ -29,8 +29,8 @@ public class CustomOfficerDetailsService implements UserDetailsService {
         
         final UserRole REQUIRED_ROLE = UserRole.CO_QUAN_CHUC_NANG;
 
-        DoiTuong user = doiTuongRepository.findById(username)
-            .orElseGet(() -> doiTuongRepository.findByEmail(username)
+        DoiTuong user = doiTuongDAO.findByCccd(username)
+            .orElseGet(() -> doiTuongDAO.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Tài khoản Cơ quan chức năng " + username + " không tồn tại.")));
 
         // 1. KIỂM TRA VAI TRÒ
