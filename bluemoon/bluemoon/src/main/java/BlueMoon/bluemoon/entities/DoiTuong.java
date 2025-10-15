@@ -3,20 +3,18 @@ package BlueMoon.bluemoon.entities;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import BlueMoon.bluemoon.utils.AccountStatus;
+import BlueMoon.bluemoon.utils.Gender;
+import BlueMoon.bluemoon.utils.ResidentStatus; // Import quan trọng
+import BlueMoon.bluemoon.utils.UserRole; // Import quan trọng
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType; // Import quan trọng
-import jakarta.persistence.Enumerated; // Import quan trọng
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-
-// Import các Enums từ package utils
-import BlueMoon.bluemoon.utils.UserRole;
-import BlueMoon.bluemoon.utils.Gender;
-import BlueMoon.bluemoon.utils.AccountStatus;
-import BlueMoon.bluemoon.utils.ResidentStatus;
 
 
 @Entity
@@ -63,6 +61,15 @@ public class DoiTuong {
 
     @Column(name = "nghe_nghiep", length = 100)
     private String ngheNghiep;
+
+	// Add these fields
+	@Column(name = "reset_token")
+	private String resetToken;
+
+	@Column(name = "reset_token_expiry")
+	private LocalDateTime resetTokenExpiry;
+
+// Add getters and setters
 
     // Trạng thái tài khoản và dân cư
     // SỬ DỤNG ENUM
@@ -231,6 +238,22 @@ public class DoiTuong {
 
 	public void setNgayCapNhat(LocalDateTime ngayCapNhat) {
 		this.ngayCapNhat = ngayCapNhat;
+	}
+	
+	public String getResetToken() {
+		return resetToken;
+	}
+
+	public void setResetToken(String resetToken) {
+		this.resetToken = resetToken;
+	}
+
+	public LocalDateTime getResetTokenExpiry() {
+		return resetTokenExpiry;
+	}
+
+	public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) {
+		this.resetTokenExpiry = resetTokenExpiry;
 	}
 
 	public DoiTuong(String cccd, String matKhau, UserRole vaiTro, Boolean laCuDan, String hoVaTen, LocalDate ngaySinh,

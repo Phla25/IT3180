@@ -103,4 +103,48 @@ public class DoiTuongDAO {
             .setParameter("trangThai", trangThaiDanCu)
             .getResultList();
     }
+    /**
+     * Tìm kiếm tài khoản cư dân theo CCCD
+     */
+    public Optional<DoiTuong> timNguoiDungThuongTheoCCCD(String cccd){
+        String jpql = "SELECT d FROM DoiTuong d WHERE d.cccd = :cccd AND d.vaiTro = :vaiTro";
+        try {
+            DoiTuong doiTuong = entityManager.createQuery(jpql, DoiTuong.class)
+                    .setParameter("cccd", cccd)
+                    .setParameter("vaiTro", UserRole.NGUOI_DUNG_THUONG)
+                    .getSingleResult();
+            return Optional.of(doiTuong);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+    /** 
+     * Tìm cư dân theo CCCD 
+    */
+    public Optional<DoiTuong> findResidentByCccd(String cccd) {
+        String jpql = "SELECT d FROM DoiTuong d WHERE d.cccd = :cccd AND d.laCuDan = true";
+        try {
+            DoiTuong doiTuong = entityManager.createQuery(jpql, DoiTuong.class)
+                    .setParameter("cccd", cccd)
+                    .getSingleResult();
+            return Optional.of(doiTuong);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Tìm người dùng bằng reset token
+     */
+    public Optional<DoiTuong> findByResetToken(String token) {
+        String jpql = "SELECT d FROM DoiTuong d WHERE d.resetToken = :token";
+        try {
+            DoiTuong doiTuong = entityManager.createQuery(jpql, DoiTuong.class)
+                    .setParameter("token", token)
+                    .getSingleResult();
+            return Optional.of(doiTuong);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
 }
