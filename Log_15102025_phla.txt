@@ -1,0 +1,27 @@
+Thời gian ngắn nhất => Chi phí tối thiểu 
+Lịch trình thực hiện tối ưu => KHông ai quá rảnh không ai quá bận
+Cái mình có => Cái mình cần => Đi ngược từ dưới lên
+Chia việc vào sprint => Chia cho từng đứa => Check lịch trình từng đứa (Schedule) => Tần suất, thời gian làm việc từng cá nhân => Thời gian ngắn nhất cho 1 sprint
+Size Point phải là công thức, công thức như thế nào? Có không? (dựa trên nhiệm vụ, vấn đề, bản chat của nhiệm vụ đó)
+Có công thức thì mới có được effort (dựa trên năng lực của cá nhân) => Tính ngày công cho các chuyên gia, cho từng cá nhân => Tính trung bình
+Năng suất tisnh chủ quan, độ phức tạp tính khách quan => Chất lượng, nỗ lực thực té
+NĂNG SUẤT = 0.9 => HIỆU QUẢ (base tốt mới làm được) => PHẢI TÍNH KÈM CÔNG THỨC CỦA NGÀY CÔNG => LƯƠNG FRESHER KHÁC SENIOR
+ĐỘ PHỨC TẠP VỚI ESTIMATE SIZE LÀ TUYẾN TÍNH. (PRODUCT SCOPE) => SIZE dựa trên cả phức tạp và năng suất.
+USER STORY bắt buộc, tùy chọn, mong muốn => Front/Back ? => Bàn bạc với khách hàng => MỨC ĐỘ YÊU CẦU VÀ KỲ VỌNG CỦA KHÁCH HÀNG
+ƯỚC LƯỢNG CÓ CĂN CỨ
+PHẢI TRUY XUẤT ĐƯỢC TRACEBILITY MATRIX => Đã phủ hết?
+Nên xem xét => Acceptance Criteria
+Phương pháp CPM => Thời gian ngắn nhất 
+Tìm ra đường, chuỗi liên tiếp các hoạt động liên tiếp => Bố trí các hoạt động không nằm trên chuỗi nằm song song nhau => Critical Path là thời gian ngắn nhất => Gắn người vào nhánh thì sẽ không bị trùng. => Vẽ được Critical Path, số nhánh = đúng số người trong nhóm => schedule khớp => KHÔNG CÓ IDLE TIME => FULL TIME (tối ưu, nắn thời gian ngắn nhất) => Số nhánh tối da có thể thực hiện song song. Critcal Path > Sprint time => Failed => Bỏ bớt task, user story. Tại 1 thời điểm có nhiều người làm => FAILED 
+Đảm bảo giao việc thì người đấy phải làm được, không thể đổ tại khách quan. Nếu không thì SPRINT THẤT BẠI.
+=> LÝ DO, CƠ SỞ LÀM RA ĐƯỢC 
+=> 5 NGƯỜI, 5 SCHEDULE => Check 
+Nhìn theo góc độ của người quản lý.
+=> SPRINT PLANNING => Sprint Priority trong từng Sprint, cái có uu tiên cao có thực sự đứng đầu trong critical path không ?
+Khó thì lên trên, nhưng chưa chắc là trên cùng => ĐẨY LÊN SỚM NHẤT CÓ THỂ
+Cái khách hàng cần và khả năng của minh. Khó nhất => Không nuột nhất => Khách hàng muốn dung nhất 
+WBS => luồng chia sprint và có tất tần tật công việc của các bên liên quan => bổ sung theo kiểu PDCA
+
+CHỈNH SỬA WBS => ĐẢM BẢO CÔNG VIỆC TRONG TỪNG WBS ĐÃ SẴN SÀNG CHO TẤT CẢ CÁC SPRINT => NHẶT VÀO BACKLOG NHỮNG ID CỦA NHÀ PHÁT TRIỂN => TIÊU CHÍ KIỂM TRA
+QUẢN LÝ CẤU HÌNH (tạo repo trên GitHub và phân quyền tương ung)
+
