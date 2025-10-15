@@ -147,4 +147,22 @@ public class DoiTuongDAO {
             return Optional.empty();
         }
     }
+    /**
+     * Tìm kiếm cư dân theo cccd, họ tên, tuổi, địa chỉ, giới tính, sđt, chủ hộ
+     */
+    public List<DoiTuong> searchResidents(String keyword) {
+        String jpql = "SELECT d FROM DoiTuong d WHERE d.laCuDan = true AND (" +
+                      "LOWER(d.cccd) LIKE :kw OR " +
+                      "LOWER(d.hoTen) LIKE :kw OR " +
+                      "CAST(d.tuoi AS string) LIKE :kw OR " +
+                      "LOWER(d.diaChi) LIKE :kw OR " +
+                      "LOWER(d.gioiTinh) LIKE :kw OR " +
+                      "LOWER(d.sdt) LIKE :kw OR " +
+                      "LOWER(d.chuHo) LIKE :kw" +
+                      ")";
+        String kwParam = "%" + keyword.toLowerCase() + "%";
+        return entityManager.createQuery(jpql, DoiTuong.class)
+                            .setParameter("kw", kwParam)
+                            .getResultList();
+    }
 }
