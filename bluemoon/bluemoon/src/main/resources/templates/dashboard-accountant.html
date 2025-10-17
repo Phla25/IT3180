@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Kế Toán - BlueMoon Portal</title>
+    
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ==================== FEATURE TOGGLE STYLES ==================== */
+        .feature-badge {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: auto;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .nav-item:hover .feature-badge {
+            animation-play-state: paused;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR - KẾ TOÁN -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard-accountant.html" class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Quản Lý Hóa Đơn', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Quản Lý Hóa Đơn</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Xác Nhận Thanh Toán', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-money-check"></i>
+                <span>Xác Nhận Thanh Toán</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Quản Lý Dịch Vụ', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-concierge-bell"></i>
+                <span>Quản Lý Dịch Vụ</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Báo Cáo Tài Chính', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-chart-bar"></i>
+                <span>Báo Cáo Tài Chính</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Lịch Sử Giao Dịch', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-receipt"></i>
+                <span>Lịch Sử Giao Dịch</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Cài Đặt</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Dashboard - Kế Toán</h1>
+        </div>
+        
+        <div class="header-right">
+            <div class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="badge">8</span>
+            </div>
+            
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name">Trần Thị Lan</span>
+                    <span class="user-role" style="color: #F59E0B;">KẾ TOÁN</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="profile.html">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-cog"></i> Cài Đặt
+                    </a>
+                    <hr>
+                    <button type="button" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- Welcome Banner -->
+        <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; padding: 32px; border-radius: 12px; margin-bottom: 30px;">
+            <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">
+                💰 Dashboard Kế Toán
+            </h1>
+            <p style="font-size: 16px; opacity: 0.9;">
+                Tổng quan tài chính và quản lý thu chi chung cư
+            </p>
+        </div>
+        
+        <!-- Stats Cards - Financial Focus -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Tổng Thu Tháng Này</span>
+                    <div class="stat-icon green">
+                        <i class="fas fa-arrow-circle-down"></i>
+                    </div>
+                </div>
+                <div class="stat-value">98.2M</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+15% so với tháng trước</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Chưa Thu</span>
+                    <div class="stat-icon orange">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                </div>
+                <div class="stat-value">27.3M</div>
+                <div class="stat-change negative">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>18 hóa đơn</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Quá Hạn</span>
+                    <div class="stat-icon" style="background: #FEE2E2; color: #DC2626;">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value">8.5M</div>
+                <div class="stat-change negative">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>5 hóa đơn</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Tỷ Lệ Thu</span>
+                    <div class="stat-icon blue">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                </div>
+                <div class="stat-value">78%</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+3% so với tháng trước</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions for Accountant -->
+        <div class="content-card" style="margin-bottom: 24px;">
+            <div class="content-card-header">
+                <h2 class="content-card-title">⚡ Thao Tác Nhanh</h2>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <button class="btn btn-primary" style="padding: 16px;">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Tạo Hóa Đơn</span>
+                </button>
+                <button class="btn btn-success" style="padding: 16px;">
+                    <i class="fas fa-check-double"></i>
+                    <span>Xác Nhận Thanh Toán</span>
+                </button>
+                <button class="btn btn-warning" style="padding: 16px; color: white;">
+                    <i class="fas fa-envelope"></i>
+                    <span>Gửi Nhắc Nhở</span>
+                </button>
+                <button class="btn btn-outline" style="padding: 16px;">
+                    <i class="fas fa-file-export"></i>
+                    <span>Xuất Báo Cáo</span>
+                </button>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+            <!-- Hóa Đơn Cần Xử Lý -->
+            <div class="content-card">
+                <div class="content-card-header">
+                    <h2 class="content-card-title">📋 Hóa Đơn Cần Xác Nhận</h2>
+                    <a href="fees.html" class="btn btn-sm btn-outline">Xem tất cả</a>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã HĐ</th>
+                                <th>Hộ Gia Đình</th>
+                                <th>Số Tiền</th>
+                                <th>Hạn</th>
+                                <th>Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>#HD002</strong></td>
+                                <td>Hộ Trần Thị B</td>
+                                <td><strong>1.800.000 ₫</strong></td>
+                                <td>15/11/2024</td>
+                                <td>
+                                    <button class="btn btn-sm btn-success">
+                                        <i class="fas fa-check"></i> Xác nhận
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr style="background: #FEF2F2;">
+                                <td><strong>#HD003</strong></td>
+                                <td>Hộ Lê Văn C</td>
+                                <td><strong style="color: var(--danger-color);">3.200.000 ₫</strong></td>
+                                <td style="color: var(--danger-color);">25/10/2024</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-exclamation"></i> Cảnh báo
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>#HD004</strong></td>
+                                <td>Hộ Phạm Thị D</td>
+                                <td><strong>4.500.000 ₫</strong></td>
+                                <td>30/11/2024</td>
+                                <td>
+                                    <button class="btn btn-sm btn-success">
+                                        <i class="fas fa-check"></i> Xác nhận
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Biểu Đồ Thu Chi -->
+            <div class="content-card">
+                <div class="content-card-header">
+                    <h2 class="content-card-title">📊 Thu Chi Tháng Này</h2>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; color: var(--gray);">
+                                <i class="fas fa-arrow-down" style="color: var(--secondary-color);"></i> Thu
+                            </span>
+                            <span style="font-weight: 700; color: var(--secondary-color);">98.2M</span>
+                        </div>
+                        <div style="background: var(--gray-lighter); border-radius: 10px; height: 12px; overflow: hidden;">
+                            <div style="background: var(--secondary-color); height: 100%; width: 78%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; color: var(--gray);">
+                                <i class="fas fa-arrow-up" style="color: var(--danger-color);"></i> Chi
+                            </span>
+                            <span style="font-weight: 700; color: var(--danger-color);">45.5M</span>
+                        </div>
+                        <div style="background: var(--gray-lighter); border-radius: 10px; height: 12px; overflow: hidden;">
+                            <div style="background: var(--danger-color); height: 100%; width: 36%;"></div>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 8px 0; border: none; border-top: 1px solid var(--gray-light);">
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 16px; font-weight: 600;">Lợi nhuận:</span>
+                        <span style="font-size: 24px; font-weight: 700; color: var(--secondary-color);">52.7M</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/main.js"></script>
+    
+    <script>
+        // ==================== FEATURE TOGGLE FUNCTION ====================
+        function showFeatureToggle(featureName, message) {
+            Swal.fire({
+                icon: 'info',
+                title: `${featureName} - Coming Soon`,
+                html: `
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(45deg, #4F46E5, #7C3AED); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-rocket" style="font-size: 32px; color: white;"></i>
+                        </div>
+                        <p style="margin-bottom: 15px; font-size: 16px;">${message}</p>
+                        <p style="color: #6B7280; font-size: 14px;">
+                            <i class="fas fa-clock"></i> 
+                            Tính năng này sẽ được phát triển trong phiên bản tiếp theo
+                        </p>
+                    </div>
+                `,
+                confirmButtonColor: '#4F46E5',
+                confirmButtonText: 'Tôi hiểu',
+                showCancelButton: true,
+                cancelButtonText: 'Thông báo cho tôi',
+                cancelButtonColor: '#6B7280'
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã đăng ký!',
+                        text: 'Chúng tôi sẽ thông báo khi tính năng này ra mắt.',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                }
+            });
+        }
+        
+        console.log('BlueMoon Portal - Accountant Dashboard Loaded ✓');
+    </script>
+</body>
+</html>
+

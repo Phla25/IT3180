@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Cư Dân - BlueMoon Portal</title>
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="residents.html" class="nav-item active">
+                <i class="fas fa-users"></i>
+                <span>Quản Lý Cư Dân</span>
+            </a>
+            <a href="apartments.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Quản Lý Căn Hộ</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-users-cog"></i>
+                <span>Quản Lý Hộ Gia Đình</span>
+            </a>
+            <a href="assets.html" class="nav-item">
+                <i class="fas fa-building"></i>
+                <span>Quản Lý Tài Sản</span>
+            </a>
+            <a href="fees.html" class="nav-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Quản Lý Khoản Phí</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-concierge-bell"></i>
+                <span>Quản Lý Dịch Vụ</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Xử Lý Sự Cố</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-bell"></i>
+                <span>Gửi Thông Báo</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Báo Cáo Thống Kê</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Cài Đặt</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Quản Lý Cư Dân</h1>
+        </div>
+
+        <div class="header-right">
+            <div class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name">Nguyễn Văn Thanh</span>
+                    <span class="user-role">BAN_QUAN_TRI</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="profile.html">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-cog"></i> Cài Đặt
+                    </a>
+                    <hr>
+                    <button type="button" class="logout-btn"
+                        onclick="showNotification('Đã đăng xuất thành công', 'success')">
+                        <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div class="content-card">
+            <div class="content-card-header">
+                <div>
+                    <h2 class="content-card-title">Quản Lý Cư Dân</h2>
+                    <p style="color: var(--gray); font-size: 14px; margin-top: 4px;">
+                        Quản lý thông tin tất cả cư dân trong chung cư
+                    </p>
+                </div>
+                <a href="resident-add.html" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Thêm Cư Dân Mới
+                </a>
+            </div>
+
+            <!-- Search & Filter -->
+            <div class="flex-between mb-3">
+                <div class="search-box" style="flex: 1; max-width: 400px;">
+                    <input type="text" class="form-control" id="searchInput"
+                        placeholder="Tìm kiếm theo tên, CCCD, email..."
+                        onkeyup="searchTable('searchInput', 'residentsTable')">
+                </div>
+
+                <div class="flex gap-2">
+                    <select class="form-control" style="width: 200px;">
+                        <option value="">Tất cả vai trò</option>
+                        <option value="BAN_QUAN_TRI">Ban Quản Trị</option>
+                        <option value="KE_TOAN">Kế Toán</option>
+                        <option value="CO_QUAN_CHUC_NANG">Cơ Quan Chức Năng</option>
+                        <option value="NGUOI_DUNG_THUONG">Cư Dân Thường</option>
+                    </select>
+
+                    <select class="form-control" style="width: 200px;">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="HOAT_DONG">Hoạt động</option>
+                        <option value="TAM_KHOA">Tạm khóa</option>
+                        <option value="DA_XOA">Đã xóa</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <table id="residentsTable">
+                    <thead>
+                        <tr>
+                            <th>CCCD</th>
+                            <th>Họ và Tên</th>
+                            <th>Ngày Sinh</th>
+                            <th>Giới Tính</th>
+                            <th>Email</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Vai Trò</th>
+                            <th>Trạng Thái</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>001234567890</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div
+                                        style="width: 36px; height: 36px; border-radius: 50%; background: #4F46E5; 
+                                                display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                                        NT
+                                    </div>
+                                    <span style="font-weight: 500;">Nguyễn Văn Thanh</span>
+                                </div>
+                            </td>
+                            <td>15/03/1985</td>
+                            <td>Nam</td>
+                            <td>thanh.nv@gmail.com</td>
+                            <td>0912345678</td>
+                            <td><span class="badge badge-info">Ban Quản Trị</span></td>
+                            <td><span class="badge badge-success">Hoạt động</span></td>
+                            <td>
+                                <div class="flex gap-1">
+                                    <button onclick="viewResident('001234567890')" class="btn btn-sm btn-outline"
+                                        title="Xem chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="resident-edit.html" class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="confirmDelete('001234567890', 'Nguyễn Văn Thanh', '#')"
+                                        class="btn btn-sm btn-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>001234567891</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div
+                                        style="width: 36px; height: 36px; border-radius: 50%; background: #10B981; 
+                                                display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                                        TL
+                                    </div>
+                                    <span style="font-weight: 500;">Trần Thị Lan</span>
+                                </div>
+                            </td>
+                            <td>20/08/1990</td>
+                            <td>Nữ</td>
+                            <td>lan.tt@gmail.com</td>
+                            <td>0987654321</td>
+                            <td><span class="badge badge-warning">Kế Toán</span></td>
+                            <td><span class="badge badge-success">Hoạt động</span></td>
+                            <td>
+                                <div class="flex gap-1">
+                                    <button onclick="viewResident('001234567891')" class="btn btn-sm btn-outline">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="resident-edit.html" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="confirmDelete('001234567891', 'Trần Thị Lan', '#')"
+                                        class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>001234567892</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div
+                                        style="width: 36px; height: 36px; border-radius: 50%; background: #F59E0B; 
+                                                display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                                        PH
+                                    </div>
+                                    <span style="font-weight: 500;">Phạm Văn Hùng</span>
+                                </div>
+                            </td>
+                            <td>12/05/1988</td>
+                            <td>Nam</td>
+                            <td>hung.pv@gmail.com</td>
+                            <td>0901234567</td>
+                            <td><span class="badge badge-success">Cư Dân Thường</span></td>
+                            <td><span class="badge badge-success">Hoạt động</span></td>
+                            <td>
+                                <div class="flex gap-1">
+                                    <button onclick="viewResident('001234567892')" class="btn btn-sm btn-outline">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="resident-edit.html" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="confirmDelete('001234567892', 'Phạm Văn Hùng', '#')"
+                                        class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>001234567893</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div
+                                        style="width: 36px; height: 36px; border-radius: 50%; background: #EF4444; 
+                                                display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                                        HM
+                                    </div>
+                                    <span style="font-weight: 500;">Hoàng Thị Mai</span>
+                                </div>
+                            </td>
+                            <td>25/11/1995</td>
+                            <td>Nữ</td>
+                            <td>mai.ht@gmail.com</td>
+                            <td>0976543210</td>
+                            <td><span class="badge badge-success">Cư Dân Thường</span></td>
+                            <td><span class="badge badge-warning">Tạm khóa</span></td>
+                            <td>
+                                <div class="flex gap-1">
+                                    <button onclick="viewResident('001234567893')" class="btn btn-sm btn-outline">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="resident-edit.html" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="confirmDelete('001234567893', 'Hoàng Thị Mai', '#')"
+                                        class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>001234567894</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div
+                                        style="width: 36px; height: 36px; border-radius: 50%; background: #8B5CF6; 
+                                                display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                                        LT
+                                    </div>
+                                    <span style="font-weight: 500;">Lê Văn Tuấn</span>
+                                </div>
+                            </td>
+                            <td>30/07/1992</td>
+                            <td>Nam</td>
+                            <td>tuan.lv@gmail.com</td>
+                            <td>0965432109</td>
+                            <td><span class="badge badge-info">Cơ Quan CN</span></td>
+                            <td><span class="badge badge-success">Hoạt động</span></td>
+                            <td>
+                                <div class="flex gap-1">
+                                    <button onclick="viewResident('001234567894')" class="btn btn-sm btn-outline">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="resident-edit.html" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="confirmDelete('001234567894', 'Lê Văn Tuấn', '#')"
+                                        class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex-between mt-3" style="padding-top: 20px; border-top: 1px solid var(--gray-light);">
+                <div style="color: var(--gray); font-size: 14px;">
+                    Hiển thị 1-5 trong tổng số 48 cư dân
+                </div>
+                <div class="flex gap-1">
+                    <button class="btn btn-sm btn-outline">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-sm btn-primary">1</button>
+                    <button class="btn btn-sm btn-outline">2</button>
+                    <button class="btn btn-sm btn-outline">3</button>
+                    <button class="btn btn-sm btn-outline">...</button>
+                    <button class="btn btn-sm btn-outline">10</button>
+                    <button class="btn btn-sm btn-outline">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/main.js"></script>
+</body>
+
+</html>

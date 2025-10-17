@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Tài Sản Mới - BlueMoon Portal</title>
+    
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- SIDEBAR - BAN QUẢN TRỊ -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard-admin.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="residents.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Quản Lý Cư Dân</span>
+            </a>
+            <a href="apartments.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Quản Lý Căn Hộ</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-users-cog"></i>
+                <span>Quản Lý Hộ Gia Đình</span>
+            </a>
+            <a href="assets.html" class="nav-item active">
+                <i class="fas fa-building"></i>
+                <span>Quản Lý Tài Sản</span>
+            </a>
+            <a href="fees.html" class="nav-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Quản Lý Khoản Phí</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-concierge-bell"></i>
+                <span>Quản Lý Dịch Vụ</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Xử Lý Sự Cố</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-bell"></i>
+                <span>Gửi Thông Báo</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Báo Cáo Thống Kê</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Cài Đặt</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Thêm Tài Sản Mới</h1>
+        </div>
+        
+        <div class="header-right">
+            <div class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="badge">5</span>
+            </div>
+            
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name">Nguyễn Văn Thanh</span>
+                    <span class="user-role" style="color: #4F46E5;">BAN QUẢN TRỊ</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="profile.html">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-cog"></i> Cài Đặt
+                    </a>
+                    <hr>
+                    <button type="button" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 20px;">
+            <a href="assets.html" style="color: var(--gray); text-decoration: none;">
+                <i class="fas fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+        
+        <!-- Form Card -->
+        <div class="content-card" style="max-width: 1000px;">
+            <div class="content-card-header">
+                <div>
+                    <h2 class="content-card-title">Thêm Tài Sản Chung Cư Mới</h2>
+                    <p style="color: var(--gray); font-size: 14px; margin-top: 4px;">
+                        Nhập đầy đủ thông tin tài sản để lưu trữ và quản lý hồ sơ
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Form -->
+            <form id="assetForm">
+                <!-- Thông Tin Cơ Bản -->
+                <div style="margin-bottom: 32px;">
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--dark);">
+                        <i class="fas fa-info-circle"></i> Thông Tin Cơ Bản
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Loại Tài Sản <span style="color: var(--danger-color);">*</span></label>
+                            <select class="form-control" name="loaiTaiSan" id="loaiTaiSan" required onchange="updateAssetTypeHint()">
+                                <option value="">-- Chọn loại tài sản --</option>
+                                <option value="CAN_HO">🏠 Căn Hộ</option>
+                                <option value="THIET_BI">🔧 Thiết Bị</option>
+                                <option value="TIEN_ICH">✨ Tiện Ích</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Tên Tài Sản <span style="color: var(--danger-color);">*</span></label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="tenTaiSan" 
+                                   placeholder="VD: Căn A-1205, Chỗ Đậu Xe B-45..."
+                                   required>
+                        </div>
+                    </div>
+                    
+                    <div id="assetTypeHint" style="display: none; padding: 12px; background: #DBEAFE; border-radius: 8px; margin-top: 12px;">
+                        <p style="font-size: 13px; color: #1E40AF; margin: 0;">
+                            <i class="fas fa-lightbulb"></i> <span id="hintText"></span>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Chi Tiết Tài Sản -->
+                <div style="margin-bottom: 32px;">
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--dark);">
+                        <i class="fas fa-clipboard-list"></i> Chi Tiết Tài Sản
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Vị Trí <span style="color: var(--danger-color);">*</span></label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="viTri" 
+                               placeholder="VD: Tháp A, Tầng 12 hoặc Tầng Hầm B1"
+                               required>
+                        <small style="color: var(--gray); font-size: 12px;">Mô tả chi tiết vị trí của tài sản trong chung cư</small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Diện Tích (m²)</label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="dienTich"
+                                   id="dienTich"
+                                   placeholder="VD: 120"
+                                   step="0.01"
+                                   min="0">
+                            <small style="color: var(--gray); font-size: 12px;">Để trống nếu không áp dụng (VD: thiết bị)</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Giá Trị (VNĐ) <span style="color: var(--danger-color);">*</span></label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="giaTri"
+                                   id="giaTri"
+                                   placeholder="VD: 5200000000"
+                                   step="1000000"
+                                   min="0"
+                                   required>
+                            <small style="color: var(--gray); font-size: 12px;">
+                                Giá trị: <strong id="giaTriText">0 ₫</strong>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Thông Tin Sở Hữu -->
+                <div style="margin-bottom: 32px;">
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--dark);">
+                        <i class="fas fa-user-tie"></i> Thông Tin Sở Hữu
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Hộ Gia Đình Sở Hữu</label>
+                        <select class="form-control" name="maHo" id="maHo">
+                            <option value="">-- Chưa có chủ sở hữu (Tài sản chung) --</option>
+                            <option value="HO001">Hộ Nguyễn Văn A - Căn A-1205</option>
+                            <option value="HO002">Hộ Trần Thị B - Căn B-0803</option>
+                            <option value="HO003">Hộ Lê Văn C - Căn C-1502</option>
+                            <option value="HO004">Hộ Phạm Thị D - Căn D-0910</option>
+                            <option value="HO005">Hộ Hoàng Văn E - Căn E-0607</option>
+                        </select>
+                        <small style="color: var(--gray); font-size: 12px;">
+                            Chọn hộ gia đình nếu tài sản thuộc sở hữu riêng (VD: căn hộ, chỗ đậu xe cá nhân)
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Trạng Thái -->
+                <div style="margin-bottom: 32px;">
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--dark);">
+                        <i class="fas fa-toggle-on"></i> Trạng Thái Tài Sản
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Trạng Thái</label>
+                        <select class="form-control" name="trangThai">
+                            <option value="HOAT_DONG" selected>✅ Hoạt động</option>
+                            <option value="BAO_TRI">🔧 Đang bảo trì</option>
+                            <option value="HONG">❌ Hỏng</option>
+                            <option value="NGUNG_HOAT_DONG">⏸️ Ngừng hoạt động</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="flex-between" style="padding-top: 24px; border-top: 1px solid var(--gray-light);">
+                    <a href="assets.html" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Hủy bỏ
+                    </a>
+                    
+                    <div class="flex gap-2">
+                        <button type="reset" class="btn btn-outline" onclick="resetForm()">
+                            <i class="fas fa-redo"></i>
+                            Làm mới
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Lưu Tài Sản
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/main.js"></script>
+    
+    <script>
+        // Update asset type hint
+        function updateAssetTypeHint() {
+            const loaiTaiSan = document.getElementById('loaiTaiSan').value;
+            const hintBox = document.getElementById('assetTypeHint');
+            const hintText = document.getElementById('hintText');
+            
+            const hints = {
+                'CAN_HO': 'Căn hộ: Nhập tên như "Căn A-1205", điền diện tích và giá trị. Chọn hộ gia đình sở hữu.',
+                'THIET_BI': 'Thiết bị: VD: Thang máy, Máy phát điện. Giá trị là giá mua thiết bị. Thường là tài sản chung.',
+                'TIEN_ICH': 'Tiện ích: VD: Hồ bơi, Gym, Khu vui chơi. Thường là tài sản chung của toàn chung cư.'
+            };
+            
+            if (loaiTaiSan && hints[loaiTaiSan]) {
+                hintText.textContent = hints[loaiTaiSan];
+                hintBox.style.display = 'block';
+            } else {
+                hintBox.style.display = 'none';
+            }
+        }
+
+        // Format currency display
+        document.getElementById('giaTri').addEventListener('input', function() {
+            const value = this.value;
+            if (value) {
+                const formatted = formatCurrency(parseInt(value) || 0);
+                document.getElementById('giaTriText').textContent = formatted;
+            } else {
+                document.getElementById('giaTriText').textContent = '0 ₫';
+            }
+        });
+
+        // Auto-suggest name based on type
+        document.getElementById('loaiTaiSan').addEventListener('change', function() {
+            const nameInput = document.querySelector('input[name="tenTaiSan"]');
+            const type = this.value;
+            
+            if (type === 'CAN_HO' && !nameInput.value) {
+                nameInput.placeholder = 'VD: Căn A-1205, Căn B-0803';
+            } else if (type === 'THIET_BI' && !nameInput.value) {
+                nameInput.placeholder = 'VD: Thang Máy #1, Máy Phát Điện';
+            } else if (type === 'TIEN_ICH' && !nameInput.value) {
+                nameInput.placeholder = 'VD: Hồ Bơi Tầng 5, Phòng Gym';
+            }
+        });
+
+        // Form submission
+        document.getElementById('assetForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateForm('assetForm')) {
+                Alert.error('Lỗi', 'Vui lòng điền đầy đủ thông tin bắt buộc');
+                return;
+            }
+
+            const formData = new FormData(this);
+            const data = {
+                tenTaiSan: formData.get('tenTaiSan'),
+                loaiTaiSan: formData.get('loaiTaiSan'),
+                viTri: formData.get('viTri'),
+                dienTich: formData.get('dienTich'),
+                giaTri: formData.get('giaTri'),
+                maHo: formData.get('maHo'),
+                trangThai: formData.get('trangThai')
+            };
+
+            // Show loading
+            Alert.loading('Đang lưu thông tin tài sản...');
+            
+            // Simulate API call
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    html: `
+                        <div style="text-align: left; padding: 20px;">
+                            <p style="margin-bottom: 12px;">✅ Đã thêm tài sản mới:</p>
+                            <ul style="list-style: none; padding-left: 0;">
+                                <li style="margin-bottom: 8px;">
+                                    <strong>Tên:</strong> ${data.tenTaiSan}
+                                </li>
+                                <li style="margin-bottom: 8px;">
+                                    <strong>Loại:</strong> ${data.loaiTaiSan}
+                                </li>
+                                <li style="margin-bottom: 8px;">
+                                    <strong>Vị trí:</strong> ${data.viTri}
+                                </li>
+                                <li style="margin-bottom: 8px;">
+                                    <strong>Giá trị:</strong> ${formatCurrency(parseInt(data.giaTri) || 0)}
+                                </li>
+                            </ul>
+                        </div>
+                    `,
+                    confirmButtonColor: '#4F46E5',
+                    confirmButtonText: 'Quay về danh sách'
+                }).then(() => {
+                    window.location.href = 'assets.html';
+                });
+            }, 1500);
+        });
+
+        function resetForm() {
+            document.getElementById('assetTypeHint').style.display = 'none';
+            document.getElementById('giaTriText').textContent = '0 ₫';
+        }
+
+        // Format currency helper
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+    </script>
+</body>
+</html>
+

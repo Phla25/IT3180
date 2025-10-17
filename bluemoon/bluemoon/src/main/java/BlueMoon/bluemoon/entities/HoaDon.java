@@ -1,15 +1,29 @@
 package BlueMoon.bluemoon.entities;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import BlueMoon.bluemoon.utils.InvoiceType;
+import org.hibernate.annotations.DynamicUpdate;
+
 import BlueMoon.bluemoon.utils.InvoiceStatus;
+import BlueMoon.bluemoon.utils.InvoiceType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "hoa_don")
+@DynamicUpdate
 public class HoaDon {
 
     @Id
@@ -44,7 +58,7 @@ public class HoaDon {
     // Trạng thái hóa đơn
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai", length = 20)
-    private InvoiceStatus trangThai = InvoiceStatus.CHUA_THANH_TOAN;
+    private InvoiceStatus trangThai = InvoiceStatus.chua_thanh_toan;
 
     // Ngày tạo hóa đơn
     @Column(name = "ngay_tao")
@@ -73,7 +87,7 @@ public class HoaDon {
         this.hoGiaDinh = hoGiaDinh;
         this.soTien = soTien;
         this.loaiHoaDon = loaiHoaDon;
-        this.trangThai = InvoiceStatus.CHUA_THANH_TOAN;
+        this.trangThai = InvoiceStatus.chua_thanh_toan;
         this.ngayTao = LocalDateTime.now();
     }
 

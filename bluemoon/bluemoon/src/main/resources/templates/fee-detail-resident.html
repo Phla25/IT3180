@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Hóa Đơn - BlueMoon Portal</title>
+    
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- SIDEBAR - CƯ DÂN -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard-resident.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Trang Chủ</span>
+            </a>
+            <a href="fees-resident.html" class="nav-item active">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Hóa Đơn Của Tôi</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Đăng Ký Dịch Vụ đang phát triển', 'info'); return false;">
+                <i class="fas fa-concierge-bell"></i>
+                <span>Đăng Ký Dịch Vụ</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Báo Cáo Sự Cố đang phát triển', 'info'); return false;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Báo Cáo Sự Cố</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Thông Báo đang phát triển', 'info'); return false;">
+                <i class="fas fa-bell"></i>
+                <span>Thông Báo</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Thông Tin Hộ đang phát triển', 'info'); return false;">
+                <i class="fas fa-home"></i>
+                <span>Thông Tin Hộ</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Phản Hồi đang phát triển', 'info'); return false;">
+                <i class="fas fa-comment-dots"></i>
+                <span>Phản Hồi</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Cài Đặt</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Chi Tiết Hóa Đơn</h1>
+        </div>
+        
+        <div class="header-right">
+            <div class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="badge">6</span>
+            </div>
+            
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name">Nguyễn Văn A</span>
+                    <span class="user-role" style="color: #10B981;">CƯ DÂN</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="resident-profile.html">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-cog"></i> Cài Đặt
+                    </a>
+                    <hr>
+                    <button type="button" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 20px;">
+            <a href="fees-resident.html" style="color: var(--gray); text-decoration: none;">
+                <i class="fas fa-arrow-left"></i> Quay lại danh sách hóa đơn
+            </a>
+        </div>
+
+        <div style="max-width: 900px; margin: 0 auto;">
+            <!-- Status Banner - Đã Thanh Toán -->
+            <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 32px; border-radius: 12px; margin-bottom: 24px; text-align: center;">
+                <i class="fas fa-check-circle" style="font-size: 64px; margin-bottom: 16px;"></i>
+                <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">
+                    Đã Thanh Toán
+                </h1>
+                <p style="font-size: 16px; opacity: 0.9;">
+                    Cảm ơn bạn đã thanh toán hóa đơn đúng hạn!
+                </p>
+            </div>
+
+            <!-- Invoice Card -->
+            <div class="content-card" style="margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px dashed var(--gray-light);">
+                    <div>
+                        <h2 style="font-size: 28px; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;">
+                            HÓA ĐƠN #HD001
+                        </h2>
+                        <p style="color: var(--gray); font-size: 14px;">
+                            📅 Ngày tạo: 01/10/2024
+                        </p>
+                    </div>
+                    <span class="badge badge-success" style="font-size: 16px; padding: 10px 20px;">
+                        ✅ Đã thanh toán
+                    </span>
+                </div>
+
+                <!-- Thông Tin Căn Hộ -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; background: var(--gray-lighter); border-radius: 8px; margin-bottom: 24px;">
+                    <div>
+                        <label style="font-size: 12px; color: var(--gray); display: block; margin-bottom: 4px;">Căn Hộ</label>
+                        <p style="font-weight: 600; font-size: 18px; margin: 0;">A-1205</p>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: var(--gray); display: block; margin-bottom: 4px;">Chủ Hộ</label>
+                        <p style="font-weight: 600; font-size: 18px; margin: 0;">Nguyễn Văn A</p>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: var(--gray); display: block; margin-bottom: 4px;">Kỳ Thanh Toán</label>
+                        <p style="font-weight: 600; font-size: 18px; margin: 0;">Tháng 10/2024</p>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: var(--gray); display: block; margin-bottom: 4px;">Hạn Thanh Toán</label>
+                        <p style="font-weight: 600; font-size: 18px; margin: 0;">31/10/2024</p>
+                    </div>
+                </div>
+
+                <!-- Chi Tiết Các Khoản Phí -->
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--dark);">
+                    <i class="fas fa-list"></i> Chi Tiết Các Khoản Phí
+                </h3>
+
+                <table style="width: 100%; margin-bottom: 24px;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--gray-light);">
+                            <th style="text-align: left; padding: 12px 0; font-size: 13px; color: var(--gray);">Mô Tả</th>
+                            <th style="text-align: center; padding: 12px 0; font-size: 13px; color: var(--gray);">Đơn Giá</th>
+                            <th style="text-align: center; padding: 12px 0; font-size: 13px; color: var(--gray);">Số Lượng</th>
+                            <th style="text-align: right; padding: 12px 0; font-size: 13px; color: var(--gray);">Thành Tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--gray-light);">
+                            <td style="padding: 16px 0;">
+                                <div style="font-weight: 500;">Phí quản lý chung cư</div>
+                                <small style="color: var(--gray);">Tháng 10/2024</small>
+                            </td>
+                            <td style="text-align: center; padding: 16px 0;">15.000 ₫/m²</td>
+                            <td style="text-align: center; padding: 16px 0;">120 m²</td>
+                            <td style="text-align: right; padding: 16px 0; font-weight: 600;">1.800.000 ₫</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--gray-light);">
+                            <td style="padding: 16px 0;">
+                                <div style="font-weight: 500;">Phí dịch vụ chung</div>
+                                <small style="color: var(--gray);">Điện, nước khu vực chung</small>
+                            </td>
+                            <td style="text-align: center; padding: 16px 0;">-</td>
+                            <td style="text-align: center; padding: 16px 0;">-</td>
+                            <td style="text-align: right; padding: 16px 0; font-weight: 600;">500.000 ₫</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--gray-light);">
+                            <td style="padding: 16px 0;">
+                                <div style="font-weight: 500;">Phí bảo trì thang máy</div>
+                                <small style="color: var(--gray);">Hàng tháng</small>
+                            </td>
+                            <td style="text-align: center; padding: 16px 0;">-</td>
+                            <td style="text-align: center; padding: 16px 0;">-</td>
+                            <td style="text-align: right; padding: 16px 0; font-weight: 600;">200.000 ₫</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr style="border-top: 3px double var(--gray-dark);">
+                            <td colspan="3" style="padding: 20px 0; text-align: right; font-weight: 600; font-size: 18px;">
+                                TỔNG CỘNG:
+                            </td>
+                            <td style="padding: 20px 0; text-align: right; font-weight: 700; font-size: 28px; color: var(--secondary-color);">
+                                2.500.000 ₫
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <!-- Thông Tin Thanh Toán -->
+                <div style="padding: 20px; background: #D1FAE5; border-radius: 12px; margin-bottom: 24px;">
+                    <h4 style="font-weight: 600; margin-bottom: 16px; color: #065F46;">
+                        <i class="fas fa-check-circle"></i> Thông Tin Thanh Toán
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                        <div>
+                            <label style="font-size: 12px; color: #065F46; display: block; margin-bottom: 4px;">Ngày Thanh Toán</label>
+                            <p style="font-weight: 600; margin: 0; color: #065F46;">15/10/2024 14:30</p>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: #065F46; display: block; margin-bottom: 4px;">Phương Thức</label>
+                            <p style="font-weight: 600; margin: 0; color: #065F46;">Chuyển khoản ngân hàng</p>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: #065F46; display: block; margin-bottom: 4px;">Mã Giao Dịch</label>
+                            <p style="font-weight: 600; margin: 0; color: #065F46;">GD123456789</p>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: #065F46; display: block; margin-bottom: 4px;">Số Tiền</label>
+                            <p style="font-weight: 700; font-size: 18px; margin: 0; color: #065F46;">2.500.000 ₫</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                    <button class="btn btn-primary" style="padding: 14px;">
+                        <i class="fas fa-download"></i>
+                        Tải Hóa Đơn PDF
+                    </button>
+                    <button class="btn btn-outline" style="padding: 14px;">
+                        <i class="fas fa-print"></i>
+                        In Hóa Đơn
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hóa Đơn Chưa Thanh Toán (Demo) -->
+            <div style="padding: 20px; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-radius: 12px; text-align: center; margin-top: 24px;">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #92400E;">
+                    📌 Xem Demo Hóa Đơn Chưa Thanh Toán
+                </h3>
+                <p style="font-size: 14px; color: #92400E; margin-bottom: 16px;">
+                    Để demo tính năng thanh toán trực tuyến
+                </p>
+                <a href="fee-payment.html" class="btn btn-warning" style="color: white; font-size: 16px; padding: 12px 32px;">
+                    <i class="fas fa-arrow-right"></i>
+                    Xem Hóa Đơn Demo
+                </a>
+            </div>
+        </div>
+    </main>
+    
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>
+

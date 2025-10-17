@@ -78,13 +78,13 @@ public class WebSecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 // Cho phép truy cập tự do các tài nguyên tĩnh và trang đăng nhập
-                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/reset-password","/forgot-password","/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
 
                 // Các trang yêu cầu vai trò cụ thể
-                .requestMatchers("/admin/**").hasRole(UserRole.BAN_QUAN_TRI.name())
-                .requestMatchers("/accounting/**").hasAnyRole(UserRole.KE_TOAN.name(), UserRole.BAN_QUAN_TRI.name())
-                .requestMatchers("/officer/**").hasAnyRole(UserRole.CO_QUAN_CHUC_NANG.name(), UserRole.BAN_QUAN_TRI.name())
-                .requestMatchers("/user/**").hasAnyRole(UserRole.NGUOI_DUNG_THUONG.name(), UserRole.BAN_QUAN_TRI.name())
+                .requestMatchers("/admin/**").hasRole(UserRole.ban_quan_tri.name())
+                .requestMatchers("/accounting/**").hasAnyRole(UserRole.ke_toan.name(), UserRole.ban_quan_tri.name())
+                .requestMatchers("/officer/**").hasAnyRole(UserRole.co_quan_chuc_nang.name(), UserRole.ban_quan_tri.name())
+                .requestMatchers("/user/**").hasAnyRole(UserRole.nguoi_dung_thuong.name(), UserRole.ban_quan_tri.name())
 
                 // Còn lại phải đăng nhập
                 .anyRequest().authenticated()

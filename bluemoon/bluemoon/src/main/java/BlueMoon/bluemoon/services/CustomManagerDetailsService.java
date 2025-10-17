@@ -30,7 +30,7 @@ public class CustomManagerDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         
         // 1. Lấy vai trò cụ thể cho Service này
-        final UserRole REQUIRED_ROLE = UserRole.BAN_QUAN_TRI; // <--- THAY ĐỔI VAI TRÒ Ở ĐÂY
+        final UserRole REQUIRED_ROLE = UserRole.ban_quan_tri; // <--- THAY ĐỔI VAI TRÒ Ở ĐÂY
 
         // 2. Tìm Entity (tìm bằng CCCD trước, sau đó là Email)
         DoiTuong user = doiTuongDAO.findByCccd(username)
@@ -44,7 +44,7 @@ public class CustomManagerDetailsService implements UserDetailsService {
         }
         
         // 4. KIỂM TRA TRẠNG THÁI
-        if (user.getTrangThaiTaiKhoan() != AccountStatus.HOAT_DONG) {
+        if (user.getTrangThaiTaiKhoan() != AccountStatus.hoat_dong) {
              throw new UsernameNotFoundException("Tài khoản đã bị khóa hoặc không hoạt động.");
         }
         

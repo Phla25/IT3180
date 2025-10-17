@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Cơ Quan Chức Năng - BlueMoon Portal</title>
+    
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ==================== FEATURE TOGGLE STYLES ==================== */
+        .feature-badge {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: auto;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .nav-item:hover .feature-badge {
+            animation-play-state: paused;
+            transform: scale(1.1);
+        }
+        
+        .feature-badge {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: auto;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR - CƠ QUAN CHỨC NĂNG -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard-officer.html" class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Xem Sự Cố', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Xem Sự Cố</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Báo Cáo', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-chart-bar"></i>
+                <span>Báo Cáo</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Tài Liệu', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-file-alt"></i>
+                <span>Tài Liệu</span>
+            </a>
+            <a href="apartments-officer.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Xem Căn Hộ</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Cài Đặt</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Dashboard - Cơ Quan Chức Năng</h1>
+        </div>
+        
+        <div class="header-right">
+            <div class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name">Lê Văn Tuấn</span>
+                    <span class="user-role" style="color: #7C3AED;">CƠ QUAN CHỨC NĂNG</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="profile.html">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-cog"></i> Cài Đặt
+                    </a>
+                    <hr>
+                    <button type="button" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- Welcome Banner -->
+        <div style="background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); color: white; padding: 32px; border-radius: 12px; margin-bottom: 30px;">
+            <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">
+                🏛️ Dashboard Giám Sát
+            </h1>
+            <p style="font-size: 16px; opacity: 0.9;">
+                Theo dõi và giám sát hoạt động chung cư BlueMoon
+            </p>
+        </div>
+        
+        <!-- Stats Cards - Monitoring Focus -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Tổng Sự Cố</span>
+                    <div class="stat-icon orange">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+                <div class="stat-value">32</div>
+                <div class="stat-change negative">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+5 so với tháng trước</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Đã Xử Lý</span>
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value">24</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>75% tổng sự cố</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Đang Xử Lý</span>
+                    <div class="stat-icon blue">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                </div>
+                <div class="stat-value">5</div>
+                <div class="stat-change">
+                    <i class="fas fa-clock"></i>
+                    <span>Đang giải quyết</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Chưa Xử Lý</span>
+                    <div class="stat-icon" style="background: #FEE2E2; color: #DC2626;">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value">3</div>
+                <div class="stat-change negative">
+                    <i class="fas fa-exclamation"></i>
+                    <span>Cần xử lý</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sự Cố Theo Mức Độ -->
+        <div class="content-card" style="margin-bottom: 24px;">
+            <div class="content-card-header">
+                <h2 class="content-card-title">📊 Sự Cố Theo Mức Độ Ưu Tiên</h2>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div style="padding: 20px; background: #FEE2E2; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 32px; font-weight: 700; color: #DC2626; margin-bottom: 8px;">8</div>
+                    <div style="font-size: 14px; color: #991B1B;">Ưu tiên cao</div>
+                </div>
+                <div style="padding: 20px; background: #FEF3C7; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 32px; font-weight: 700; color: #D97706; margin-bottom: 8px;">12</div>
+                    <div style="font-size: 14px; color: #92400E;">Ưu tiên trung bình</div>
+                </div>
+                <div style="padding: 20px; background: #DBEAFE; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 32px; font-weight: 700; color: #1E40AF; margin-bottom: 8px;">12</div>
+                    <div style="font-size: 14px; color: #1E3A8A;">Ưu tiên thấp</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh Sách Sự Cố -->
+        <div class="content-card">
+            <div class="content-card-header">
+                <h2 class="content-card-title">⚠️ Danh Sách Sự Cố</h2>
+                <a href="#" class="btn btn-sm btn-outline">Xem tất cả</a>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã SC</th>
+                            <th>Loại Sự Cố</th>
+                            <th>Vị Trí</th>
+                            <th>Mức Độ</th>
+                            <th>Ngày Báo Cáo</th>
+                            <th>Trạng Thái</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>#SC001</strong></td>
+                            <td>Chập điện</td>
+                            <td>Tầng 5</td>
+                            <td><span class="badge badge-danger">Cao</span></td>
+                            <td>14/10/2024</td>
+                            <td><span class="badge badge-warning">Đang xử lý</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#SC002</strong></td>
+                            <td>Rò rỉ nước</td>
+                            <td>Tầng 8</td>
+                            <td><span class="badge badge-warning">Trung bình</span></td>
+                            <td>13/10/2024</td>
+                            <td><span class="badge badge-success">Đã xử lý</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#SC003</strong></td>
+                            <td>Thang máy lỗi</td>
+                            <td>Tháp A</td>
+                            <td><span class="badge badge-danger">Cao</span></td>
+                            <td>12/10/2024</td>
+                            <td><span class="badge badge-warning">Đang xử lý</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/main.js"></script>
+    
+    <script>
+        // ==================== FEATURE TOGGLE FUNCTION ====================
+        function showFeatureToggle(featureName, message) {
+            Swal.fire({
+                icon: 'info',
+                title: `${featureName} - Coming Soon`,
+                html: `
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(45deg, #4F46E5, #7C3AED); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-rocket" style="font-size: 32px; color: white;"></i>
+                        </div>
+                        <p style="margin-bottom: 15px; font-size: 16px;">${message}</p>
+                        <p style="color: #6B7280; font-size: 14px;">
+                            <i class="fas fa-clock"></i> 
+                            Tính năng này sẽ được phát triển trong phiên bản tiếp theo
+                        </p>
+                    </div>
+                `,
+                confirmButtonColor: '#4F46E5',
+                confirmButtonText: 'Tôi hiểu',
+                showCancelButton: true,
+                cancelButtonText: 'Thông báo cho tôi',
+                cancelButtonColor: '#6B7280'
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã đăng ký!',
+                        text: 'Chúng tôi sẽ thông báo khi tính năng này ra mắt.',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                }
+            });
+        }
+        
+        console.log('BlueMoon Portal - Officer Dashboard Loaded ✓');
+    </script>
+</body>
+</html>
+

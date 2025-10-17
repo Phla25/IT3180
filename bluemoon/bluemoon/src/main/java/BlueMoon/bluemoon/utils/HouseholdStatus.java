@@ -1,9 +1,9 @@
 package BlueMoon.bluemoon.utils;
 
 public enum HouseholdStatus {
-    HOAT_DONG("hoat_dong"),
-    DA_CHUYEN_DI("da_chuyen_di"),
-    GIAI_THE("giai_the");
+    hoat_dong("hoat_dong"),
+    da_chuyen_di("da_chuyen_di"),
+    giai_the("giai_the");
     
     private final String dbValue;
     HouseholdStatus(String dbValue) { this.dbValue = dbValue; }

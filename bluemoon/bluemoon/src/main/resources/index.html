@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueMoon Portal - Dashboard</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="index.html" class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="residents.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Quản Lý Cư Dân</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Quản Lý Hộ Gia Đình</span>
+            </a>
+            <a href="assets.html" class="nav-item">
+                <i class="fas fa-building"></i>
+                <span>Quản Lý Tài Sản</span>
+            </a>
+            <a href="fees.html" class="nav-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Quản Lý Khoản Phí</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-concierge-bell"></i>
+                <span>Quản Lý Dịch Vụ</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Xử Lý Sự Cố</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-bell"></i>
+                <span>Gửi Thông Báo</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Báo Cáo Thống Kê</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Cài Đặt</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Dashboard</h1>
+        </div>
+
+        <div class="header-right">
+            <!-- Notifications -->
+            <div class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+
+            <!-- User Menu -->
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name">Nguyễn Văn Thanh</span>
+                    <span class="user-role">BAN_QUAN_TRI</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="profile.html">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-cog"></i> Cài Đặt
+                    </a>
+                    <hr>
+                    <form action="#" method="post" style="margin: 0;">
+                        <button type="submit" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- Welcome Banner -->
+        <div
+            style="background: var(--gradient-blue); color: white; padding: 32px; border-radius: 12px; margin-bottom: 30px;">
+            <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">
+                Chào mừng trở lại, Administrator!
+            </h1>
+            <p style="font-size: 16px; opacity: 0.9;">
+                Đây là tổng quan về các hoạt động và chỉ số quan trọng của hệ thống.
+            </p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Tổng Cư Dân</span>
+                    <div class="stat-icon blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-value">248</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+12 so với tháng trước</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Cư Dân Hoạt Động</span>
+                    <div class="stat-icon green">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                </div>
+                <div class="stat-value">235</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+5 so với tháng trước</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Hóa Đơn Chưa Thanh Toán</span>
+                    <div class="stat-icon orange">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                </div>
+                <div class="stat-value">18</div>
+                <div class="stat-change negative">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>-3 so với tháng trước</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-card-title">Doanh Thu Tháng</span>
+                    <div class="stat-icon purple">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                </div>
+                <div class="stat-value">425M</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+8% so với tháng trước</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="content-card">
+            <div class="content-card-header">
+                <h2 class="content-card-title">Hoạt Động Gần Đây</h2>
+                <a href="#" class="btn btn-sm btn-outline">Xem tất cả</a>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div
+                    style="display: flex; align-items: start; gap: 16px; padding: 12px; border-radius: 8px; background: var(--gray-lighter);">
+                    <div
+                        style="width: 40px; height: 40px; border-radius: 50%; background: #D1FAE5; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user-plus" style="color: var(--secondary-color);"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <p style="font-weight: 600; margin-bottom: 4px;">Cư dân mới được thêm</p>
+                        <p style="font-size: 14px; color: var(--gray); margin-bottom: 4px;">Sarah Johnson đã được thêm
+                            vào hệ thống</p>
+                        <span style="font-size: 12px; color: var(--gray);">2 giờ trước</span>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; align-items: start; gap: 16px; padding: 12px; border-radius: 8px; background: var(--gray-lighter);">
+                    <div
+                        style="width: 40px; height: 40px; border-radius: 50%; background: #DBEAFE; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-check-circle" style="color: var(--info-color);"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <p style="font-weight: 600; margin-bottom: 4px;">Hóa đơn được thanh toán</p>
+                        <p style="font-size: 14px; color: var(--gray); margin-bottom: 4px;">Mike Chen đã thanh toán hóa
+                            đơn #12345</p>
+                        <span style="font-size: 12px; color: var(--gray);">4 giờ trước</span>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; align-items: start; gap: 16px; padding: 12px; border-radius: 8px; background: var(--gray-lighter);">
+                    <div
+                        style="width: 40px; height: 40px; border-radius: 50%; background: #FEF3C7; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-edit" style="color: var(--warning-color);"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <p style="font-weight: 600; margin-bottom: 4px;">Thông tin cư dân được cập nhật</p>
+                        <p style="font-size: 14px; color: var(--gray); margin-bottom: 4px;">Alex Rivera đã cập nhật
+                            thông tin cá nhân</p>
+                        <span style="font-size: 12px; color: var(--gray);">2 ngày trước</span>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; align-items: start; gap: 16px; padding: 12px; border-radius: 8px; background: var(--gray-lighter);">
+                    <div
+                        style="width: 40px; height: 40px; border-radius: 50%; background: #DBEAFE; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <p style="font-weight: 600; margin-bottom: 4px;">Sự cố mới được báo cáo</p>
+                        <p style="font-size: 14px; color: var(--gray); margin-bottom: 4px;">Điện tầng 5 bị chập - Cần xử
+                            lý gấp</p>
+                        <span style="font-size: 12px; color: var(--gray);">3 ngày trước</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="content-card">
+            <div class="content-card-header">
+                <h2 class="content-card-title">Thao Tác Nhanh</h2>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <a href="resident-add.html" class="btn btn-primary" style="padding: 16px;">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Thêm Cư Dân</span>
+                </a>
+                <a href="#" class="btn btn-success" style="padding: 16px;">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Quản Lý Hóa Đơn</span>
+                </a>
+                <a href="#" class="btn btn-warning" style="padding: 16px;">
+                    <i class="fas fa-bell"></i>
+                    <span>Gửi Thông Báo</span>
+                </a>
+                <a href="#" class="btn btn-outline" style="padding: 16px;">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Xem Báo Cáo</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/main.js"></script>
+</body>
+
+</html>

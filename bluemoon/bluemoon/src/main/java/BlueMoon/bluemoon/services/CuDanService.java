@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +13,7 @@ import BlueMoon.bluemoon.daos.DoiTuongDAO;
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.utils.AccountStatus;
 import BlueMoon.bluemoon.utils.ResidentStatus;
+import BlueMoon.bluemoon.utils.UserRole;
 
 @Service
 public class CuDanService {
@@ -37,8 +39,8 @@ public class CuDanService {
 
             // Set default values
             cuDan.setLaCuDan(true);
-            cuDan.setTrangThaiDanCu(ResidentStatus.O_CHUNG_CU);
-            cuDan.setTrangThaiTaiKhoan(AccountStatus.CHUA_KICH_HOAT);
+            cuDan.setTrangThaiDanCu(ResidentStatus.o_chung_cu);
+            cuDan.setTrangThaiTaiKhoan(AccountStatus.chua_kich_hoat);
 
             return doiTuongDAO.save(cuDan);
         
@@ -81,7 +83,7 @@ public class CuDanService {
         
         if (cuDanOptional.isPresent()) {
             DoiTuong cuDan = cuDanOptional.get();
-            cuDan.setTrangThaiDanCu(ResidentStatus.ROI_DI);
+            cuDan.setTrangThaiDanCu(ResidentStatus.roi_di);
             cuDan.setLaCuDan(false);
             doiTuongDAO.save(cuDan);
         } else {
@@ -93,7 +95,7 @@ public class CuDanService {
      * Lấy danh sách tất cả cư dân đang cư trú
      */
     public List<DoiTuong> layDanhSachCuDan() {
-        return doiTuongDAO.findResidentsInComplex(ResidentStatus.O_CHUNG_CU);
+        return doiTuongDAO.findResidentsInComplex(ResidentStatus.o_chung_cu);
     }
 
     /**
@@ -101,5 +103,35 @@ public class CuDanService {
      */
     public Optional<DoiTuong> timCuDanTheoCCCD(String cccd) {
         return doiTuongDAO.findResidentByCccd(cccd);
+    }
+    /**
+     * Đăng ký tài khoản mới cho cư dân
+     */
+    public DoiTuong dangKyTaiKhoan(DoiTuong cuDan) {
+        // Kiểm tra có phải cư dan trong chung cư không
+        if (!doiTuongDAO.findResidentByCccd(cuDan.getCccd()).isPresent()) {
+            throw new IllegalArgumentException("Người dùng không phải cư dân trong chung cư");
+        }
+
+        // Kiểm tra CCCD đã được đăng ký tài khoản chưa
+        if (doiTuongDAO.timNguoiDungThuongTheoCCCD(cuDan.getCccd()).isPresent()) {
+            throw new IllegalArgumentException("CCCD đã được đăng ký tài khoản");
+        }
+
+        // Mã hóa mật khẩu
+        String hashedPassword = BCryptPasswordEncoder((cuDan.getMatKhau()));
+        cuDan.setMatKhau(hashedPassword);
+
+        // Set các giá trị mặc định
+        cuDan.setVaiTro(UserRole.nguoi_dung_thuong);
+        cuDan.setLaCuDan(true);
+        cuDan.setTrangThaiTaiKhoan(AccountStatus.hoat_dong);
+        cuDan.setTrangThaiDanCu(ResidentStatus.o_chung_cu);
+
+        return doiTuongDAO.save(cuDan);
+    }
+    private String BCryptPasswordEncoder(String password) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.encode(password);
     }
 }

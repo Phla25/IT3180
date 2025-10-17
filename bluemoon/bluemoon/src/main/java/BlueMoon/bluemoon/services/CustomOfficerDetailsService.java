@@ -27,7 +27,7 @@ public class CustomOfficerDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         
-        final UserRole REQUIRED_ROLE = UserRole.CO_QUAN_CHUC_NANG;
+        final UserRole REQUIRED_ROLE = UserRole.co_quan_chuc_nang;
 
         DoiTuong user = doiTuongDAO.findByCccd(username)
             .orElseGet(() -> doiTuongDAO.findByEmail(username)
@@ -39,7 +39,7 @@ public class CustomOfficerDetailsService implements UserDetailsService {
         }
         
         // 2. KIỂM TRA TRẠNG THÁI
-        if (user.getTrangThaiTaiKhoan() != AccountStatus.HOAT_DONG) {
+        if (user.getTrangThaiTaiKhoan() != AccountStatus.hoat_dong) {
              throw new UsernameNotFoundException("Tài khoản Cơ quan chức năng đã bị khóa hoặc không hoạt động.");
         }
         

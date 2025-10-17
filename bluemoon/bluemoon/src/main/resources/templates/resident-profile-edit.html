@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cập Nhật Thông Tin Liên Lạc - BlueMoon Portal</title>
+    
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- SIDEBAR - CƯ DÂN -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard-resident.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Trang Chủ</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Hóa Đơn đang phát triển', 'info'); return false;">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Hóa Đơn Của Tôi</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Đăng Ký Dịch Vụ đang phát triển', 'info'); return false;">
+                <i class="fas fa-concierge-bell"></i>
+                <span>Đăng Ký Dịch Vụ</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Báo Cáo Sự Cố đang phát triển', 'info'); return false;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Báo Cáo Sự Cố</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Thông Báo đang phát triển', 'info'); return false;">
+                <i class="fas fa-bell"></i>
+                <span>Thông Báo</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Thông Tin Hộ đang phát triển', 'info'); return false;">
+                <i class="fas fa-home"></i>
+                <span>Thông Tin Hộ</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showNotification('Tính năng Phản Hồi đang phát triển', 'info'); return false;">
+                <i class="fas fa-comment-dots"></i>
+                <span>Phản Hồi</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Cài Đặt</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Cập Nhật Thông Tin Liên Lạc</h1>
+        </div>
+        
+        <div class="header-right">
+            <div class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="badge">6</span>
+            </div>
+            
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name">Nguyễn Văn A</span>
+                    <span class="user-role" style="color: #10B981;">CƯ DÂN</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="resident-profile.html">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-cog"></i> Cài Đặt
+                    </a>
+                    <hr>
+                    <button type="button" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div style="max-width: 800px; margin: 0 auto;">
+            <!-- Breadcrumb -->
+            <div style="margin-bottom: 20px;">
+                <a href="resident-profile.html" style="color: var(--gray); text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Quay lại thông tin cá nhân
+                </a>
+            </div>
+
+            <!-- Form Card -->
+            <div class="content-card">
+                <div class="content-card-header">
+                    <div>
+                        <h2 class="content-card-title">
+                            <i class="fas fa-edit"></i> Cập Nhật Thông Tin Liên Lạc
+                        </h2>
+                        <p style="color: var(--gray); font-size: 14px; margin-top: 4px;">
+                            Cập nhật số điện thoại và email để nhận thông báo kịp thời
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Important Notice -->
+                <div style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); border-radius: 12px; border-left: 4px solid var(--info-color);">
+                    <div style="display: flex; gap: 16px; align-items: start;">
+                        <i class="fas fa-shield-alt" style="font-size: 32px; color: var(--info-color);"></i>
+                        <div>
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #1E40AF;">
+                                Bảo Mật Thông Tin
+                            </h3>
+                            <p style="font-size: 14px; margin: 0; color: #1E3A8A;">
+                                Thông tin của bạn được mã hóa và bảo mật. Chỉ Ban Quản Trị mới có thể xem để liên lạc khi cần thiết.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <form id="contactForm">
+                    <!-- Thông Tin Liên Lạc -->
+                    <div style="margin-bottom: 32px;">
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: var(--dark);">
+                            <i class="fas fa-phone-alt"></i> Cập Nhật Thông Tin Liên Lạc
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-mobile-alt"></i> Số Điện Thoại 
+                                <span style="color: var(--danger-color);">*</span>
+                            </label>
+                            <input type="tel" 
+                                   class="form-control" 
+                                   name="soDienThoai"
+                                   id="soDienThoai"
+                                   value="0912345678"
+                                   placeholder="Nhập số điện thoại"
+                                   pattern="[0-9]{10,11}"
+                                   required
+                                   style="font-size: 16px; padding: 14px;">
+                            <small style="color: var(--gray); font-size: 13px; display: flex; align-items: center; gap: 4px; margin-top: 8px;">
+                                <i class="fas fa-info-circle"></i>
+                                Số điện thoại dùng để nhận SMS thông báo về hóa đơn và sự kiện
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-envelope"></i> Email 
+                                <span style="color: var(--danger-color);">*</span>
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   name="email"
+                                   id="email"
+                                   value="nguyenvana@gmail.com"
+                                   placeholder="Nhập địa chỉ email"
+                                   required
+                                   style="font-size: 16px; padding: 14px;">
+                            <small style="color: var(--gray); font-size: 13px; display: flex; align-items: center; gap: 4px; margin-top: 8px;">
+                                <i class="fas fa-info-circle"></i>
+                                Email dùng để nhận hóa đơn điện tử và thông báo quan trọng
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Preview Changes -->
+                    <div id="previewBox" style="display: none; margin-bottom: 24px; padding: 20px; background: #FEF3C7; border-radius: 12px; border-left: 4px solid var(--warning-color);">
+                        <h4 style="font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #92400E;">
+                            <i class="fas fa-exclamation-triangle"></i> Xác Nhận Thay Đổi
+                        </h4>
+                        <div style="font-size: 14px; color: #92400E;">
+                            <p><strong>Số điện thoại mới:</strong> <span id="previewPhone"></span></p>
+                            <p><strong>Email mới:</strong> <span id="previewEmail"></span></p>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex-between" style="padding-top: 24px; border-top: 1px solid var(--gray-light);">
+                        <a href="resident-profile.html" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                            Hủy bỏ
+                        </a>
+                        
+                        <button type="submit" class="btn btn-success" style="padding: 12px 32px; font-size: 16px;">
+                            <i class="fas fa-save"></i>
+                            Lưu Thay Đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/main.js"></script>
+    
+    <script>
+        const originalPhone = '0912345678';
+        const originalEmail = 'nguyenvana@gmail.com';
+
+        // Detect changes and show preview
+        document.getElementById('soDienThoai').addEventListener('input', function() {
+            // Auto-format: chỉ cho số
+            this.value = this.value.replace(/[^0-9]/g, '');
+            checkChanges();
+        });
+
+        document.getElementById('email').addEventListener('input', function() {
+            checkChanges();
+        });
+
+        function checkChanges() {
+            const newPhone = document.getElementById('soDienThoai').value;
+            const newEmail = document.getElementById('email').value;
+            const previewBox = document.getElementById('previewBox');
+
+            if (newPhone !== originalPhone || newEmail !== originalEmail) {
+                document.getElementById('previewPhone').textContent = newPhone;
+                document.getElementById('previewEmail').textContent = newEmail;
+                previewBox.style.display = 'block';
+            } else {
+                previewBox.style.display = 'none';
+            }
+        }
+
+        // Form submission with validation
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateForm('contactForm')) {
+                Alert.error('Lỗi', 'Vui lòng điền đầy đủ thông tin bắt buộc');
+                return;
+            }
+
+            const newPhone = document.getElementById('soDienThoai').value;
+            const newEmail = document.getElementById('email').value;
+
+            // Kiểm tra có thay đổi không
+            if (newPhone === originalPhone && newEmail === originalEmail) {
+                Alert.error('Chưa có thay đổi', 'Bạn chưa thay đổi thông tin nào');
+                return;
+            }
+
+            // Confirm trước khi lưu
+            Alert.confirm(
+                'Xác nhận cập nhật',
+                `Bạn có chắc muốn cập nhật thông tin liên lạc?\n\nSố điện thoại: ${newPhone}\nEmail: ${newEmail}`,
+                () => {
+                    // Show loading
+                    Alert.loading('Đang cập nhật thông tin...');
+                    
+                    // Simulate API call
+                    setTimeout(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Cập nhật thành công!',
+                            html: `
+                                <div style="text-align: left; padding: 20px;">
+                                    <p style="margin-bottom: 12px;">✅ Thông tin liên lạc đã được cập nhật:</p>
+                                    <ul style="list-style: none; padding-left: 0;">
+                                        <li style="margin-bottom: 8px;">
+                                            <i class="fas fa-phone" style="color: #10B981;"></i> 
+                                            <strong>SĐT:</strong> ${newPhone}
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-envelope" style="color: #3B82F6;"></i> 
+                                            <strong>Email:</strong> ${newEmail}
+                                        </li>
+                                    </ul>
+                                    <p style="margin-top: 16px; padding: 12px; background: #FEF3C7; border-radius: 6px; font-size: 13px;">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Chúng tôi sẽ gửi thông báo đến thông tin liên lạc mới của bạn.
+                                    </p>
+                                </div>
+                            `,
+                            confirmButtonColor: '#10B981',
+                            confirmButtonText: 'Quay về trang cá nhân'
+                        }).then(() => {
+                            window.location.href = 'resident-profile.html';
+                        });
+                    }, 1500);
+                }
+            );
+        });
+
+        // Phone validation - format số điện thoại
+        document.getElementById('soDienThoai').addEventListener('blur', function() {
+            const phone = this.value;
+            if (phone.length !== 10 && phone.length !== 11) {
+                this.classList.add('error');
+                Alert.error('Số điện thoại không hợp lệ', 'Số điện thoại phải có 10 hoặc 11 chữ số');
+            } else {
+                this.classList.remove('error');
+            }
+        });
+
+        // Email validation
+        document.getElementById('email').addEventListener('blur', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                this.classList.add('error');
+                Alert.error('Email không hợp lệ', 'Vui lòng nhập địa chỉ email đúng định dạng');
+            } else {
+                this.classList.remove('error');
+            }
+        });
+    </script>
+</body>
+</html>
+

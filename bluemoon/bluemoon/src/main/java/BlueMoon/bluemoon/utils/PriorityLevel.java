@@ -1,10 +1,10 @@
 package BlueMoon.bluemoon.utils;
 
 public enum PriorityLevel {
-    THAP("thap"),
-    BINH_THUONG("binh_thuong"),
-    CAO("cao"),
-    KHAN_CAP("khan_cap");
+    thap("thap"),
+    binh_thuong("binh_thuong"),
+    cao("cao"),
+    khan_cap("khan_cap");
     
     private final String dbValue;
     PriorityLevel(String dbValue) { this.dbValue = dbValue; }

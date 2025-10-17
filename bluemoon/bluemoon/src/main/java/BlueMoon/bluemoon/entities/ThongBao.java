@@ -1,12 +1,27 @@
 package BlueMoon.bluemoon.entities;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import org.hibernate.annotations.DynamicUpdate;
+
 import BlueMoon.bluemoon.utils.NotificationType;
 import BlueMoon.bluemoon.utils.RecipientType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "thong_bao")
+@DynamicUpdate
 public class ThongBao {
 
     @Id
@@ -26,11 +41,11 @@ public class ThongBao {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "loai_thong_bao", length = 30)
-    private NotificationType loaiThongBao = NotificationType.BINH_THUONG;
+    private NotificationType loaiThongBao = NotificationType.binh_thuong; // NORMAL, URGENT, SYSTEM,...
 
     @Enumerated(EnumType.STRING)
     @Column(name = "doi_tuong_nhan", length = 30)
-    private RecipientType doiTuongNhan = RecipientType.TAT_CA; // ALL_RESIDENTS, MANAGER, ACCOUNTANT,...
+    private RecipientType doiTuongNhan = RecipientType.tat_ca; // ALL_RESIDENTS, MANAGER, ACCOUNTANT,...
 
     @Column(name = "thoi_gian_gui")
     private LocalDateTime thoiGianGui;

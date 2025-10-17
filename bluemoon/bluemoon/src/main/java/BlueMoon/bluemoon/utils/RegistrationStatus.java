@@ -5,11 +5,11 @@ package BlueMoon.bluemoon.utils;
  * Mapping đúng với cột trang_thai trong bảng dang_ky_dich_vu.
  */
 public enum RegistrationStatus {
-    CHO_DUYET("cho_duyet"),
-    DA_DUYET("da_duyet"),
-    DANG_SU_DUNG("dang_su_dung"),
-    DA_HUY("da_huy"),
-    DA_KET_THUC("da_ket_thuc");
+    cho_duyet("cho_duyet"),
+    da_duyet("da_duyet"),
+    dang_su_dung("dang_su_dung"),
+    da_huy("da_huy"),
+    da_ket_thuc("da_ket_thuc");
 
     private final String description;
 

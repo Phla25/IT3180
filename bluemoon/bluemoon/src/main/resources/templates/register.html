@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký Tài Khoản - BlueMoon Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Tái sử dụng CSS từ login.html */
+        :root {
+            --primary-color: #4f46e5;
+            --primary-dark: #3730a3;
+            --white: #fff;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+            --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #4f46e5, #9333ea);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .register-card { /* Đổi tên class để phân biệt với login */
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            width: 90%;
+            max-width: 500px; 
+            padding: 40px;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .card-header i {
+            font-size: 36px;
+            background: linear-gradient(90deg, #4f46e5, #9333ea);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 10px 0 0;
+        }
+
+        .card-header p {
+            color: var(--gray);
+            font-size: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+        
+        .form-group.full-width {
+            flex: none;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #111827;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--gray-light);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #4f46e5, #9333ea);
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        /* Alert/Message styling */
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .alert-danger {
+            color: #991b1b;
+            background-color: #fee2e2;
+        }
+        .alert-success {
+            color: #065f46;
+            background-color: #d1fae5;
+        }
+
+        @media (max-width: 500px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-card">
+        <div class="card-header">
+            <i class="fas fa-user-plus"></i>
+            <h1>Đăng Ký Tài Khoản</h1>
+            <p>Vui lòng điền thông tin để tạo tài khoản cư dân.</p>
+        </div>
+
+        <form action="/register" method="POST">
+            
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="hoTen">Họ và Tên</label>
+                    <input type="text" id="hoTen" name="hoTen" placeholder="Nhập đầy đủ Họ và Tên" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cccd">CCCD/CMND (*)</label>
+                    <input type="text" id="cccd" name="cccd" placeholder="Dùng làm Tên đăng nhập" required>
+                </div>
+                <div class="form-group">
+                    <label for="sdt">Số Điện Thoại</label>
+                    <input type="tel" id="sdt" name="sdt" placeholder="Nhập số điện thoại" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Nhập địa chỉ Email" required>
+                </div>
+                <div class="form-group">
+                    <label for="diaChi">Quê Quán</label>
+                    <input type="text" id="diaChi" name="diaChi" placeholder="Ví dụ: Hà Nội" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="matKhau">Mật Khẩu</label>
+                    <input type="password" id="matKhau" name="matKhau" placeholder="Nhập mật khẩu" required>
+                </div>
+                <div class="form-group">
+                    <label for="xacNhanMatKhau">Xác Nhận Mật Khẩu</label>
+                    <input type="password" id="xacNhanMatKhau" name="xacNhanMatKhau" placeholder="Nhập lại mật khẩu" required>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Đăng Ký Tài Khoản</button>
+            
+            <div class="footer">
+                Đã có tài khoản? <a href="/login">Đăng nhập ngay</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

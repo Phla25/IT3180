@@ -3,6 +3,8 @@ package BlueMoon.bluemoon.entities;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import BlueMoon.bluemoon.utils.RegistrationStatus;
@@ -20,6 +22,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
+@DynamicUpdate
 @Table(name = "dang_ky_dich_vu")
 public class DangKyDichVu {
 

@@ -2,6 +2,8 @@ package BlueMoon.bluemoon.entities;
 
 import java.time.LocalDate;
 
+import org.hibernate.annotations.DynamicUpdate;
+
 import BlueMoon.bluemoon.utils.TerminationReason;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
@@ -20,6 +22,7 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "thanh_vien_ho")
+@DynamicUpdate
 public class ThanhVienHo {
 
     // Khóa chính tổng hợp

@@ -11,12 +11,44 @@ import org.springframework.stereotype.Service;
 
 import BlueMoon.bluemoon.daos.DoiTuongDAO;
 import BlueMoon.bluemoon.entities.DoiTuong;
+import BlueMoon.bluemoon.utils.AccountStatus;
+import BlueMoon.bluemoon.utils.ResidentStatus;
 import jakarta.transaction.Transactional;
 
 @Service
 public class NguoiDungService {
     @Autowired
     private DoiTuongDAO doiTuongDAO;
+
+    // Thêm vào NguoiDungService.java
+
+    @Transactional
+    public DoiTuong dangKyNguoiDung(DoiTuong doiTuong, String matKhau) {
+        // 1. Kiểm tra CCCD/Email đã tồn tại chưa (quan trọng)
+        if (doiTuongDAO.timNguoiDungThuongTheoCCCD(doiTuong.getCccd()).isPresent()) {
+            throw new IllegalArgumentException("Người dùng đã tồn tại.");
+        }
+        if (doiTuongDAO.findByEmail(doiTuong.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email đã tồn tại.");
+        }
+
+        // 2. Mã hóa mật khẩu
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String hashedPassword = passwordEncoder.encode(matKhau);
+        // 3. Lưu thông tin mật khẩu đã mã hóa
+        doiTuong.setMatKhau(hashedPassword);
+        doiTuong.setTrangThaiTaiKhoan(AccountStatus.hoat_dong);
+        doiTuong.setLaCuDan(true);
+        doiTuong.setVaiTro(BlueMoon.bluemoon.utils.UserRole.nguoi_dung_thuong);
+        doiTuong.setResetToken(null);
+        doiTuong.setResetTokenExpiry(null);
+        doiTuong.setTrangThaiDanCu(ResidentStatus.o_chung_cu); 
+        doiTuong.setNgayTao(LocalDateTime.now());
+        doiTuong.setNgayCapNhat(LocalDateTime.now());
+        doiTuong.setNgaySinh(doiTuongDAO.timCuDanBangCccd(doiTuong.getCccd()).getNgaySinh());
+        // 4. Lưu đối tượng người dùng vào DB
+        return doiTuongDAO.save(doiTuong);
+    }
 
     /**
      * Đổi mật khẩu
@@ -51,8 +83,9 @@ public class NguoiDungService {
         // Tạo token ngẫu nhiên
         String token = UUID.randomUUID().toString();
     
-        // Token có hiệu lực trong 24 giờ
-        LocalDateTime expiry = LocalDateTime.now().plusHours(2/15);
+        // THAY ĐỔI: Dùng 10 phút (0.1666 giờ) cho tính an toàn cao hơn và khớp với nội dung email.
+        // CŨ: LocalDateTime expiry = LocalDateTime.now().plusHours(2/15); // = 0 giờ, sai cú pháp.
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(10); 
     
         // Lưu token và thời gian hết hạn
         doiTuong.setResetToken(token);
@@ -60,7 +93,7 @@ public class NguoiDungService {
         doiTuongDAO.save(doiTuong);
 
         // Gửi email chứa link reset mật khẩu
-        String resetLink = "http://yourdomain.com/reset-password?token=" + token;
+        String resetLink = "http://localhost:8080/reset-password?token=" + token;
         guiEmailResetMatKhau(doiTuong.getEmail(), resetLink);
     }
 
@@ -78,7 +111,8 @@ public class NguoiDungService {
         }
 
         // Cập nhật mật khẩu mới
-        String hashedPassword = BCryptPasswordEncoder(matKhauMoi);
+        // SỬA LỖI CÚ PHÁP: Gọi đúng hàm helper
+        String hashedPassword = BCryptPasswordEncoderHelper(matKhauMoi);
         doiTuong.setMatKhau(hashedPassword);
     
         // Xóa token
@@ -88,7 +122,8 @@ public class NguoiDungService {
         doiTuongDAO.save(doiTuong);
     }
 
-    private String BCryptPasswordEncoder(String password) {
+    // Đổi tên hàm helper để tránh nhầm lẫn với constructor của BCryptPasswordEncoder
+    private String BCryptPasswordEncoderHelper(String password) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.encode(password);
     }
@@ -98,7 +133,7 @@ public class NguoiDungService {
         message.setTo(email);
         message.setSubject("Yêu cầu đặt lại mật khẩu");
         message.setText("Để đặt lại mật khẩu, vui lòng click vào link sau:\n" + resetLink + 
-                   "\nLink có hiệu lực trong 10 phút.");
+                        "\nLink có hiệu lực trong 10 phút.");
         mailSender.send(message);
     }
 }

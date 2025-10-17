@@ -3,6 +3,7 @@ package BlueMoon.bluemoon.daos;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import BlueMoon.bluemoon.entities.DoiTuong;
@@ -18,6 +19,7 @@ import jakarta.transaction.Transactional;
 public class DoiTuongDAO {
 
     // Tiêm EntityManager để truy vấn thủ công
+    @Autowired
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -42,7 +44,10 @@ public class DoiTuongDAO {
         DoiTuong doiTuong = entityManager.find(DoiTuong.class, cccd);
         return Optional.ofNullable(doiTuong);
     }
-    
+    public DoiTuong timCuDanBangCccd(String cccd) {
+        DoiTuong doiTuong = entityManager.find(DoiTuong.class, cccd);
+        return doiTuong;
+    }
     /**
      * Tìm tất cả các Entity.
      */
@@ -111,7 +116,7 @@ public class DoiTuongDAO {
         try {
             DoiTuong doiTuong = entityManager.createQuery(jpql, DoiTuong.class)
                     .setParameter("cccd", cccd)
-                    .setParameter("vaiTro", UserRole.NGUOI_DUNG_THUONG)
+                    .setParameter("vaiTro", UserRole.nguoi_dung_thuong)
                     .getSingleResult();
             return Optional.of(doiTuong);
         } catch (NoResultException e) {

@@ -3,6 +3,8 @@ package BlueMoon.bluemoon.entities;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.DynamicUpdate;
+
 import BlueMoon.bluemoon.utils.AccountStatus;
 import BlueMoon.bluemoon.utils.Gender;
 import BlueMoon.bluemoon.utils.ResidentStatus; // Import quan trọng
@@ -19,6 +21,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "doi_tuong")
+@DynamicUpdate
 public class DoiTuong {
 
     // Khóa chính (Primary Key)
@@ -103,7 +106,7 @@ public class DoiTuong {
         
         // Thiết lập giá trị mặc định cho trạng thái tài khoản nếu chưa được gán
         if (this.trangThaiTaiKhoan == null) {
-            this.trangThaiTaiKhoan = AccountStatus.HOAT_DONG; 
+            this.trangThaiTaiKhoan = AccountStatus.hoat_dong; 
         }
     }
 

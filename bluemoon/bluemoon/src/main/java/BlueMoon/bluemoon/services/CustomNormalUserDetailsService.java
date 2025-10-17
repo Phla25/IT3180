@@ -27,7 +27,7 @@ public class CustomNormalUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         
-        final UserRole REQUIRED_ROLE = UserRole.NGUOI_DUNG_THUONG;
+        final UserRole REQUIRED_ROLE = UserRole.nguoi_dung_thuong;
 
         DoiTuong user = doiTuongDAO.findByCccd(username)
             .orElseGet(() -> doiTuongDAO.findByEmail(username)
@@ -39,7 +39,7 @@ public class CustomNormalUserDetailsService implements UserDetailsService {
         }
         
         // 2. KIỂM TRA TRẠNG THÁI
-        if (user.getTrangThaiTaiKhoan() != AccountStatus.HOAT_DONG) {
+        if (user.getTrangThaiTaiKhoan() != AccountStatus.hoat_dong) {
              throw new UsernameNotFoundException("Tài khoản Người dùng thường đã bị khóa hoặc không hoạt động.");
         }
         

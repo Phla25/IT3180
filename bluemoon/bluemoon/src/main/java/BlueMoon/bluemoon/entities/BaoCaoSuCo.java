@@ -1,13 +1,27 @@
 package BlueMoon.bluemoon.entities;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import BlueMoon.bluemoon.utils.PriorityLevel;
+
+import org.hibernate.annotations.DynamicUpdate;
+
 import BlueMoon.bluemoon.utils.IncidentStatus;
+import BlueMoon.bluemoon.utils.PriorityLevel;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "bao_cao_su_co")
+@DynamicUpdate
 public class BaoCaoSuCo {
 
     @Id
@@ -31,11 +45,11 @@ public class BaoCaoSuCo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "muc_do_uu_tien", length = 20)
-    private PriorityLevel mucDoUuTien = PriorityLevel.BINH_THUONG;
+    private PriorityLevel mucDoUuTien = PriorityLevel.binh_thuong;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai", length = 20)
-    private IncidentStatus trangThai = IncidentStatus.MOI_TIEP_NHAN;
+    private IncidentStatus trangThai = IncidentStatus.moi_tiep_nhan;
 
     @Column(name = "thoi_gian_bao_cao")
     private LocalDateTime thoiGianBaoCao = LocalDateTime.now();

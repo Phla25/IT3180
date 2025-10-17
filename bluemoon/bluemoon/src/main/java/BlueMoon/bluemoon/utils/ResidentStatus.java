@@ -1,9 +1,9 @@
 package BlueMoon.bluemoon.utils;
 
 public enum ResidentStatus {
-    ROI_DI("roi_di"),
-    O_CHUNG_CU("o_chung_cu"),
-    DA_CHET("da_chet");
+    roi_di("roi_di"),
+    o_chung_cu("o_chung_cu"),
+    da_chet("da_chet");
     
     private final String dbValue;
     ResidentStatus(String dbValue) { this.dbValue = dbValue; }

@@ -1,8 +1,8 @@
 package BlueMoon.bluemoon.utils;
 
 public enum Gender {
-    NAM("nam"),
-    NU("nu");
+    nam("nam"),
+    nu("nu");
     
     private final String dbValue;
     Gender(String dbValue) { this.dbValue = dbValue; }

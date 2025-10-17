@@ -1,9 +1,9 @@
 package BlueMoon.bluemoon.utils;
 
 public enum AssetType {
-    CAN_HO("can_ho"),
-    THIET_BI("thiet_bi"),
-    TIEN_ICH("tien_ich");
+    can_ho("can_ho"),
+    thiet_bi("thiet_bi"),
+    tien_ich("tien_ich");
     
     private final String dbValue;
     AssetType(String dbValue) { this.dbValue = dbValue; }

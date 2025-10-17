@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quên Mật khẩu - BlueMoon Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Lưu ý: Để sử dụng lại toàn bộ style, bạn nên trích xuất phần <style> 
+       trong login.html ra một file CSS riêng và liên kết (link) vào đây. 
+       Tuy nhiên, để đơn giản, giả định rằng các CSS biến và quy tắc đã được định nghĩa.
+    */
+    :root {
+      --primary-color: #4f46e5;
+      --primary-dark: #3730a3;
+      --white: #fff;
+      --gray: #6b7280;
+      --gray-light: #e5e7eb;
+      --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #4f46e5, #9333ea);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card { /* Tái sử dụng .login-card cho form quên mật khẩu */
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: var(--shadow-xl);
+      width: 400px;
+      padding: 40px;
+      position: relative;
+      animation: fadeInUp 0.5s ease;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .login-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .login-logo i {
+      font-size: 36px;
+      background: linear-gradient(90deg, #4f46e5, #9333ea);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .login-logo h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #4f46e5, #9333ea);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+    .login-subtitle {
+      text-align: center;
+      color: var(--gray);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #111827;
+      font-size: 14px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--gray-light);
+      border-radius: 10px;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(90deg, #4f46e5, #9333ea);
+      border: none;
+      color: white;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl);
+    }
+    .footer {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 14px;
+      color: var(--gray);
+    }
+    .footer a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .info-text {
+        text-align: center;
+        color: var(--gray);
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="login-logo">
+      <i class="fas fa-key"></i> 
+      <h1>Quên Mật khẩu</h1>
+    </div>
+    <p class="login-subtitle">Đặt lại mật khẩu cho tài khoản của bạn</p>
+
+    <p class="info-text">
+      Vui lòng nhập **Email** đã đăng ký. Chúng tôi sẽ gửi một liên kết đặt lại mật khẩu đến địa chỉ email này.
+    </p>
+
+    <form action="/forgot-password" method="POST"> 
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Nhập Email đã đăng ký" required>
+      </div>
+
+      <button type="submit" class="login-btn">Gửi Yêu cầu Đặt lại Mật khẩu</button>
+
+      <div class="footer">
+        <a href="/login">Quay lại trang Đăng nhập</a>
+      </div>
+        <div th:if="${error}" style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 15px;">
+          Lỗi: <span th:text="${error}"></span>
+        </div>
+
+      <div th:if="${message}" style="color: green; padding: 10px; border: 1px solid green; margin-bottom: 15px;">
+          Thành công: <span th:text="${message}"></span>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,11 +1,11 @@
 package BlueMoon.bluemoon.utils;
 
 public enum IncidentStatus {
-    MOI_TIEP_NHAN("moi_tiep_nhan"),
-    DANG_XU_LY("dang_xu_ly"),
-    CHO_PHE_DUYET("cho_phe_duyet"),
-    DA_HOAN_THANH("da_hoan_thanh"),
-    DA_HUY("da_huy");
+    moi_tiep_nhan("moi_tiep_nhan"),
+    dang_xu_ly("dang_xu_ly"),
+    cho_phe_duyet("cho_phe_duyet"),
+    da_hoan_thanh("da_hoan_thanh"),
+    da_huy("da_huy");
     
     private final String dbValue;
     IncidentStatus(String dbValue) { this.dbValue = dbValue; }

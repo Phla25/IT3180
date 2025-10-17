@@ -1,11 +1,24 @@
 package BlueMoon.bluemoon.entities;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import BlueMoon.bluemoon.utils.ServiceType;
+import org.hibernate.annotations.DynamicUpdate;
+
 import BlueMoon.bluemoon.utils.AssetStatus;
+import BlueMoon.bluemoon.utils.ServiceType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 
 /**
  * Bảng dịch_vụ: mô tả các loại dịch vụ do Ban quản trị cung cấp
@@ -13,6 +26,7 @@ import BlueMoon.bluemoon.utils.AssetStatus;
  */
 @Entity
 @Table(name = "dich_vu")
+@DynamicUpdate
 public class DichVu {
 
     @Id
@@ -43,7 +57,7 @@ public class DichVu {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai", length = 20)
-    private AssetStatus trangThai = AssetStatus.HOAT_DONG; // mặc định là hoạt động
+    private AssetStatus trangThai = AssetStatus.hoat_dong; // mặc định là hoạt động
 
     @Column(name = "ngay_tao", nullable = false)
     private LocalDateTime ngayTao;
