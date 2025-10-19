@@ -45,7 +45,7 @@ public class CustomOfficerDetailsService implements UserDetailsService {
         
         // 3. Xây dựng Authorities và trả về UserDetails
         List<GrantedAuthority> authorities = Collections.singletonList(
-             new SimpleGrantedAuthority("ROLE_" + REQUIRED_ROLE.name())
+             new SimpleGrantedAuthority("ROLE_"+REQUIRED_ROLE.name())
         );
 
         return new org.springframework.security.core.userdetails.User(

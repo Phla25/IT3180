@@ -50,7 +50,7 @@ public class CustomManagerDetailsService implements UserDetailsService {
         
         // 5. Trả về đối tượng UserDetails của Spring Security
         List<GrantedAuthority> authorities = Collections.singletonList(
-             new SimpleGrantedAuthority("ROLE_" + REQUIRED_ROLE.name())
+             new SimpleGrantedAuthority("ROLE_"+REQUIRED_ROLE.name())
         );
 
         return new org.springframework.security.core.userdetails.User(

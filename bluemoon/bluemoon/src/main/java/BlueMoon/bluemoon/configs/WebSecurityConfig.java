@@ -30,16 +30,19 @@ public class WebSecurityConfig {
     private final CustomAccountantDetailsService accountantService;
     private final CustomNormalUserDetailsService normalUserService;
     private final CustomOfficerDetailsService officerService;
+    private final CustomAuthenticationSuccessHandler successHandler;
 
     public WebSecurityConfig(
             CustomManagerDetailsService managerService,
             CustomAccountantDetailsService accountantService,
             CustomNormalUserDetailsService normalUserService,
-            CustomOfficerDetailsService officerService) {
+            CustomOfficerDetailsService officerService,
+            CustomAuthenticationSuccessHandler successHandler) {
         this.managerService = managerService;
         this.accountantService = accountantService;
         this.normalUserService = normalUserService;
         this.officerService = officerService;
+        this.successHandler = successHandler;
     }
 
     @Bean
@@ -82,9 +85,9 @@ public class WebSecurityConfig {
 
                 // Các trang yêu cầu vai trò cụ thể
                 .requestMatchers("/admin/**").hasRole(UserRole.ban_quan_tri.name())
-                .requestMatchers("/accounting/**").hasAnyRole(UserRole.ke_toan.name(), UserRole.ban_quan_tri.name())
-                .requestMatchers("/officer/**").hasAnyRole(UserRole.co_quan_chuc_nang.name(), UserRole.ban_quan_tri.name())
-                .requestMatchers("/user/**").hasAnyRole(UserRole.nguoi_dung_thuong.name(), UserRole.ban_quan_tri.name())
+                .requestMatchers("/accountant/**").hasAnyRole(UserRole.ke_toan.name(), UserRole.ban_quan_tri.name())
+                .requestMatchers("/staff/**").hasAnyRole(UserRole.co_quan_chuc_nang.name(), UserRole.ban_quan_tri.name())
+                .requestMatchers("/resident/**").hasAnyRole(UserRole.nguoi_dung_thuong.name(), UserRole.ban_quan_tri.name())
 
                 // Còn lại phải đăng nhập
                 .anyRequest().authenticated()
@@ -92,7 +95,7 @@ public class WebSecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login") // Trang login MVC tự làm (vd: login.html)
                 .loginProcessingUrl("/process-login") // Action của form login
-                .defaultSuccessUrl("/home", true) // Trang chuyển đến sau khi login thành công
+                .successHandler(successHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
