@@ -34,13 +34,27 @@ public class CuDanService {
         
             // Check if CCCD already exists
             if (doiTuongDAO.findByCccd(cuDan.getCccd()).isPresent()) {
-                throw new IllegalArgumentException("CCCD đã tồn tại trong hệ thống");
+                cuDan.setTrangThaiDanCu(ResidentStatus.o_chung_cu);
+                cuDan.setLaCuDan(true);
+                cuDan.setVaiTro(UserRole.khong_dung_he_thong);
+                cuDan.setTrangThaiTaiKhoan(AccountStatus.chua_kich_hoat);
+                cuDan.setMatKhau(BCryptPasswordEncoder("123")); // Chưa có mật khẩu
+                if (doiTuongDAO.timNguoiDungThuongTheoCCCD(cuDan.getCccd()).isPresent()) {
+                    DoiTuong existingUser = doiTuongDAO.timNguoiDungThuongTheoCCCD(cuDan.getCccd()).get();
+                    cuDan.setVaiTro(UserRole.nguoi_dung_thuong);
+                    cuDan.setTrangThaiTaiKhoan(AccountStatus.hoat_dong);
+                    cuDan.setMatKhau(existingUser.getMatKhau());
+                    return doiTuongDAO.save(cuDan);
+                }
+                return doiTuongDAO.save(cuDan);
             }
 
             // Set default values
             cuDan.setLaCuDan(true);
+            cuDan.setVaiTro(UserRole.khong_dung_he_thong);
             cuDan.setTrangThaiDanCu(ResidentStatus.o_chung_cu);
             cuDan.setTrangThaiTaiKhoan(AccountStatus.chua_kich_hoat);
+            cuDan.setMatKhau(BCryptPasswordEncoder("123")); // Chưa có mật khẩu
 
             return doiTuongDAO.save(cuDan);
         
@@ -77,20 +91,55 @@ public class CuDanService {
     /**
      * Xóa cư dân (thực tế là đánh dấu đã chuyển đi)
      */
-    @Transactional
-    public void xoaCuDan(String cccd) {
-        Optional<DoiTuong> cuDanOptional = doiTuongDAO.findResidentByCccd(cccd);
-        
-        if (cuDanOptional.isPresent()) {
-            DoiTuong cuDan = cuDanOptional.get();
-            cuDan.setTrangThaiDanCu(ResidentStatus.roi_di);
-            cuDan.setLaCuDan(false);
-            doiTuongDAO.save(cuDan);
-        } else {
-            throw new RuntimeException("Không tìm thấy cư dân với CCCD: " + cccd);
-        }
-    }
 
+    /**
+     * Đánh dấu cư dân đã chuyển đi/mất (Thao tác xóa mềm)
+     */
+@Transactional
+public void xoaCuDan(String cccd, ResidentStatus lyDo) {
+    System.out.println("=== BẮT ĐẦU XÓA CƯ DÂN ===");
+    System.out.println("CCCD: " + cccd);
+    System.out.println("Lý do: " + lyDo);
+    
+    Optional<DoiTuong> cuDanOptional = doiTuongDAO.findResidentByCccd(cccd);
+    
+    System.out.println("Tìm thấy cư dân: " + cuDanOptional.isPresent());
+    
+    if (cuDanOptional.isPresent()) {
+        DoiTuong cuDan = cuDanOptional.get();
+        
+        System.out.println("Trước khi update:");
+        System.out.println("- Trạng thái dân cư: " + cuDan.getTrangThaiDanCu());
+        System.out.println("- Là cư dân: " + cuDan.getLaCuDan());
+        System.out.println("- Trạng thái tài khoản: " + cuDan.getTrangThaiTaiKhoan());
+        
+        // 1. Cập nhật trạng thái dân cư theo lý do (roi_di hoặc da_chet)
+        cuDan.setTrangThaiDanCu(lyDo); 
+
+        // 2. Đánh dấu không phải cư dân hiện tại
+        cuDan.setLaCuDan(false);
+        
+        // 3. Tùy chọn: Đánh dấu tài khoản không hoạt động (nếu có)
+        cuDan.setTrangThaiTaiKhoan(AccountStatus.tam_ngung); 
+        
+        System.out.println("Sau khi set:");
+        System.out.println("- Trạng thái dân cư: " + cuDan.getTrangThaiDanCu());
+        System.out.println("- Là cư dân: " + cuDan.getLaCuDan());
+        System.out.println("- Trạng thái tài khoản: " + cuDan.getTrangThaiTaiKhoan());
+        
+        DoiTuong saved = doiTuongDAO.save(cuDan);
+        
+        System.out.println("Sau khi save:");
+        System.out.println("- Trạng thái dân cư: " + saved.getTrangThaiDanCu());
+        System.out.println("- Là cư dân: " + saved.getLaCuDan());
+        System.out.println("- Trạng thái tài khoản: " + saved.getTrangThaiTaiKhoan());
+        
+        System.out.println("=== HOÀN THÀNH XÓA CƯ DÂN ===");
+    } else {
+        System.out.println("KHÔNG TÌM THẤY CƯ DÂN!");
+        throw new RuntimeException("Không tìm thấy cư dân với CCCD: " + cccd);
+    }
+}
     /**
      * Lấy danh sách tất cả cư dân đang cư trú
      */
@@ -133,5 +182,14 @@ public class CuDanService {
     private String BCryptPasswordEncoder(String password) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.encode(password);
+    }
+    public List<DoiTuong> layTatCaNguoiDung() {
+        return doiTuongDAO.findAll();
+    }
+    public List<DoiTuong> timKiemvaLoc(String keyword, ResidentStatus trangThaiDanCu) {
+        if (trangThaiDanCu != null) {
+            return doiTuongDAO.findResidentsInComplex(trangThaiDanCu);
+        }
+        return doiTuongDAO.searchResidents(keyword);
     }
 }

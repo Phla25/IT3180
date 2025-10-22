@@ -33,15 +33,15 @@ public class CustomAccountantDetailsService implements UserDetailsService {
             .orElseGet(() -> doiTuongDAO.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Tài khoản Kế toán " + username + " không tồn tại.")));
 
-        // 1. KIỂM TRA VAI TRÒ
+        // 3. KIỂM TRA VAI TRÒ PHÙ HỢP
         if (user.getVaiTro() != REQUIRED_ROLE) {
-            // Ném lỗi để ProviderManager chuyển sang Provider tiếp theo
-            throw new UsernameNotFoundException("Tài khoản này không phải là Kế toán."); 
+            // SỬA ĐỔI: Ném BadCredentialsException để ProviderManager dừng lại và trả về lỗi
+            throw new UsernameNotFoundException("Tài khoản không phải là Kế toán."); // <--- Thay đổi ở đây
         }
         
-        // 2. KIỂM TRA TRẠNG THÁI
+        // 4. KIỂM TRA TRẠNG THÁI
         if (user.getTrangThaiTaiKhoan() != AccountStatus.hoat_dong) {
-             throw new UsernameNotFoundException("Tài khoản Kế toán đã bị khóa hoặc không hoạt động.");
+             throw new UsernameNotFoundException("Tài khoản đã bị khóa hoặc không hoạt động."); // <--- Nên dùng BadCredentialsException hoặc DisabledException
         }
         
         // 3. Xây dựng Authorities và trả về UserDetails

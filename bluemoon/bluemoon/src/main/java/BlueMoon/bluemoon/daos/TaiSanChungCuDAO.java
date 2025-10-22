@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import BlueMoon.bluemoon.entities.HoGiaDinh;
 import BlueMoon.bluemoon.entities.TaiSanChungCu;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
@@ -141,4 +142,22 @@ public class TaiSanChungCuDAO {
                             .setParameter("maxGiaTri", maxGiaTri)
                             .getResultList();
     }
+    // Giả định bạn đã sửa lại TaiSanChungCuDAO.java để bao gồm phương thức sau:
+
+    /**
+     * Tìm căn hộ chính (loaiTaiSan = CAN_HỌ) của một hộ gia đình.
+     */
+    public Optional<TaiSanChungCu> findApartmentByHo(String maHo) {
+        String jpql = "SELECT ts FROM TaiSanChungCu ts WHERE ts.hoGiaDinh.maHo = :maHo AND ts.loaiTaiSan = :loaiCanHo";
+        try {
+            return Optional.of(entityManager.createQuery(jpql, TaiSanChungCu.class)
+                                            .setParameter("maHo", maHo)
+                                            .setParameter("loaiCanHo", BlueMoon.bluemoon.utils.AssetType.can_ho)
+                                            .setMaxResults(1) // Lấy căn hộ đầu tiên (giả định 1 hộ sở hữu 1 căn chính)
+                                            .getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
 }
+

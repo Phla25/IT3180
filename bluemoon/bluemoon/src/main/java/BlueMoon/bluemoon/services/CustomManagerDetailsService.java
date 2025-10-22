@@ -37,15 +37,15 @@ public class CustomManagerDetailsService implements UserDetailsService {
             .orElseGet(() -> doiTuongDAO.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Tài khoản " + username + " không tồn tại.")));
 
-        // 3. KIỂM TRA VAI TRÒ PHÙ HỢP
+       // 3. KIỂM TRA VAI TRÒ PHÙ HỢP
         if (user.getVaiTro() != REQUIRED_ROLE) {
-            // Ném lỗi để ProviderManager chuyển sang Provider tiếp theo
-            throw new UsernameNotFoundException("Tài khoản không phải là " + REQUIRED_ROLE.getDbValue()); 
+            // SỬA ĐỔI: Ném BadCredentialsException để ProviderManager dừng lại và trả về lỗi
+            throw new UsernameNotFoundException("Tài khoản không phải là Ban quản trị."); // <--- Thay đổi ở đây
         }
         
         // 4. KIỂM TRA TRẠNG THÁI
         if (user.getTrangThaiTaiKhoan() != AccountStatus.hoat_dong) {
-             throw new UsernameNotFoundException("Tài khoản đã bị khóa hoặc không hoạt động.");
+             throw new UsernameNotFoundException("Tài khoản đã bị khóa hoặc không hoạt động."); // <--- Nên dùng BadCredentialsException hoặc DisabledException
         }
         
         // 5. Trả về đối tượng UserDetails của Spring Security

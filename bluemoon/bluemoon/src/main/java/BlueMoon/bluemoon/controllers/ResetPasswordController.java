@@ -21,10 +21,11 @@ public class ResetPasswordController {
     }
 
     @PostMapping("/forgot-password")
-    public String processForgotPassword(@RequestParam("email") String email, 
+    public String processForgotPassword(@RequestParam("email") String email,
+                                        @RequestParam("id") String id, 
                                       RedirectAttributes redirectAttributes) {
         try {
-            nguoiDungService.taoYeuCauResetMatKhau(email);
+            nguoiDungService.taoYeuCauResetMatKhau(id, email);
             redirectAttributes.addFlashAttribute("message", 
                 "Link đặt lại mật khẩu đã được gửi đến email của bạn.");
             return "redirect:/forgot-password";

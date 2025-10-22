@@ -85,9 +85,9 @@ public class WebSecurityConfig {
 
                 // Các trang yêu cầu vai trò cụ thể
                 .requestMatchers("/admin/**").hasRole(UserRole.ban_quan_tri.name())
-                .requestMatchers("/accountant/**").hasAnyRole(UserRole.ke_toan.name(), UserRole.ban_quan_tri.name())
-                .requestMatchers("/staff/**").hasAnyRole(UserRole.co_quan_chuc_nang.name(), UserRole.ban_quan_tri.name())
-                .requestMatchers("/resident/**").hasAnyRole(UserRole.nguoi_dung_thuong.name(), UserRole.ban_quan_tri.name())
+                .requestMatchers("/accountant/**").hasRole(UserRole.ke_toan.name())
+                .requestMatchers("/staff/**").hasRole(UserRole.co_quan_chuc_nang.name())
+                .requestMatchers("/resident/**").hasRole(UserRole.nguoi_dung_thuong.name())
 
                 // Còn lại phải đăng nhập
                 .anyRequest().authenticated()

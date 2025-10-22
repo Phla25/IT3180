@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -12,21 +12,27 @@
 </head>
 
 <body>
-    <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="logo">
                 <i class="fas fa-building"></i>
                 <span>BlueMoon Portal</span>
             </div>
+            <div class="user-profile">
+                <div class="avatar"><i class="fas fa-user-circle"></i></div>
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Tên Người Dùng'">Tên Người Dùng</span>
+                    <span class="user-role" th:text="${user?.vaiTro?.dbValue} ?: 'Vai Trò'">Vai Trò</span>
+                </div>
+            </div>
         </div>
 
         <nav class="sidebar-nav">
-            <a href="index.html" class="nav-item">
+            <a th:href="@{/admin/dashboard}" class="nav-item">
                 <i class="fas fa-chart-line"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="residents.html" class="nav-item active">
+            <a th:href="@{/admin/resident-list}" class="nav-item active">
                 <i class="fas fa-users"></i>
                 <span>Quản Lý Cư Dân</span>
             </a>
@@ -42,9 +48,9 @@
                 <i class="fas fa-building"></i>
                 <span>Quản Lý Tài Sản</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="fees.html" class="nav-item">
                 <i class="fas fa-file-invoice-dollar"></i>
-                <span>Quản Lý Hóa Đơn</span>
+                <span>Quản Lý Khoản Phí</span>
             </a>
             <a href="#" class="nav-item">
                 <i class="fas fa-concierge-bell"></i>
@@ -71,8 +77,6 @@
             </a>
         </div>
     </aside>
-
-    <!-- HEADER -->
     <header class="header">
         <div class="header-left">
             <button class="menu-toggle" onclick="toggleSidebar()">
@@ -80,201 +84,103 @@
             </button>
             <h1>Thêm Cư Dân Mới</h1>
         </div>
+        </header>
 
-        <div class="header-right">
-            <div class="notification-icon">
-                <i class="fas fa-bell"></i>
-                <span class="badge">3</span>
-            </div>
-
-            <div class="user-menu">
-                <div class="user-info">
-                    <span class="user-name">Nguyễn Văn Thanh</span>
-                    <span class="user-role">BAN_QUAN_TRI</span>
-                </div>
-                <div class="user-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="dropdown-menu">
-                    <a href="profile.html">
-                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
-                    </a>
-                    <a href="#">
-                        <i class="fas fa-cog"></i> Cài Đặt
-                    </a>
-                    <hr>
-                    <button type="button" class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> Đăng Xuất
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- MAIN CONTENT -->
     <main class="main-content">
-        <!-- Breadcrumb -->
         <div style="margin-bottom: 20px;">
-            <a href="residents.html" style="color: var(--gray); text-decoration: none;">
+            <a th:href="@{/admin/resident-list}" style="color: var(--gray); text-decoration: none;">
                 <i class="fas fa-arrow-left"></i> Quay lại danh sách
             </a>
         </div>
 
-        <!-- Form Card -->
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            <span th:text="${errorMessage}">Lỗi khi thêm cư dân.</span>
+        </div>
+
         <div class="content-card" style="max-width: 1000px;">
             <div class="content-card-header">
                 <div>
-                    <h2 class="content-card-title">Thêm Cư Dân Mới</h2>
+                    <h2 class="content-card-title">Thêm Cư Dân Mới (Thông Tin Dân Cư)</h2>
                     <p style="color: var(--gray); font-size: 14px; margin-top: 4px;">
-                        Nhập thông tin chi tiết của cư dân mới
+                        Chỉ cần nhập thông tin cơ bản. Tài khoản sẽ được tạo khi cư dân tự đăng ký.
                     </p>
                 </div>
             </div>
 
-            <!-- Form -->
-            <form id="residentForm">
-                <!-- Thông Tin Tài Khoản -->
+            <form id="residentForm" th:action="@{/admin/resident-add}" th:object="${newResident}" method="post">
                 <div style="margin-bottom: 32px;">
                     <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--dark);">
-                        <i class="fas fa-user-circle"></i> Thông Tin Tài Khoản
+                        <i class="fas fa-id-card"></i> Thông Tin Cơ Bản
                     </h3>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">CCCD <span style="color: var(--danger-color);">*</span></label>
-                            <input type="text" class="form-control" name="cccd" id="cccd"
+                            <input type="text" class="form-control" th:field="*{cccd}" id="cccd"
                                 placeholder="Nhập số CCCD (12 số)" pattern="[0-9]{12}" maxlength="12" required>
                             <small style="color: var(--gray); font-size: 12px;">Số CCCD phải có đúng 12 chữ số</small>
                         </div>
-
+                        
                         <div class="form-group">
-                            <label class="form-label">Mật khẩu <span
-                                    style="color: var(--danger-color);">*</span></label>
-                            <input type="password" class="form-control" name="matKhau" placeholder="Nhập mật khẩu"
-                                minlength="6" required>
-                            <small style="color: var(--gray); font-size: 12px;">Mật khẩu tối thiểu 6 ký tự</small>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Vai trò <span style="color: var(--danger-color);">*</span></label>
-                            <select class="form-control" name="vaiTro" required>
-                                <option value="">-- Chọn vai trò --</option>
-                                <option value="BAN_QUAN_TRI">Ban Quản Trị</option>
-                                <option value="KE_TOAN">Kế Toán</option>
-                                <option value="CO_QUAN_CHUC_NANG">Cơ Quan Chức Năng</option>
-                                <option value="NGUOI_DUNG_THUONG" selected>Người Dùng Thường</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Là cư dân</label>
-                            <select class="form-control" name="laCuDan">
-                                <option value="true" selected>Có</option>
-                                <option value="false">Không</option>
-                            </select>
+                            <label class="form-label">Họ và tên <span style="color: var(--danger-color);">*</span></label>
+                            <input type="text" class="form-control" th:field="*{hoVaTen}" placeholder="Nhập họ và tên đầy đủ"
+                                required>
                         </div>
                     </div>
                 </div>
 
-                <!-- Thông Tin Cá Nhân -->
                 <div style="margin-bottom: 32px;">
                     <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--dark);">
-                        <i class="fas fa-id-card"></i> Thông Tin Cá Nhân
+                        <i class="fas fa-info-circle"></i> Chi Tiết Khác
                     </h3>
-
-                    <div class="form-group">
-                        <label class="form-label">Họ và tên <span style="color: var(--danger-color);">*</span></label>
-                        <input type="text" class="form-control" name="hoVaTen" placeholder="Nhập họ và tên đầy đủ"
-                            required>
-                    </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Ngày sinh <span
-                                    style="color: var(--danger-color);">*</span></label>
-                            <input type="date" class="form-control" name="ngaySinh" max="2010-12-31" required>
+                                        style="color: var(--danger-color);">*</span></label>
+                            <input type="date" class="form-control" th:field="*{ngaySinh}" max="2010-12-31" required>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Giới tính <span
-                                    style="color: var(--danger-color);">*</span></label>
-                            <select class="form-control" name="gioiTinh" required>
+                                        style="color: var(--danger-color);">*</span></label>
+                            <select class="form-control" th:field="*{gioiTinh}" required>
                                 <option value="">-- Chọn giới tính --</option>
-                                <option value="NAM">Nam</option>
-                                <option value="NU">Nữ</option>
-                                <option value="KHAC">Khác</option>
+                                <option th:each="gender : ${genders}" 
+                                        th:value="${gender}" 
+                                        th:text="${gender.dbValue}">Nam</option>
                             </select>
                         </div>
                     </div>
 
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" th:field="*{email}" placeholder="example@gmail.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="tel" class="form-control" th:field="*{soDienThoai}" id="soDienThoai"
+                                placeholder="0912345678" pattern="[0-9]{10,11}">
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label class="form-label">Quê quán</label>
-                        <textarea class="form-control" name="queQuan" rows="2"
+                        <textarea class="form-control" th:field="*{queQuan}" rows="2"
                             placeholder="Nhập địa chỉ quê quán đầy đủ"></textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Nghề nghiệp</label>
-                        <input type="text" class="form-control" name="ngheNghiep" placeholder="Nhập nghề nghiệp">
+                        <input type="text" class="form-control" th:field="*{ngheNghiep}" placeholder="Nhập nghề nghiệp">
                     </div>
                 </div>
 
-                <!-- Thông Tin Liên Hệ -->
-                <div style="margin-bottom: 32px;">
-                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--dark);">
-                        <i class="fas fa-phone"></i> Thông Tin Liên Hệ
-                    </h3>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Email <span style="color: var(--danger-color);">*</span></label>
-                            <input type="email" class="form-control" name="email" placeholder="example@gmail.com"
-                                required>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Số điện thoại <span
-                                    style="color: var(--danger-color);">*</span></label>
-                            <input type="tel" class="form-control" name="soDienThoai" id="soDienThoai"
-                                placeholder="0912345678" pattern="[0-9]{10,11}" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Trạng Thái -->
-                <div style="margin-bottom: 32px;">
-                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--dark);">
-                        <i class="fas fa-toggle-on"></i> Trạng Thái
-                    </h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Trạng thái tài khoản</label>
-                            <select class="form-control" name="trangThaiTaiKhoan">
-                                <option value="HOAT_DONG" selected>Hoạt động</option>
-                                <option value="TAM_KHOA">Tạm khóa</option>
-                                <option value="DA_XOA">Đã xóa</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Trạng thái dân cư</label>
-                            <select class="form-control" name="trangThaiDanCu">
-                                <option value="">-- Không áp dụng --</option>
-                                <option value="THUONG_TRU" selected>Thường trú</option>
-                                <option value="TAM_TRU">Tạm trú</option>
-                                <option value="TAM_VANG">Tạm vắng</option>
-                                <option value="DA_CHUYEN_DI">Đã chuyển đi</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Form Actions -->
                 <div class="flex-between" style="padding-top: 24px; border-top: 1px solid var(--gray-light);">
-                    <a href="residents.html" class="btn btn-secondary">
+                    <a th:href="@{/admin/resident-list}" class="btn btn-secondary">
                         <i class="fas fa-times"></i>
                         Hủy bỏ
                     </a>
@@ -294,7 +200,6 @@
         </div>
     </main>
 
-    <!-- FOOTER -->
     <footer class="footer">
         <div class="footer-content">
             <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
@@ -310,29 +215,18 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/main.js"></script>
 
-    <script>
-        // Form submission
-        document.getElementById('residentForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            if (!validateForm('residentForm')) {
-                Alert.error('Lỗi', 'Vui lòng điền đầy đủ thông tin bắt buộc');
-                return;
-            }
-
-            // Show loading
-            Alert.loading('Đang lưu thông tin...');
-
-            // Simulate API call
-            setTimeout(() => {
-                Alert.success('Thành công!', 'Đã thêm cư dân mới thành công');
-
-                // Redirect sau 1.5s
-                setTimeout(() => {
-                    window.location.href = 'residents.html';
-                }, 1500);
-            }, 1000);
-        });
+    <script th:inline="javascript">
+        // Khởi tạo đối tượng Alert cơ bản
+        const Alert = {
+            error: (title, text) => Swal.fire({ icon: 'error', title, text, confirmButtonColor: '#DC3545' }),
+            success: (title, text) => Swal.fire({ icon: 'success', title, text, confirmButtonColor: '#4F46E5' })
+        };
+        
+        // Hàm validation cơ bản
+        function validateForm(formId) {
+            const form = document.getElementById(formId);
+            return form.checkValidity();
+        }
 
         // CCCD validation - chỉ cho phép số
         document.getElementById('cccd').addEventListener('input', function () {
@@ -341,7 +235,18 @@
 
         // Phone validation - chỉ cho phép số
         document.getElementById('soDienThoai').addEventListener('input', function () {
-            this.value = this.value.replace(/[^0-9]/g, '');
+             // Chỉ cho phép số và không bắt buộc
+             if (this.value) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+             }
+        });
+        
+        // Cần đảm bảo form submit được Spring MVC xử lý.
+        document.getElementById('residentForm').addEventListener('submit', function (e) {
+            if (!validateForm('residentForm')) {
+                 e.preventDefault();
+                 Alert.error('Lỗi', 'Vui lòng điền đầy đủ thông tin bắt buộc');
+            }
         });
     </script>
 </body>
