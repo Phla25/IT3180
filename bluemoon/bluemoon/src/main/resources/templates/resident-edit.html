@@ -86,10 +86,6 @@
         </div>
 
         <div class="header-right">
-            <div class="notification-icon">
-                <i class="fas fa-bell"></i>
-                <span class="badge">3</span>
-            </div>
 
             <div class="user-menu">
                 <div class="user-info">
@@ -100,10 +96,10 @@
                     <i class="fas fa-user-circle"></i>
                 </div>
                 <div class="dropdown-menu">
-                    <a href="profile.html">
+                    <a th:href="@{/admin/profile}">
                         <i class="fas fa-user"></i> Thông Tin Cá Nhân
                     </a>
-                    <a href="#">
+                    <a href="/admin/settings">
                         <i class="fas fa-cog"></i> Cài Đặt
                     </a>
                     <hr>

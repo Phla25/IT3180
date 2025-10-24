@@ -85,6 +85,23 @@ public class AdminController {
 
         return "dashboard-admin";
     }
+    @GetMapping("/profile")
+    public String showAdminProfile(Model model, Authentication auth) {
+        
+        // 1. Lấy thông tin người dùng đang đăng nhập (Ban Quản Trị)
+        DoiTuong user = getCurrentUser(auth); 
+        
+        if (user == null) {
+            // Trường hợp lỗi (ví dụ: Session hết hạn hoặc không tìm thấy user)
+            return "redirect:/login?error=auth";
+        }
+
+        // 2. Thêm đối tượng user vào Model để hiển thị trong Thymeleaf
+        model.addAttribute("user", user);
+
+        // 3. Trả về tên file Thymeleaf (profile.html trong thư mục template/admin/)
+        return "profile-admin"; // Hoặc "admin/profile" tùy theo cấu trúc thư mục của bạn
+    }
     // Trong AdminController.java
 
     // @Autowired private CuDanService cuDanService; // Đã có
@@ -249,6 +266,93 @@ public class AdminController {
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi cập nhật: " + e.getMessage());
             return "redirect:/admin/resident-edit?cccd=" + residentCapNhat.getCccd();
+        }
+    }
+
+    // =======================================================
+    // PROFILE EDIT / CHANGE PASSWORD
+    // =======================================================
+    
+    // Hiển thị form Đổi Mật Khẩu
+    @GetMapping("/change-password")
+    public String showAdminChangePasswordForm(Model model, Authentication auth) {
+        DoiTuong user = getCurrentUser(auth); 
+        if (user == null) {
+            return "redirect:/login?error=auth";
+        }
+        model.addAttribute("user", user);
+        return "change-password-admin"; 
+    }
+
+    // Xử lý POST request Đổi Mật Khẩu
+    @PostMapping("/change-password")
+    public String handleAdminChangePassword(@RequestParam("matKhauCu") String matKhauCu,
+                                            @RequestParam("matKhauMoi") String matKhauMoi,
+                                            @RequestParam("xacNhanMatKhau") String xacNhanMatKhau,
+                                            Authentication auth,
+                                            RedirectAttributes redirectAttributes) {
+        
+        DoiTuong currentUser = getCurrentUser(auth); 
+        if (currentUser == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực người dùng.");
+            return "redirect:/admin/profile";
+        }
+
+        if (!matKhauMoi.equals(xacNhanMatKhau)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu mới và xác nhận mật khẩu không khớp.");
+            return "redirect:/admin/change-password";
+        }
+        
+        try {
+            nguoiDungService.doiMatKhau(currentUser.getCccd(), matKhauCu, matKhauMoi);
+            redirectAttributes.addFlashAttribute("successMessage", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+            return "redirect:/logout"; 
+            
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/change-password";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
+            return "redirect:/admin/change-password";
+        }
+    }
+
+    // Hiển thị form Cập Nhật Thông Tin Cá Nhân
+    @GetMapping("/profile/edit")
+    public String showAdminEditProfileForm(Model model, Authentication auth) {
+        DoiTuong user = getCurrentUser(auth); 
+        if (user == null) {
+            return "redirect:/login?error=auth";
+        }
+        model.addAttribute("user", user); 
+        model.addAttribute("genders", Gender.values()); // Để hiển thị Enum giới tính
+        return "edit-profile-admin"; 
+    }
+
+    // Xử lý POST request Cập Nhật Thông Tin Cá Nhân
+    @PostMapping("/profile/edit")
+    public String handleAdminEditProfile(@ModelAttribute("user") DoiTuong doiTuongCapNhat,
+                                        Authentication auth,
+                                        RedirectAttributes redirectAttributes) {
+        
+        DoiTuong currentUser = getCurrentUser(auth); 
+        if (currentUser == null || !currentUser.getCccd().equals(doiTuongCapNhat.getCccd())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực người dùng.");
+            return "redirect:/admin/profile";
+        }
+        
+        try {
+            // Sử dụng hàm đã thêm trong NguoiDungService
+            nguoiDungService.capNhatThongTinNguoiDung(doiTuongCapNhat);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin cá nhân thành công!");
+            return "redirect:/admin/profile";
+            
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/profile/edit";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi cập nhật: " + e.getMessage());
+            return "redirect:/admin/profile/edit";
         }
     }
 }

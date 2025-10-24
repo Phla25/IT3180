@@ -159,5 +159,35 @@ public class TaiSanChungCuDAO {
             return Optional.empty();
         }
     }
+    /**
+     * Đếm tổng số căn hộ trong hệ thống
+     */
+    public Long countAllApartments() {
+        String jpql = "SELECT COUNT(ts) FROM TaiSanChungCu ts WHERE ts.loaiTaiSan = :loaiCanHo";
+        Long count = entityManager.createQuery(jpql, Long.class)
+                                  .setParameter("loaiCanHo", BlueMoon.bluemoon.utils.AssetType.can_ho)
+                                  .getSingleResult();
+        return count != null ? count : 0;
+    }
+    /**
+     * Đếm tổng số chỗ đỗ xe trong hệ thống
+     */
+    public Long countAllParkingSpots() {
+        String jpql = "SELECT COUNT(ts) FROM TaiSanChungCu ts WHERE ts.tenTaiSan = :ten AND ts.loaiTaiSan = :loaiTienIch";
+        Long count = entityManager.createQuery(jpql, Long.class)
+                                  .setParameter("ten", "cho_do_xe")
+                                  .setParameter("loaiTienIch", BlueMoon.bluemoon.utils.AssetType.tien_ich)
+                                  .getSingleResult();
+        return count != null ? count : 0;
+    }
+    /**
+     * Đếm tổng số tài sản chung cư
+     */
+    public Long countAllAssets() {
+        String jpql = "SELECT COUNT(ts) FROM TaiSanChungCu ts";
+        Long count = entityManager.createQuery(jpql, Long.class).getSingleResult();
+        return count != null ? count : 0;
+    }
+    
 }
 

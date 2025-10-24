@@ -9,7 +9,9 @@ import org.springframework.stereotype.Repository;
 import BlueMoon.bluemoon.entities.HoGiaDinh;
 import BlueMoon.bluemoon.entities.HoaDon;
 import BlueMoon.bluemoon.utils.InvoiceStatus;
+import BlueMoon.bluemoon.utils.InvoiceType;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 
 @Repository
 public class HoaDonDAO {
@@ -48,6 +50,46 @@ public class HoaDonDAO {
     public BigDecimal sumSoTienByTrangThai(InvoiceStatus trangThai) {
         String jpql = "SELECT SUM(hd.soTien) FROM HoaDon hd WHERE hd.trangThai = :trangThai";
         BigDecimal sum = entityManager.createQuery(jpql, BigDecimal.class)
+                .setParameter("trangThai", trangThai)
+                .getSingleResult();
+        return sum != null ? sum : BigDecimal.ZERO;
+    }
+    public List<HoaDon> findAllWithHoGiaDinh() {
+        // Thêm FETCH JOIN để tránh vấn đề N+1 khi truy cập hoGiaDinh trong Thymeleaf
+        String jpql = "SELECT hd FROM HoaDon hd JOIN FETCH hd.hoGiaDinh h";
+        return entityManager.createQuery(jpql, HoaDon.class).getResultList();
+    }
+    
+    // PHƯƠNG THỨC MỚI ĐỂ GIẢI QUYẾT LỖI BIÊN DỊCH
+    public List<HoaDon> findByTrangThaiOrderByNgayTao(InvoiceStatus trangThai) {
+        // Tạm thời sử dụng truy vấn đơn giản nhất
+        String jpql = "SELECT hd FROM HoaDon hd JOIN FETCH hd.hoGiaDinh h WHERE hd.trangThai = :trangThai ORDER BY hd.ngayTao DESC";
+        return entityManager.createQuery(jpql, HoaDon.class)
+            .setParameter("trangThai", trangThai)
+            .getResultList();
+    }
+    
+    // PHƯƠNG THỨC NÀY ĐƯỢC SỬ DỤNG KHI CẦN HIỂN THỊ TÊN CHỦ HỘ
+    @SuppressWarnings("unchecked")
+    public List<HoaDon> findByTrangThaiWithChuHo(InvoiceStatus trangThai) {
+        
+        // JPQL sử dụng JOIN PHỨC HỢP để tải Chủ Hộ
+        String jpql = "SELECT DISTINCT hd FROM HoaDon hd "
+                + "JOIN FETCH hd.hoGiaDinh h "
+                + "JOIN h.thanhVienHoList tvh " // Tên trường @OneToMany trong HoGiaDinh.java
+                + "JOIN tvh.doiTuong dt " // Tên trường trong ThanhVienHo.java
+                + "WHERE tvh.laChuHo = TRUE AND hd.trangThai = :trangThai "
+                + "ORDER BY hd.ngayTao DESC";
+
+        Query query = entityManager.createQuery(jpql, HoaDon.class)
+            .setParameter("trangThai", trangThai);
+        
+        return query.getResultList();
+    }
+    public BigDecimal sumSoTienByLoaiAndTrangThai(InvoiceType loaiHoaDon, InvoiceStatus trangThai) {
+        String jpql = "SELECT SUM(hd.soTien) FROM HoaDon hd WHERE hd.loaiHoaDon = :loaiHoaDon AND hd.trangThai = :trangThai";
+        BigDecimal sum = entityManager.createQuery(jpql, BigDecimal.class)
+                .setParameter("loaiHoaDon", loaiHoaDon)
                 .setParameter("trangThai", trangThai)
                 .getSingleResult();
         return sum != null ? sum : BigDecimal.ZERO;

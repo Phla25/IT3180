@@ -198,4 +198,42 @@ public class DoiTuongDAO {
             return Optional.empty();
         }
     }
+    /**
+     * Đếm tổng số cư dân trong hệ thống
+     */
+    public Long countResidents() {
+        String jpql = "SELECT COUNT(d) FROM DoiTuong d WHERE d.laCuDan = true";
+        Long count = entityManager.createQuery(jpql, Long.class).getSingleResult();
+        return count != null ? count : 0;
+    }
+    /**
+     * Tìm cơ quan chức năng theo id
+     */
+        public Optional<DoiTuong> findOfficerById(String id) {
+        String jpql = "SELECT d FROM DoiTuong d WHERE d.cccd = :id AND d.vaiTro = :vaiTro";
+        try {
+            DoiTuong doiTuong = entityManager.createQuery(jpql, DoiTuong.class)
+                    .setParameter("id", id)
+                    .setParameter("vaiTro", UserRole.co_quan_chuc_nang)
+                    .getSingleResult();
+            return Optional.of(doiTuong);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+    /**
+     * Tìm kế toán theo id
+     */
+    public Optional<DoiTuong> findAccountantById(String id){
+        String jpql = "SELECT d FROM DoiTuong d WHERE d.cccd = :id AND d.vaiTro = :vaiTro";
+        try {
+            DoiTuong doiTuong = entityManager.createQuery(jpql, DoiTuong.class)
+                    .setParameter("id", id)
+                    .setParameter("vaiTro", UserRole.ke_toan)
+                    .getSingleResult();
+            return Optional.of(doiTuong);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
 }

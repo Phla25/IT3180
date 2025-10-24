@@ -45,6 +45,10 @@ public class HoGiaDinh {
     @Column(name = "ngay_cap_nhat")
     private LocalDateTime ngayCapNhat;
 
+    // 🔹 Liên kết với Thành Viên Hộ (Đã thêm)
+    @OneToMany(mappedBy = "hoGiaDinh", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ThanhVienHo> thanhVienHoList = new ArrayList<>();
+
     // 🔹 Một hộ có thể sở hữu nhiều tài sản (căn hộ, chỗ đậu xe, kho,...)
     @OneToMany(mappedBy = "hoGiaDinh", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TaiSanChungCu> taiSanList = new ArrayList<>();
@@ -80,4 +84,30 @@ public class HoGiaDinh {
 
     public List<TaiSanChungCu> getTaiSanList() { return taiSanList; }
     public void setTaiSanList(List<TaiSanChungCu> taiSanList) { this.taiSanList = taiSanList; }
+    
+    // 🔹 Getters/Setters cho ThanhVienHoList
+    public List<ThanhVienHo> getThanhVienHoList() {
+        return thanhVienHoList;
+    }
+
+    public void setThanhVienHoList(List<ThanhVienHo> thanhVienHoList) {
+        this.thanhVienHoList = thanhVienHoList;
+    }
+    
+    /**
+     * Helper: Trả về DoiTuong là Chủ Hộ hiện tại.
+     * Sử dụng để truy cập Chủ Hộ an toàn qua Entity ThanhVienHo.
+     */
+    public DoiTuong getChuHo() {
+        if (thanhVienHoList != null) {
+            return thanhVienHoList.stream()
+                    // Lọc ra thành viên là Chủ Hộ
+                    .filter(tvh -> Boolean.TRUE.equals(tvh.getLaChuHo()))
+                    // Lấy đối tượng DoiTuong
+                    .map(tvh -> tvh.getDoiTuong())
+                    .findFirst()
+                    .orElse(null); // Trả về null nếu không tìm thấy
+        }
+        return null;
+    }
 }

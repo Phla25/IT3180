@@ -4,6 +4,9 @@ package BlueMoon.bluemoon.models;
 public class DichVuStatsDTO {
     // Đảm bảo thuộc tính này tồn tại và có getter/là public
     private Integer tongDichVu; 
+    // THUỘC TÍNH MỚI CẦN THÊM
+    private String trangThai; 
+    // END THUỘC TÍNH MỚI
 
     public Integer getTongDichVu() {
         return tongDichVu;
@@ -32,4 +35,14 @@ public class DichVuStatsDTO {
     public void setTongSoDichVu(Integer tongSoDichVu) {
         this.tongDichVu = tongSoDichVu;
     }
+
+    // GETTER VÀ SETTER MỚI CHO TRANGTHAI
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
+    }
+    // HẾT GETTER VÀ SETTER MỚI
 }

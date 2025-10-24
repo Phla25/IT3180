@@ -14,39 +14,39 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import BlueMoon.bluemoon.entities.BaoCaoSuCo;
 import BlueMoon.bluemoon.entities.DoiTuong;
-import BlueMoon.bluemoon.services.BaoCaoSuCoService;
+import BlueMoon.bluemoon.entities.HoaDon;
+import BlueMoon.bluemoon.models.HoaDonStatsDTO;
+import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
-import BlueMoon.bluemoon.utils.PriorityLevel;
+import BlueMoon.bluemoon.utils.InvoiceStatus;
 
 @Controller
-@RequestMapping("/officer")
-public class OfficerController {
+@RequestMapping("/accountant")
+public class AccountantController {
 
     @Autowired
     private NguoiDungService nguoiDungService;
-    
-    // GIẢ ĐỊNH: Service Sự Cố đã được tạo ở bước trước
+
     @Autowired
-    private BaoCaoSuCoService suCoService; 
+    private HoaDonService hoaDonService;
 
     /**
-     * Helper: Lấy đối tượng DoiTuong hiện tại (Cơ Quan Chức Năng)
+     * Helper: Lấy đối tượng DoiTuong hiện tại (Kế Toán)
      */
     private DoiTuong getCurrentUser(Authentication auth) {
         String id = auth.getName(); // Lấy CCCD/ID từ principal
         // SỬ DỤNG SERVICE ĐÃ CÓ
-        Optional<DoiTuong> userOpt = nguoiDungService.timCoQuanChucNangTheoID(id);
+        Optional<DoiTuong> userOpt = nguoiDungService.timKeToanTheoID(id);
         return userOpt.orElse(null); 
     }
 
     // =======================================================
-    // DASHBOARD
+    // DASHBOARD (Giữ nguyên)
     // =======================================================
     
     @GetMapping("/dashboard")
-    public String showOfficerDashboard(Model model, Authentication auth) {
+    public String showAccountantDashboard(Model model, Authentication auth) {
         
         DoiTuong user = getCurrentUser(auth);
         if (user == null) {
@@ -56,63 +56,52 @@ public class OfficerController {
         // 1. Thông tin người dùng (cho header và sidebar)
         model.addAttribute("user", user);
 
-        // 2. Lấy Thống kê chung về Sự Cố
-        Long tongSuCo = suCoService.getTongSuCo();
-        Long suCoDaXuLy = suCoService.getSuCoDaXuLy();
-        Long suCoDangXuLy = suCoService.getSuCoDangXuLy();
-        Long suCoChuaXuLy = suCoService.getSuCoChuaXuLy();
-        int tyLeDaXuLy = suCoService.getTyLeDaXuLy();
+        // 2. Lấy số liệu thống kê tài chính
+        HoaDonStatsDTO stats = hoaDonService.getAccountantStats();
         
-        // 3. Thống kê theo Mức độ Ưu tiên
-        Long suCoCao = suCoService.getSuCoTheoMucDo(PriorityLevel.cao);
-        Long suCoTrungBinh = suCoService.getSuCoTheoMucDo(PriorityLevel.binh_thuong);
-        Long suCoThap = suCoService.getSuCoTheoMucDo(PriorityLevel.thap);
+        // 3. Truyền các thông số riêng lẻ vào Model 
+        model.addAttribute("tongThuThangNay", stats.tongThuThangNay);
+        model.addAttribute("tongChuaThu", stats.tongChuaThanhToan);
+        model.addAttribute("soHoaDonChuaThu", (long) stats.tongHoaDonChuaThanhToan);
+        model.addAttribute("tongQuaHan", stats.tongQuaHan);
+        model.addAttribute("soHoaDonQuaHan", (long) stats.soHoaDonQuaHan);
         
-        // 4. Danh sách Sự Cố Gần Đây
-        List<BaoCaoSuCo> danhSachSuCo = suCoService.getRecentIncidents(5); 
+        // 4. Lấy danh sách hóa đơn cần xử lý
+        List<HoaDon> hoaDonCanXacNhan = hoaDonService.getHoaDonCanXacNhan(InvoiceStatus.chua_thanh_toan, 5); 
+        model.addAttribute("hoaDonCanXacNhan", hoaDonCanXacNhan);
 
-        // 5. Truyền dữ liệu vào Model
-        model.addAttribute("tongSuCo", tongSuCo);
-        model.addAttribute("suCoDaXuLy", suCoDaXuLy);
-        model.addAttribute("suCoDangXuLy", suCoDangXuLy);
-        model.addAttribute("suCoChuaXuLy", suCoChuaXuLy);
-        model.addAttribute("tyLeDaXuLy", tyLeDaXuLy);
-        
-        model.addAttribute("suCoCao", suCoCao);
-        model.addAttribute("suCoTrungBinh", suCoTrungBinh);
-        model.addAttribute("suCoThap", suCoThap);
-
-        model.addAttribute("danhSachSuCo", danhSachSuCo);
-
-        return "dashboard-officer"; 
+        return "dashboard-accountant"; 
     }
     
     // =======================================================
     // PROFILE
     // =======================================================
     @GetMapping("/profile")
-    public String showOfficerProfile(Model model, Authentication auth) {
+    public String showAccountantProfile(Model model, Authentication auth) {
         DoiTuong user = getCurrentUser(auth);
         if (user == null) {
             return "redirect:/login?error=notfound";
         }
         model.addAttribute("user", user);
-        return "profile-officer"; // Tên file Thymeleaf đã tạo
+        return "profile-accountant"; // Tên file Thymeleaf đã tạo
     }
+    // =======================================================
+    // PROFILE EDIT / CHANGE PASSWORD
+    // =======================================================
     // Hiển thị form Đổi Mật Khẩu
     @GetMapping("/change-password")
-    public String showOfficerChangePasswordForm(Model model, Authentication auth) {
+    public String showAccountantChangePasswordForm(Model model, Authentication auth) {
         DoiTuong user = getCurrentUser(auth); 
         if (user == null) {
             return "redirect:/login?error=auth";
         }
         model.addAttribute("user", user);
-        return "change-password-officer"; 
+        return "change-password-accountant"; 
     }
 
     // Xử lý POST request Đổi Mật Khẩu
     @PostMapping("/change-password")
-    public String handleOfficerChangePassword(@RequestParam("matKhauCu") String matKhauCu,
+    public String handleAccountantChangePassword(@RequestParam("matKhauCu") String matKhauCu,
                                             @RequestParam("matKhauMoi") String matKhauMoi,
                                             @RequestParam("xacNhanMatKhau") String xacNhanMatKhau,
                                             Authentication auth,
@@ -121,12 +110,12 @@ public class OfficerController {
         DoiTuong currentUser = getCurrentUser(auth); 
         if (currentUser == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực người dùng.");
-            return "redirect:/officer/profile";
+            return "redirect:/accountant/profile";
         }
 
         if (!matKhauMoi.equals(xacNhanMatKhau)) {
             redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu mới và xác nhận mật khẩu không khớp.");
-            return "redirect:/officer/change-password";
+            return "redirect:/accountant/change-password";
         }
         
         try {
@@ -136,16 +125,16 @@ public class OfficerController {
             
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/officer/change-password";
+            return "redirect:/accountant/change-password";
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
-            return "redirect:/officer/change-password";
+            return "redirect:/accountant/change-password";
         }
     }
 
     // Hiển thị form Cập Nhật Thông Tin Cá Nhân
     @GetMapping("/profile/edit")
-    public String showOfficerEditProfileForm(Model model, Authentication auth) {
+    public String showAccountantEditProfileForm(Model model, Authentication auth) {
         DoiTuong user = getCurrentUser(auth); 
         if (user == null) {
             return "redirect:/login?error=auth";
@@ -153,32 +142,32 @@ public class OfficerController {
         model.addAttribute("user", user); 
         // Cần import Gender
         // model.addAttribute("genders", BlueMoon.bluemoon.utils.Gender.values());
-        return "edit-profile-officer"; 
+        return "edit-profile-accountant"; 
     }
 
     // Xử lý POST request Cập Nhật Thông Tin Cá Nhân
     @PostMapping("/profile/edit")
-    public String handleOfficerEditProfile(@ModelAttribute("user") DoiTuong doiTuongCapNhat,
+    public String handleAccountantEditProfile(@ModelAttribute("user") DoiTuong doiTuongCapNhat,
                                         Authentication auth,
                                         RedirectAttributes redirectAttributes) {
         
         DoiTuong currentUser = getCurrentUser(auth); 
         if (currentUser == null || !currentUser.getCccd().equals(doiTuongCapNhat.getCccd())) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực người dùng.");
-            return "redirect:/officer/profile";
+            return "redirect:/accountant/profile";
         }
         
         try {
             nguoiDungService.capNhatThongTinNguoiDung(doiTuongCapNhat);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin cá nhân thành công!");
-            return "redirect:/officer/profile";
+            return "redirect:/accountant/profile";
             
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/officer/profile/edit";
+            return "redirect:/accountant/profile/edit";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi cập nhật: " + e.getMessage());
-            return "redirect:/officer/profile/edit";
+            return "redirect:/accountant/profile/edit";
         }
-    }
+    }    
 }

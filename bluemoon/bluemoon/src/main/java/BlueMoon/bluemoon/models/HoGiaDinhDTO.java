@@ -14,6 +14,8 @@ public class HoGiaDinhDTO {
     
     // Tình trạng căn hộ hoặc tình trạng cư trú (Ví dụ: "Đang cư trú", "N/A", "Đã bán")
     private String tinhTrang; 
+
+    private Integer tongThanhVien;
     
     // ==== Constructors ====
     
@@ -21,12 +23,20 @@ public class HoGiaDinhDTO {
         this.maCanHo = "N/A";
         this.chuHo = "N/A";
         this.tinhTrang = "Không xác định";
+        this.tongThanhVien = 0;
     }
 
+    public HoGiaDinhDTO(String maCanHo, String chuHo, String tinhTrang, Integer tongThanhVien) {
+        this.maCanHo = maCanHo;
+        this.chuHo = chuHo;
+        this.tinhTrang = tinhTrang;
+        this.tongThanhVien = tongThanhVien;
+    }
     public HoGiaDinhDTO(String maCanHo, String chuHo, String tinhTrang) {
         this.maCanHo = maCanHo;
         this.chuHo = chuHo;
         this.tinhTrang = tinhTrang;
+        this.tongThanhVien = 0;
     }
 
     // ==== Getters and Setters ====
@@ -53,5 +63,12 @@ public class HoGiaDinhDTO {
 
     public void setTinhTrang(String tinhTrang) {
         this.tinhTrang = tinhTrang;
+    }
+
+    public Integer getTongThanhVien() {
+        return tongThanhVien;
+    }
+    public void setTongThanhVien(Integer tongThanhVien) {
+        this.tongThanhVien = tongThanhVien;
     }
 }

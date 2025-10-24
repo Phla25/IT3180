@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cập Nhật Thông Tin Cá Nhân - Kế Toán - BlueMoon Portal</title>
+    <link rel="stylesheet" href="/css/main.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS cho form */
+        .form-card { background-color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); padding: 30px; margin-top: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-weight: 500; color: #1F2937; margin-bottom: 8px; }
+        .form-control, .form-select, .form-textarea { width: 100%; padding: 10px 15px; border: 1px solid #D1D5DB; border-radius: 8px; box-sizing: border-box; transition: border-color 0.3s; }
+        .form-control[readonly] { background-color: #F9FAFB; cursor: not-allowed; }
+        .form-control:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .form-textarea { resize: vertical; }
+        .btn-submit { background-color: #4F46E5; color: white; padding: 12px 25px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; }
+        .btn-submit:hover { background-color: #4338CA; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo"> <i class="fas fa-building"></i> <span>BlueMoon Portal</span> </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Kế Toán'">Kế Toán</span>
+                    <span class="user-role" style="color: #F59E0B;">KẾ TOÁN</span>
+                </div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+             <a th:href="@{/accountant/dashboard}" class="nav-item"> <i class="fas fa-chart-line"></i> <span>Dashboard</span> </a>
+             <a href="#" class="nav-item"> <i class="fas fa-file-invoice-dollar"></i> <span>Quản Lý Hóa Đơn</span> </a>
+             <a href="#" class="nav-item"> <i class="fas fa-money-check"></i> <span>Xác Nhận Thanh Toán</span> </a>
+             <a href="#" class="nav-item"> <i class="fas fa-chart-bar"></i> <span>Báo Cáo Tài Chính</span> </a>
+             <a href="#" class="nav-item"> <i class="fas fa-receipt"></i> <span>Lịch Sử Giao Dịch</span> </a>
+        </nav>
+        <div class="sidebar-footer">
+             <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+                <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none; text-align: left; padding: 0;">
+                    <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()"> <i class="fas fa-bars"></i> </button>
+            <h1>Cập Nhật Thông Tin Cá Nhân - Kế Toán</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user.hoVaTen} ?: 'N/A'">Nguyễn Văn Thanh</span>
+                    <span class="user-role" style="color: #F59E0B;">KẾ TOÁN</span>
+                </div>
+                <div class="user-avatar"> <i class="fas fa-user-circle"></i> </div>
+                <div class="dropdown-menu">
+                    <a th:href="@{/accountant/profile}"> <i class="fas fa-user"></i> Thông Tin Cá Nhân </a>
+                    <a th:href="@{/accountant/settings}"> <i class="fas fa-cog"></i> Cài Đặt </a> <hr>
+                    <form th:action="@{/logout}" method="post"> <button type="submit" class="logout-btn"> <i class="fas fa-sign-out-alt"></i> Đăng Xuất </button> </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}">Thông báo thành công</div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}">Thông báo lỗi</div>
+
+            <div class="form-card">
+                <form th:action="@{/accountant/profile/edit}" method="post" th:object="${user}">
+                    <div class="form-grid">
+                        
+                        <div class="form-group">
+                            <label for="cccd" class="form-label">CCCD (ID Đăng Nhập):</label>
+                            <input type="text" id="cccd" th:field="*{cccd}" class="form-control" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="hoVaTen" class="form-label">Họ và Tên:</label>
+                            <input type="text" id="hoVaTen" th:field="*{hoVaTen}" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ngaySinh" class="form-label">Ngày Sinh:</label>
+                            <input type="date" id="ngaySinh" th:field="*{ngaySinh}" class="form-control"> 
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email:</label>
+                            <input type="email" id="email" th:field="*{email}" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="soDienThoai" class="form-label">Số Điện Thoại:</label>
+                            <input type="text" id="soDienThoai" th:field="*{soDienThoai}" class="form-control" maxlength="15">
+                        </div>
+                        <div class="form-group">
+                            <label for="gioiTinh" class="form-label">Giới Tính:</label>
+                            <select id="gioiTinh" th:field="*{gioiTinh}" class="form-select">
+                                <option value="" disabled>Chọn Giới Tính</option>
+                                <option th:each="gender : ${T(BlueMoon.bluemoon.utils.Gender).values()}" 
+                                        th:value="${gender}" 
+                                        th:text="${gender.dbValue}"></option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="queQuan" class="form-label">Quê Quán/Địa chỉ Thường Trú:</label>
+                            <textarea id="queQuan" th:field="*{queQuan}" class="form-textarea" rows="3"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: right;">
+                        <button type="submit" class="btn-submit"> <i class="fas fa-save"></i> Lưu Thông Tin </button>
+                    </div>
+                </form>
+            </div>
+            
+            <p style="text-align: center; margin-top: 20px;">
+                <a th:href="@{/accountant/profile}" style="color: #4F46E5; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Quay lại Thông Tin Cá Nhân
+                </a>
+            </p>
+        </div>
+    </main>
+    
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('shifted');
+            document.querySelector('.header').classList.toggle('shifted');
+        }
+        document.querySelector('.user-menu').addEventListener('click', function() {
+            this.querySelector('.dropdown-menu').classList.toggle('show');
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-menu')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

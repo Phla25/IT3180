@@ -51,6 +51,19 @@
             return doiTuongDAO.save(doiTuong);
         }
 
+        public DoiTuong capNhatThongTinNguoiDung(DoiTuong doiTuongCapNhat)
+        {
+            DoiTuong doiTuongHienTai = doiTuongDAO.findByCccd(doiTuongCapNhat.getCccd())
+                .orElseThrow(()->new IllegalArgumentException("Không tìm thấy người dùng"));
+            doiTuongHienTai.setEmail(doiTuongCapNhat.getEmail());
+            doiTuongHienTai.setSoDienThoai(doiTuongCapNhat.getSoDienThoai());
+            doiTuongHienTai.setNgheNghiep(doiTuongCapNhat.getNgheNghiep());
+            doiTuongHienTai.setQueQuan(doiTuongCapNhat.getQueQuan());
+            doiTuongHienTai.setGioiTinh(doiTuongCapNhat.getGioiTinh());
+
+            return doiTuongDAO.save(doiTuongHienTai);
+        }
+
         /**
          * Đổi mật khẩu
          */
@@ -151,5 +164,17 @@
          */
         public Optional<DoiTuong> timBanQuanTriTheoID(String id) {
             return doiTuongDAO.findAdminById(id);
+        }
+        /**
+         * Tìm cơ quan chức năng theo id
+         */
+        public Optional<DoiTuong> timCoQuanChucNangTheoID(String id) {
+            return doiTuongDAO.findOfficerById(id);
+        }
+        /**
+         * Tìm kế toán theo id
+         */
+        public Optional<DoiTuong> timKeToanTheoID(String id){
+            return doiTuongDAO.findAccountantById(id);
         }
     }
