@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi Tiết Hộ Gia Đình - Ban Quản Trị - BlueMoon Portal</title>
+    <title>Chi Tiết Căn Hộ - Ban Quản Trị - BlueMoon Portal</title>
 
     <link rel="stylesheet" href="/css/main.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -63,25 +63,6 @@
         .member-table th {
             background-color: #F9FAFB;
         }
-
-        .member-is-chuhp {
-            color: #7C3AED;
-            font-weight: 700;
-        }
-        
-        .btn-action-small {
-            background: none;
-            border: none;
-            color: #EF4444; /* Red for remove */
-            cursor: pointer;
-            padding: 5px;
-            font-size: 0.9rem;
-            margin-left: 10px;
-        }
-
-        .btn-action-small:hover {
-            opacity: 0.8;
-        }
         
         .btn-edit {
              background-color: #F59E0B;
@@ -93,6 +74,18 @@
              display: inline-flex;
              align-items: center;
              gap: 5px;
+             margin-left: 10px;
+        }
+        .btn-delete {
+            background-color: #EF4444;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
     </style>
 </head>
@@ -111,8 +104,8 @@
         <nav class="sidebar-nav">
             <a th:href="@{/admin/dashboard}" class="nav-item"> <i class="fas fa-chart-line"></i> <span>Dashboard</span> </a>
             <a th:href="@{/admin/resident-list}" class="nav-item"> <i class="fas fa-users"></i> <span>Quản Lý Cư Dân</span> </a>
-            <a th:href="@{/admin/apartment-list}" class="nav-item"> <i class="fas fa-home"></i> <span>Quản Lý Căn Hộ</span> </a>
-            <a th:href="@{/admin/household-list}" class="nav-item active"> <i class="fas fa-users-cog"></i> <span>Quản Lý Hộ Gia Đình</span> </a>
+            <a th:href="@{/admin/apartment-list}" class="nav-item active"> <i class="fas fa-home"></i> <span>Quản Lý Căn Hộ</span> </a>
+            <a th:href="@{/admin/household-list}" class="nav-item"> <i class="fas fa-users-cog"></i> <span>Quản Lý Hộ Gia Đình</span> </a>
             <a href="assets.html" class="nav-item"> <i class="fas fa-building"></i> <span>Quản Lý Tài Sản</span> </a>
             <a href="fees.html" class="nav-item"> <i class="fas fa-file-invoice-dollar"></i> <span>Quản Lý Khoản Phí</span> </a>
             <a href="#" class="nav-item"> <i class="fas fa-concierge-bell"></i> <span>Quản Lý Dịch Vụ</span> </a>
@@ -130,7 +123,7 @@
     <header class="header">
         <div class="header-left">
             <button class="menu-toggle" onclick="toggleSidebar()"> <i class="fas fa-bars"></i> </button>
-            <h1>Chi Tiết Hộ Gia Đình: <span th:text="${household.tenHo}"></span></h1>
+            <h1>Chi Tiết Căn Hộ: <span th:text="${apartment.tenTaiSan}"></span></h1>
         </div>
         <div class="header-right">
             <div class="user-menu">
@@ -155,115 +148,105 @@
 
             <div class="detail-card">
                 
+                <div class="toolbar" style="margin-bottom: 20px; display: flex; justify-content: flex-end; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
+                    <a th:href="@{/admin/apartment-edit(maTaiSan=${apartment.maTaiSan})}" class="btn-edit" title="Chỉnh Sửa Thông Tin">
+                        <i class="fas fa-edit"></i> Chỉnh Sửa
+                    </a>
+                    <a th:href="@{/admin/apartment-delete(maTaiSan=${apartment.maTaiSan})}" class="btn-delete" title="Xóa Căn Hộ" 
+                       onclick="return confirm('Bạn có chắc chắn muốn XÓA căn hộ này không? Đây là hành động không thể hoàn tác!')">
+                        <i class="fas fa-trash"></i> Xóa Căn Hộ
+                    </a>
+                </div>
+
                 <div class="detail-section">
-                    <h3 style="margin-bottom: 15px;">Thông Tin Chung</h3>
+                    <h3 style="margin-bottom: 15px;">Thông Tin Tài Sản</h3>
                     <div class="detail-grid">
                         <div class="detail-item">
-                            <span class="detail-label">Mã Hộ:</span>
-                            <span class="detail-value" th:text="${household.maHo}">HGD-001</span>
+                            <span class="detail-label">Mã Tài Sản:</span>
+                            <span class="detail-value" th:text="${apartment.maTaiSan}">101</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Tên Hộ:</span>
-                            <span class="detail-value" th:text="${household.tenHo}">Hộ gia đình Nguyễn Văn A</span>
+                            <span class="detail-label">Tên Căn Hộ:</span>
+                            <span class="detail-value" th:text="${apartment.tenTaiSan}">A-0501</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Ngày Thành Lập:</span>
-                            <span class="detail-value" th:text="${household.ngayThanhLap} ? ${#temporals.format(household.ngayThanhLap, 'dd/MM/yyyy')} : 'N/A'">01/01/2023</span>
+                            <span class="detail-label">Diện Tích (m²):</span>
+                            <span class="detail-value" th:text="${apartment.dienTich}">75.5</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Giá Trị (₫):</span>
+                            <span class="detail-value" th:text="${#numbers.formatDecimal(apartment.giaTri, 0, 'POINT', 0, 'POINT')}">3,500,000,000</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Loại Tài Sản:</span>
+                            <span class="detail-value" th:text="${apartment.loaiTaiSan?.dbValue}">Căn Hộ</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Trạng Thái:</span>
-                            <span class="detail-value" th:text="${household.trangThai?.dbValue}">Hoạt Động</span>
+                            <span class="detail-value" th:text="${apartment.trangThai?.dbValue}">Hoạt Động</span>
                         </div>
                         <div class="detail-item" style="grid-column: 1 / -1;">
-                            <span class="detail-label">Ghi Chú:</span>
-                            <span class="detail-value" th:text="${household.ghiChu} ?: 'Không có'">Ghi chú...</span>
+                            <span class="detail-label">Vị Trí / Mô tả:</span>
+                            <span class="detail-value" th:text="${apartment.viTri} ?: 'N/A'">Tầng 5, Tòa A, Cửa sổ hướng Đông Nam</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="detail-section">
-                    <h3 style="margin-bottom: 15px;">Thông Tin Căn Hộ Chính</h3>
-                    <div class="detail-grid" th:if="${apartment != null}">
-                        <div class="detail-item">
-                            <span class="detail-label">Mã Căn Hộ:</span>
-                            <span class="detail-value" th:text="${apartment.maTaiSan}">101</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Tên Căn Hộ (Ví dụ: A-0501):</span>
-                            <span class="detail-value" th:text="${apartment.tenTaiSan}">A-0501</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Diện Tích:</span>
-                            <span class="detail-value" th:text="${apartment.dienTich} + ' m²'">75.5 m²</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Trạng Thái Tài Sản:</span>
-                            <span class="detail-value" th:text="${apartment.trangThai?.dbValue}">Đã sở hữu</span>
-                        </div>
-                    </div>
-                    <div th:unless="${apartment != null}" class="alert alert-warning">
-                        Hộ gia đình này chưa được gán căn hộ chính nào.
-                    </div>
-                </div>
-
                 <div class="detail-section" style="border-bottom: none; padding-bottom: 0;">
-                    <div class="toolbar" style="margin-bottom: 15px;">
-                        <h3 style="margin: 0;">Danh Sách Thành Viên (Đang cư trú)</h3>
-                        <div>
-                             <a th:href="@{/admin/household-split(maHo=${household.maHo})}" class="btn-edit" style="background-color: #EF4444;">
-                                <i class="fas fa-scissors"></i> Tách Hộ
-                            </a>
-                            <a th:href="@{/admin/household-member-add(maHo=${household.maHo})}" class="btn-edit" style="background-color: #10B981;">
-                                <i class="fas fa-user-plus"></i> Thêm Thành Viên
-                            </a>
+                    <h3 style="margin-bottom: 15px;">Hộ Gia Đình Liên Kết</h3>
+                    
+                    <div th:if="${apartment.hoGiaDinh != null}">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Mã Hộ:</span>
+                                <span class="detail-value" th:text="${apartment.hoGiaDinh.maHo}">HGD-001</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Tên Hộ:</span>
+                                <span class="detail-value" th:text="${apartment.hoGiaDinh.tenHo}">Hộ gia đình Nguyễn Văn A</span>
+                            </div>
+                            <div class="detail-item" style="grid-column: 1 / -1;">
+                                <a th:href="@{/admin/household-detail(maHo=${apartment.hoGiaDinh.maHo})}" class="btn btn-sm btn-outline" style="margin-top: 10px;">
+                                    <i class="fas fa-eye"></i> Xem Chi Tiết Hộ
+                                </a>
+                            </div>
                         </div>
+                        
+                        <h4 style="margin-top: 30px; margin-bottom: 15px;">Danh Sách Thành Viên Đang Cư Trú</h4>
+                        <table class="member-table">
+                            <thead>
+                                <tr>
+                                    <th>CCCD</th>
+                                    <th>Họ và Tên</th>
+                                    <th>Quan Hệ</th>
+                                    <th>Chủ Hộ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="member : ${members}">
+                                    <td th:text="${member.doiTuong.cccd}">012345678901</td>
+                                    <td th:text="${member.doiTuong.hoVaTen}">Nguyễn Văn A</td>
+                                    <td th:text="${member.quanHeVoiChuHo}">Chủ hộ</td>
+                                    <td>
+                                        <span th:if="${member.laChuHo}" style="color: #7C3AED; font-weight: 700;">CHỦ HỘ</span>
+                                        <span th:unless="${member.laChuHo}">Thành viên</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
                     </div>
-                    
-                    <table class="member-table">
-                        <thead>
-                            <tr>
-                                <th>CCCD</th>
-                                <th>Họ và Tên</th>
-                                <th>Quan Hệ với Chủ Hộ</th>
-                                <th>Chủ Hộ</th>
-                                <th>Ngày Bắt Đầu</th>
-                                <th>Hành Động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="member : ${members}">
-                                <td th:text="${member.doiTuong.cccd}">012345678901</td>
-                                <td th:text="${member.doiTuong.hoVaTen}">Nguyễn Văn A</td>
-                                <td th:text="${member.quanHeVoiChuHo}">Chủ hộ</td>
-                                <td>
-                                    <span th:if="${member.laChuHo}" class="member-is-chuhp">CHỦ HỘ</span>
-                                    <span th:unless="${member.laChuHo}" class="text-muted">-</span>
-                                </td>
-                                <td th:text="${member.id.ngayBatDau} ? ${#temporals.format(member.id.ngayBatDau, 'dd/MM/yyyy')} : 'N/A'">01/01/2023</td>
-                                <td>
-                                    <a th:if="${!member.laChuHo}" th:href="@{/admin/household-change-owner(maHo=${household.maHo})}" class="btn-action" title="Chuyển làm Chủ Hộ" 
-                                       onclick="return confirm('Bạn có chắc chắn muốn chuyển Chủ hộ sang người này không?')">
-                                        <i class="fas fa-user-tie"></i>
-                                    </a>
-                                    <a th:if="${!member.laChuHo}" href="#" class="btn-action-small" title="Rút hộ" 
-                                       onclick="return confirm('Bạn có chắc chắn muốn xóa thành viên này khỏi hộ không?')">
-                                        <i class="fas fa-user-times"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <div th:if="${members.isEmpty()}" class="alert alert-info" style="margin-top: 20px;">
-                        Hộ gia đình này hiện chưa có thành viên nào đang cư trú.
+                    <div th:unless="${apartment.hoGiaDinh != null}" class="alert alert-warning">
+                        Căn hộ này hiện chưa được liên kết với Hộ gia đình nào.
                     </div>
+
                 </div>
 
             </div>
             
             <p style="text-align: center; margin-top: 20px;">
-                <a th:href="@{/admin/household-list}" style="color: #4F46E5; text-decoration: none;">
-                    <i class="fas fa-arrow-left"></i> Quay lại Danh Sách Hộ
+                <a th:href="@{/admin/apartment-list}" style="color: #4F46E5; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Quay lại Danh Sách Căn Hộ
                 </a>
             </p>
 

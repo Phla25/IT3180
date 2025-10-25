@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Căn Hộ - Cơ Quan Chức Năng - BlueMoon Portal</title>
+
+    <link rel="stylesheet" href="/css/main.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS cho thẻ chi tiết */
+        .detail-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .detail-section {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #E5E7EB;
+            padding-bottom: 20px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .detail-item {
+            padding: 5px 0;
+        }
+
+        .detail-label {
+            display: block;
+            font-weight: 500;
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #1F2937;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a th:href="@{/officer/dashboard}" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Xem Sự Cố</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Báo Cáo</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-file-alt"></i>
+                <span>Tài Liệu</span>
+            </a>
+            <a th:href="@{/officer/apartment-list}" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Xem Căn Hộ</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+             <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+                <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none; text-align: left; padding: 0;">
+                    <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()"> <i class="fas fa-bars"></i> </button>
+            <h1>Thông Tin Giám Sát Căn Hộ: <span th:text="${apartment.tenTaiSan}"></span></h1>
+        </div>
+        <div class="header-right">
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user.hoVaTen} ?: 'N/A'">Nguyễn Văn Thanh</span>
+                    <span class="user-role" style="color: #7C3AED;">CƠ QUAN CHỨC NĂNG</span>
+                </div>
+                <div class="user-avatar"> <i class="fas fa-user-circle"></i> </div>
+                <div class="dropdown-menu">
+                    <a th:href="@{/officer/profile}"> <i class="fas fa-user"></i> Thông Tin Cá Nhân </a>
+                    <a href="/officer/settings"> <i class="fas fa-cog"></i> Cài Đặt </a> <hr>
+                    <form th:action="@{/logout}" method="post"> <button type="submit" class="logout-btn"> <i class="fas fa-sign-out-alt"></i> Đăng Xuất </button> </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}">Thông báo thành công</div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}">Thông báo lỗi</div>
+
+            <div class="detail-card">
+                <div class="detail-section">
+                    <h3 style="margin-bottom: 15px;">Thông Tin Tài Sản</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Mã Tài Sản:</span>
+                            <span class="detail-value" th:text="${apartment.maTaiSan}">101</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tên Căn Hộ:</span>
+                            <span class="detail-value" th:text="${apartment.tenTaiSan}">A-0501</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Diện Tích (m²):</span>
+                            <span class="detail-value" th:text="${apartment.dienTich}">75.5</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Giá Trị (₫):</span>
+                            <span class="detail-value" th:text="${#numbers.formatDecimal(apartment.giaTri, 0, 'POINT', 0, 'POINT')}">3,500,000,000</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Loại Tài Sản:</span>
+                            <span class="detail-value" th:text="${apartment.loaiTaiSan?.dbValue}">Căn Hộ</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Trạng Thái:</span>
+                            <span class="detail-value" th:text="${apartment.trangThai?.dbValue}">Hoạt Động</span>
+                        </div>
+                        <div class="detail-item" style="grid-column: 1 / -1;">
+                            <span class="detail-label">Vị Trí / Mô tả:</span>
+                            <span class="detail-value" th:text="${apartment.viTri} ?: 'N/A'">Tầng 5, Tòa A, Cửa sổ hướng Đông Nam</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section" style="border-bottom: none; padding-bottom: 0;">
+                    <h3 style="margin-bottom: 15px;">Hộ Gia Đình Liên Kết</h3>
+                    
+                    <div th:if="${apartment.hoGiaDinh != null}">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Mã Hộ:</span>
+                                <span class="detail-value" th:text="${apartment.hoGiaDinh.maHo}">HGD-001</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Tên Hộ:</span>
+                                <span class="detail-value" th:text="${apartment.hoGiaDinh.tenHo}">Hộ gia đình Nguyễn Văn A</span>
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin-top: 30px; margin-bottom: 15px;">Danh Sách Thành Viên Đang Cư Trú</h4>
+                        <table class="member-table">
+                            <thead>
+                                <tr>
+                                    <th>CCCD</th>
+                                    <th>Họ và Tên</th>
+                                    <th>Quan Hệ</th>
+                                    <th>Chủ Hộ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="member : ${members}">
+                                    <td th:text="${member.doiTuong.cccd}">012345678901</td>
+                                    <td th:text="${member.doiTuong.hoVaTen}">Nguyễn Văn A</td>
+                                    <td th:text="${member.quanHeVoiChuHo}">Chủ hộ</td>
+                                    <td>
+                                        <span th:if="${member.laChuHo}" style="color: #7C3AED; font-weight: 700;">CHỦ HỘ</span>
+                                        <span th:unless="${member.laChuHo}">Thành viên</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <div th:unless="${apartment.hoGiaDinh != null}" class="alert alert-warning">
+                        Căn hộ này hiện chưa được liên kết với Hộ gia đình nào.
+                    </div>
+
+                </div>
+
+            </div>
+            
+            <p style="text-align: center; margin-top: 20px;">
+                <a th:href="@{/officer/apartment-list}" style="color: #4F46E5; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Quay lại Danh Sách Căn Hộ
+                </a>
+            </p>
+
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('shifted');
+            document.querySelector('.header').classList.toggle('shifted');
+        }
+        document.querySelector('.user-menu').addEventListener('click', function() {
+            this.querySelector('.dropdown-menu').classList.toggle('show');
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-menu')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -16,8 +16,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import BlueMoon.bluemoon.entities.BaoCaoSuCo;
 import BlueMoon.bluemoon.entities.DoiTuong;
+import BlueMoon.bluemoon.entities.TaiSanChungCu; // Import TaiSanChungCu
+import BlueMoon.bluemoon.entities.ThanhVienHo;
 import BlueMoon.bluemoon.services.BaoCaoSuCoService;
 import BlueMoon.bluemoon.services.NguoiDungService;
+import BlueMoon.bluemoon.services.TaiSanChungCuService; // Import TaiSanChungCuService
+import BlueMoon.bluemoon.utils.Gender; // Cần thiết nếu dùng Enum trực tiếp
 import BlueMoon.bluemoon.utils.PriorityLevel;
 
 @Controller
@@ -27,16 +31,18 @@ public class OfficerController {
     @Autowired
     private NguoiDungService nguoiDungService;
     
-    // GIẢ ĐỊNH: Service Sự Cố đã được tạo ở bước trước
     @Autowired
     private BaoCaoSuCoService suCoService; 
+    
+    // THÊM INJECT SERVICE CĂN HỘ
+    @Autowired
+    private TaiSanChungCuService taiSanChungCuService; 
 
     /**
      * Helper: Lấy đối tượng DoiTuong hiện tại (Cơ Quan Chức Năng)
      */
     private DoiTuong getCurrentUser(Authentication auth) {
-        String id = auth.getName(); // Lấy CCCD/ID từ principal
-        // SỬ DỤNG SERVICE ĐÃ CÓ
+        String id = auth.getName(); 
         Optional<DoiTuong> userOpt = nguoiDungService.timCoQuanChucNangTheoID(id);
         return userOpt.orElse(null); 
     }
@@ -56,27 +62,29 @@ public class OfficerController {
         // 1. Thông tin người dùng (cho header và sidebar)
         model.addAttribute("user", user);
 
-        // 2. Lấy Thống kê chung về Sự Cố
+        // 2. Lấy Thống kê chung về Sự Cố (Sử dụng Service thực tế)
         Long tongSuCo = suCoService.getTongSuCo();
         Long suCoDaXuLy = suCoService.getSuCoDaXuLy();
         Long suCoDangXuLy = suCoService.getSuCoDangXuLy();
-        Long suCoChuaXuLy = suCoService.getSuCoChuaXuLy();
-        int tyLeDaXuLy = suCoService.getTyLeDaXuLy();
-        
+        // Lấy sự cố mới tiếp nhận, theo logic của Service mới
+        // Cần đảm bảo logic thống kê trên dashboard-officer.html khớp với logic Service.
+        // Dựa vào file HTML, 'suCoChuaXuLy' được hiển thị riêng.
+        // Ta dùng: suCoChuaXuLy = moi_tiep_nhan (như định nghĩa trong Service)
+        Long suCoMoiTiepNhan = suCoService.getSuCoChuaXuLy();
+
         // 3. Thống kê theo Mức độ Ưu tiên
         Long suCoCao = suCoService.getSuCoTheoMucDo(PriorityLevel.cao);
-        Long suCoTrungBinh = suCoService.getSuCoTheoMucDo(PriorityLevel.binh_thuong);
+        Long suCoTrungBinh = suCoService.getSuCoTheoMucDo(PriorityLevel.binh_thuong); // Dùng binh_thuong thay vì trung_binh
         Long suCoThap = suCoService.getSuCoTheoMucDo(PriorityLevel.thap);
         
-        // 4. Danh sách Sự Cố Gần Đây
+        // 4. Danh sách Sự Cố Gần Đây (Lấy 5 bản ghi mới nhất)
         List<BaoCaoSuCo> danhSachSuCo = suCoService.getRecentIncidents(5); 
 
         // 5. Truyền dữ liệu vào Model
         model.addAttribute("tongSuCo", tongSuCo);
         model.addAttribute("suCoDaXuLy", suCoDaXuLy);
         model.addAttribute("suCoDangXuLy", suCoDangXuLy);
-        model.addAttribute("suCoChuaXuLy", suCoChuaXuLy);
-        model.addAttribute("tyLeDaXuLy", tyLeDaXuLy);
+        model.addAttribute("suCoChuaXuLy", suCoMoiTiepNhan); // Đã sửa để khớp với Service: chỉ là "mới tiếp nhận"
         
         model.addAttribute("suCoCao", suCoCao);
         model.addAttribute("suCoTrungBinh", suCoTrungBinh);
@@ -85,6 +93,87 @@ public class OfficerController {
         model.addAttribute("danhSachSuCo", danhSachSuCo);
 
         return "dashboard-officer"; 
+    }
+    
+    // =======================================================
+    // QUẢN LÝ CĂN HỘ (CHỈ XEM)
+    // =======================================================
+    
+    // Trong OfficerController.java, thay thế phương thức showOfficerApartmentList
+
+    /**
+     * Hiển thị danh sách Căn Hộ cho Cơ Quan Chức Năng (GET) có hỗ trợ phân loại.
+     */
+    @GetMapping("/apartment-list") 
+    public String showOfficerApartmentList(
+            Model model, 
+            Authentication auth,
+            @RequestParam(required = false) BlueMoon.bluemoon.utils.AssetStatus status,
+            @RequestParam(required = false) java.math.BigDecimal minArea,
+            @RequestParam(required = false) java.math.BigDecimal maxArea,
+            @RequestParam(required = false) java.math.BigDecimal minValue,
+            @RequestParam(required = false) java.math.BigDecimal maxValue
+        ) {
+        
+        DoiTuong user = getCurrentUser(auth);
+        if (user == null) {
+            return "redirect:/login?error=notfound";
+        }
+        
+        model.addAttribute("user", user);
+
+        // Lấy danh sách căn hộ dựa trên các bộ lọc
+        List<TaiSanChungCu> apartments;
+        
+        if (minArea != null && maxArea != null && minArea.compareTo(maxArea) <= 0) {
+            apartments = taiSanChungCuService.getApartmentsByAreaRange(minArea, maxArea);
+        } else if (minValue != null && maxValue != null && minValue.compareTo(maxValue) <= 0) {
+            apartments = taiSanChungCuService.getApartmentsByValueRange(minValue, maxValue);
+        } else if (status != null) {
+            apartments = taiSanChungCuService.getApartmentsByStatus(status);
+        } else {
+            apartments = taiSanChungCuService.getAllApartments();
+        }
+        
+        model.addAttribute("apartments", apartments);
+        // Lưu trữ các giá trị lọc để giữ lại trên form
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("minArea", minArea);
+        model.addAttribute("maxArea", maxArea);
+        model.addAttribute("minValue", minValue);
+        model.addAttribute("maxValue", maxValue);
+        model.addAttribute("assetStatuses", BlueMoon.bluemoon.utils.AssetStatus.values());
+        
+        return "apartment-list-officer"; // Trỏ đến file HTML dành riêng cho Officer
+    }
+    /**
+     * Hiển thị chi tiết Căn Hộ cho Cơ Quan Chức Năng (GET)
+     */
+    @GetMapping("/apartment-details")
+    public String showOfficerApartmentDetails(@RequestParam("maTaiSan") Integer maTaiSan, Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+
+        TaiSanChungCu apartment = taiSanChungCuService.getApartmentById(maTaiSan)
+            .orElse(null);
+        
+        if (apartment == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy Căn hộ với Mã Tài Sản: " + maTaiSan);
+            return "redirect:/officer/apartment-list";
+        }
+
+        model.addAttribute("apartment", apartment);
+    
+        // Tùy chọn: Thêm danh sách thành viên hộ liên kết (nếu có)
+        if (apartment.getHoGiaDinh() != null) {
+            List<ThanhVienHo> members = apartment.getHoGiaDinh().getThanhVienHoList().stream()
+                .filter(tvh -> tvh.getNgayKetThuc() == null) 
+                .toList();
+            model.addAttribute("members", members);
+        } else {
+             model.addAttribute("members", List.of());
+        }
+
+        return "apartment-details-officer";
     }
     
     // =======================================================
@@ -151,8 +240,7 @@ public class OfficerController {
             return "redirect:/login?error=auth";
         }
         model.addAttribute("user", user); 
-        // Cần import Gender
-        // model.addAttribute("genders", BlueMoon.bluemoon.utils.Gender.values());
+        model.addAttribute("genders", Gender.values());
         return "edit-profile-officer"; 
     }
 
@@ -181,4 +269,5 @@ public class OfficerController {
             return "redirect:/officer/profile/edit";
         }
     }
+
 }

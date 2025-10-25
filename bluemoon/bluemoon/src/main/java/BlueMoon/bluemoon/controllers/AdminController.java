@@ -26,6 +26,7 @@ import BlueMoon.bluemoon.entities.ThanhVienHo;
 import BlueMoon.bluemoon.services.CuDanService;
 import BlueMoon.bluemoon.services.HoGiaDinhService;
 import BlueMoon.bluemoon.services.NguoiDungService;
+import BlueMoon.bluemoon.services.TaiSanChungCuService;
 import BlueMoon.bluemoon.utils.AccountStatus;
 import BlueMoon.bluemoon.utils.Gender;
 import BlueMoon.bluemoon.utils.HouseholdStatus;
@@ -56,6 +57,7 @@ public class AdminController {
     @Autowired private HoGiaDinhDAO hoGiaDinhDAO;
     @Autowired private BaoCaoSuCoDAO suCoDAO;
     @Autowired private HoaDonDAO hoaDonDAO;
+    @Autowired private TaiSanChungCuService taiSanChungCuService;
 
     @GetMapping("/dashboard")
     public String showAdminDashboard(Model model, Authentication auth) {
@@ -663,5 +665,180 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi chuyển Chủ hộ: " + e.getMessage());
             return "redirect:/admin/household-change-owner?maHo=" + maHo;
         }
+    }
+    // =======================================================
+    // QUẢN LÝ CĂN HỘ (APARTMENTS)
+    // =======================================================
+
+    /**
+     * Hiển thị danh sách Căn Hộ (GET) có hỗ trợ phân loại.
+     */
+    @GetMapping("/apartment-list")
+    public String showApartmentList(
+            Model model, 
+            Authentication auth,
+            @RequestParam(required = false) String keyword, // Giả định có tìm kiếm theo tên
+            @RequestParam(required = false) BlueMoon.bluemoon.utils.AssetStatus status,
+            @RequestParam(required = false) BigDecimal minArea,
+            @RequestParam(required = false) BigDecimal maxArea,
+            @RequestParam(required = false) BigDecimal minValue,
+            @RequestParam(required = false) BigDecimal maxValue
+        ) {
+        model.addAttribute("user", getCurrentUser(auth));
+        
+        // Lấy danh sách căn hộ dựa trên các bộ lọc
+        List<TaiSanChungCu> apartments;
+        
+        // Chú ý: Hiện tại DAO chỉ hỗ trợ lọc đơn (Area, Value, Status).
+        // Ta ưu tiên lọc phức tạp hơn trước.
+        if (minArea != null && maxArea != null && minArea.compareTo(maxArea) <= 0) {
+            apartments = taiSanChungCuService.getApartmentsByAreaRange(minArea, maxArea);
+        } else if (minValue != null && maxValue != null && minValue.compareTo(maxValue) <= 0) {
+            apartments = taiSanChungCuService.getApartmentsByValueRange(minValue, maxValue);
+        } else if (status != null) {
+            apartments = taiSanChungCuService.getApartmentsByStatus(status);
+        } else {
+            // Nếu không có bộ lọc nào, trả về tất cả
+            apartments = taiSanChungCuService.getAllApartments();
+        }
+        
+        // Nếu có keyword, cần thêm logic tìm kiếm theo tên/mã thủ công tại đây nếu Service không hỗ trợ
+        // (Bỏ qua logic keyword để tập trung vào phân loại chính)
+
+        model.addAttribute("apartments", apartments);
+        // Lưu trữ các giá trị lọc để giữ lại trên form
+        model.addAttribute("currentStatus", status); 
+        model.addAttribute("minArea", minArea);
+        model.addAttribute("maxArea", maxArea);
+        model.addAttribute("minValue", minValue);
+        model.addAttribute("maxValue", maxValue);
+        model.addAttribute("assetStatuses", BlueMoon.bluemoon.utils.AssetStatus.values());
+
+        return "apartment-list-admin"; 
+    }
+
+    /**
+     * Hiển thị form thêm Căn Hộ mới (GET)
+     */
+    @GetMapping("/apartment-add")
+    public String showAddApartmentForm(Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+        model.addAttribute("newApartment", new TaiSanChungCu());
+        model.addAttribute("assetStatuses", BlueMoon.bluemoon.utils.AssetStatus.values());
+        model.addAttribute("households", hoGiaDinhService.getAllHouseholds()); // Lấy danh sách Hộ gia đình để liên kết
+    
+        return "apartment-add";
+    }
+
+    /**
+     * Xử lý thêm Căn Hộ mới (POST)
+     */
+    @PostMapping("/apartment-add")
+    public String handleAddApartment(@ModelAttribute("newApartment") TaiSanChungCu apartment,
+                                     @RequestParam(value = "maHoLienKet", required = false) String maHoLienKet,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            taiSanChungCuService.themCanHo(apartment, maHoLienKet);
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Thêm Căn hộ " + apartment.getTenTaiSan() + " thành công!");
+            return "redirect:/admin/apartment-list";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/apartment-add";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
+            return "redirect:/admin/apartment-add";
+        }
+    }
+
+    /**
+     * Hiển thị form chỉnh sửa Căn Hộ (GET)
+     */
+    @GetMapping("/apartment-edit")
+    public String showEditApartmentForm(@RequestParam("maTaiSan") Integer maTaiSan, Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+    
+        TaiSanChungCu apartmentToEdit = taiSanChungCuService.getApartmentById(maTaiSan)
+            .orElse(null);
+
+        if (apartmentToEdit == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy Căn hộ.");
+            return "redirect:/admin/apartment-list";
+        }
+
+        model.addAttribute("apartment", apartmentToEdit);
+        model.addAttribute("assetStatuses", BlueMoon.bluemoon.utils.AssetStatus.values());
+        model.addAttribute("households", hoGiaDinhService.getAllHouseholds()); 
+    
+        return "apartment-edit";
+    }
+
+    /**
+     * Xử lý cập nhật Căn Hộ (POST)
+     */
+    @PostMapping("/apartment-edit")
+    public String handleEditApartment(@ModelAttribute("apartment") TaiSanChungCu apartment,
+                                      @RequestParam("maTaiSan") Integer maTaiSan,
+                                      @RequestParam(value = "maHoLienKet", required = false) String maHoLienKet,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            taiSanChungCuService.capNhatCanHo(maTaiSan, apartment, maHoLienKet);
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Cập nhật Căn hộ " + apartment.getTenTaiSan() + " thành công!");
+            return "redirect:/admin/apartment-list";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/apartment-edit?maTaiSan=" + maTaiSan;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
+            return "redirect:/admin/apartment-edit?maTaiSan=" + maTaiSan;
+        }
+    }
+
+    /**
+     * Xử lý xóa Căn Hộ (GET cho đơn giản)
+     */
+    @GetMapping("/apartment-delete")
+    public String handleDeleteApartment(@RequestParam("maTaiSan") Integer maTaiSan, RedirectAttributes redirectAttributes) {
+        try {
+            taiSanChungCuService.xoaCanHo(maTaiSan);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa căn hộ Mã " + maTaiSan + " thành công.");
+            return "redirect:/admin/apartment-list";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/apartment-list";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi xóa: " + e.getMessage());
+            return "redirect:/admin/apartment-list";
+        }
+    }
+    /**
+    * Xem chi tiết Căn Hộ (GET)
+    */
+    @GetMapping("/apartment-details")
+    public String showAdminApartmentDetails(@RequestParam("maTaiSan") Integer maTaiSan, Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+
+        TaiSanChungCu apartment = taiSanChungCuService.getApartmentById(maTaiSan)
+            .orElse(null);
+        
+        if (apartment == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy Căn hộ với Mã Tài Sản: " + maTaiSan);
+            return "redirect:/admin/apartment-list";
+        }
+
+        model.addAttribute("apartment", apartment);
+    
+        // Tùy chọn: Thêm danh sách thành viên hộ liên kết (nếu có)
+        if (apartment.getHoGiaDinh() != null) {
+            List<ThanhVienHo> members = apartment.getHoGiaDinh().getThanhVienHoList().stream()
+                .filter(tvh -> tvh.getNgayKetThuc() == null) 
+                .toList();
+            model.addAttribute("members", members);
+        } else {
+             model.addAttribute("members", List.of());
+        }
+
+        return "apartment-details-admin";
     }
 }

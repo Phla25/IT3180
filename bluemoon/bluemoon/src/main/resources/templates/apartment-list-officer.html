@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Căn Hộ - Cơ Quan Chức Năng - BlueMoon Portal</title>
+
+    <link rel="stylesheet" href="/css/main.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS cho bảng và tìm kiếm */
+        .toolbar {
+            display: flex;
+            justify-content: flex-start; /* Chỉ cần nút tìm kiếm */
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input {
+            padding: 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            width: 300px;
+        }
+
+        .btn-search {
+            background-color: #4F46E5;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        /* Đảm bảo style này được định nghĩa */
+        .form-select { 
+            width: 100%; 
+            padding: 10px 15px; 
+            border: 1px solid #D1D5DB; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            /* Thêm style để tùy chỉnh mũi tên dropdown nếu cần, nhưng dùng mặc định là ổn */
+            -webkit-appearance: none; /* Loại bỏ mũi tên mặc định trên Webkit */
+            -moz-appearance: none;    /* Loại bỏ mũi tên mặc định trên Firefox */
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2C197.9c-3.2%2C3.2-7.6%2C5-12.4%2C5s-9.2-1.8-12.4-5L146.2%2C91.1L30.2%2C197.9c-3.2%2C3.2-7.6%2C5-12.4%2C5c-4.8%2C0-9.2-1.8-12.4-5c-6.5-6.5-6.5-17.1%2C0-23.6L134%2C68.9c6.5-6.5%2C17.1-6.5%2C23.6%2C0L287%2C174.3c6.5%2C6.5%2C6.5%2C17.1%2C0%2C23.6z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 0.65em auto;
+        }
+        .form-select:focus { 
+            outline: none; 
+            border-color: #4F46E5; 
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); 
+        }
+
+        .data-table th, .data-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .data-table th {
+            background-color: #F9FAFB;
+            font-weight: 600;
+            color: #4B5563;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        
+        .data-table tr:hover {
+            background-color: #F3F4F6;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        .status-inactive, .status-sold {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        .status-available {
+            background-color: #E0F2FE;
+            color: #0369A1;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a th:href="@{/officer/dashboard}" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Xem Sự Cố', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Xem Sự Cố</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Báo Cáo', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-chart-bar"></i>
+                <span>Báo Cáo</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Tài Liệu', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-file-alt"></i>
+                <span>Tài Liệu</span>
+            </a>
+            <a th:href="@{/officer/apartment-list}" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Xem Căn Hộ</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+             <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+                <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none; text-align: left; padding: 0;">
+                    <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()"> <i class="fas fa-bars"></i> </button>
+            <h1>Danh Sách Căn Hộ (Giám Sát)</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user.hoVaTen} ?: 'N/A'">Nguyễn Văn Thanh</span>
+                    <span class="user-role" style="color: #7C3AED;">CƠ QUAN CHỨC NĂNG</span>
+                </div>
+                <div class="user-avatar"> <i class="fas fa-user-circle"></i> </div>
+                <div class="dropdown-menu">
+                    <a th:href="@{/officer/profile}"> <i class="fas fa-user"></i> Thông Tin Cá Nhân </a>
+                    <a href="/officer/settings"> <i class="fas fa-cog"></i> Cài Đặt </a> <hr>
+                    <form th:action="@{/logout}" method="post"> <button type="submit" class="logout-btn"> <i class="fas fa-sign-out-alt"></i> Đăng Xuất </button> </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}">Thông báo thành công</div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}">Thông báo lỗi</div>
+
+            <div class="toolbar">
+                <form th:action="@{/officer/apartment-list}" method="get" class="search-form" style="display: block; width: 100%; max-width: 900px;">
+                    <h4 style="margin-bottom: 10px; color: #4F46E5;"><i class="fas fa-filter"></i> Bộ Lọc Giám Sát</h4>
+                    
+                    <div style="display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;">
+                        
+                        <div style="flex-grow: 1;">
+                            <label for="status" class="detail-label">Trạng Thái:</label>
+                            <select id="status" name="status" class="form-select" style="width: 100%;">
+                                <option value="">-- Tất cả Trạng Thái --</option>
+                                <option th:each="st : ${assetStatuses}" 
+                                        th:value="${st}" 
+                                        th:text="${st.dbValue}"
+                                        th:selected="${currentStatus != null and st.name() == currentStatus.name()}"></option>
+                            </select>
+                        </div>
+                        
+                        <div style="width: 180px;">
+                            <label for="minArea" class="detail-label">DT từ (m²):</label>
+                            <input type="number" id="minArea" name="minArea" th:value="${minArea}" class="form-control" placeholder="Min" step="0.01">
+                        </div>
+                        <div style="width: 180px;">
+                            <label for="maxArea" class="detail-label">DT đến (m²):</label>
+                            <input type="number" id="maxArea" name="maxArea" th:value="${maxArea}" class="form-control" placeholder="Max" step="0.01">
+                        </div>
+                        
+                        <div style="width: 200px;">
+                            <label for="minValue" class="detail-label">Giá trị từ (₫):</label>
+                            <input type="number" id="minValue" name="minValue" th:value="${minValue}" class="form-control" placeholder="Min (VND)">
+                        </div>
+                        <div style="width: 200px;">
+                            <label for="maxValue" class="detail-label">Giá trị đến (₫):</label>
+                            <input type="number" id="maxValue" name="maxValue" th:value="${maxValue}" class="form-control" placeholder="Max (VND)">
+                        </div>
+                        
+                    </div>
+                    
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="submit" class="btn-search"><i class="fas fa-search"></i> Áp Dụng Lọc</button>
+                        <a th:href="@{/officer/apartment-list}" class="btn-search" style="background-color: #6B7280; text-decoration: none;">
+                            <i class="fas fa-redo"></i> Xóa Lọc
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mã TS</th>
+                        <th>Tên Căn Hộ</th>
+                        <th>Diện Tích (m²)</th>
+                        <th>Giá Trị (₫)</th>
+                        <th>Trạng Thái</th>
+                        <th>Hộ Liên Kết</th>
+                        <th>Thao Tác</th> </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="apartment : ${apartments}">
+                        <td th:text="${apartment.maTaiSan}">101</td>
+                        <td th:text="${apartment.tenTaiSan}">A-0501</td>
+                        <td th:text="${apartment.dienTich}">75.5</td>
+                        <td th:text="${#numbers.formatDecimal(apartment.giaTri, 0, 'POINT', 0, 'POINT')}">3,500,000,000</td>
+                        <td>
+                            <span class="status-badge" 
+                                th:classappend="${apartment.trangThai.name() == 'hoat_dong'} ? 'status-active' : (${apartment.trangThai.name() == 'da_ban'} ? 'status-sold' : 'status-available')"
+                                th:text="${apartment.trangThai?.dbValue}">Hoạt Động</span>
+                        </td>
+                        <td>
+                            <span th:if="${apartment.hoGiaDinh != null}" th:text="${apartment.hoGiaDinh.tenHo} + ' (' + ${apartment.hoGiaDinh.maHo} + ')'">
+                                Hộ gia đình Nguyễn Văn A (HGD-001)
+                            </span>
+                            <span th:unless="${apartment.hoGiaDinh != null}" class="text-muted">Chưa gán</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/officer/apartment-details(maTaiSan=${apartment.maTaiSan})}" style="color: #4F46E5; text-decoration: none;" title="Xem Chi Tiết">
+                                <i class="fas fa-eye"></i> Xem
+                            </a>
+                        </td>
+                    </tr>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div th:if="${apartments.isEmpty()}" class="alert alert-info" style="margin-top: 20px;">
+                Không tìm thấy căn hộ nào.
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('shifted');
+            document.querySelector('.header').classList.toggle('shifted');
+        }
+        document.querySelector('.user-menu').addEventListener('click', function() {
+            this.querySelector('.dropdown-menu').classList.toggle('show');
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-menu')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+        // Hàm showFeatureToggle (cần phải được định nghĩa trong file main.js hoặc ở đây)
+        function showFeatureToggle(featureName, message) {
+            Swal.fire({
+                icon: 'info',
+                title: `${featureName} - Coming Soon`,
+                html: `<div style="text-align: center; padding: 20px;"><div style="width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(45deg, #4F46E5, #7C3AED); border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-rocket" style="font-size: 32px; color: white;"></i></div><p style="margin-bottom: 15px; font-size: 16px;">${message}</p><p style="color: #6B7280; font-size: 14px;"><i class="fas fa-clock"></i> Tính năng này sẽ được phát triển trong phiên bản tiếp theo</p></div>`,
+                confirmButtonColor: '#4F46E5',
+                confirmButtonText: 'Tôi hiểu',
+                showCancelButton: true,
+                cancelButtonText: 'Thông báo cho tôi',
+                cancelButtonColor: '#6B7280'
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã đăng ký!',
+                        text: 'Chúng tôi sẽ thông báo khi tính năng này ra mắt.',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

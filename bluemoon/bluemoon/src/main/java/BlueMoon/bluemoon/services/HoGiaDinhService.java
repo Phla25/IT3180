@@ -32,7 +32,9 @@ public class HoGiaDinhService {
     // =======================================================
     // 1. CHỨC NĂNG CƠ BẢN (CRUD)
     // =======================================================
-    
+    public List<HoGiaDinh> getAllHouseholds() {
+        return hoGiaDinhDAO.findAll();
+    }
     public List<HoGiaDinh> getAllHouseholds(String keyword) {
         if (keyword != null && !keyword.trim().isEmpty()) {
             return hoGiaDinhDAO.search(keyword);
