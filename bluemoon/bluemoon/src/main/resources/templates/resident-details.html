@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Cư Dân - Ban Quản Trị - BlueMoon Portal</title>
+
+    <link rel="stylesheet" href="/css/main.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Tái sử dụng CSS từ profile-admin.html */
+        .profile-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+
+        .profile-avatar {
+            flex-shrink: 0;
+            text-align: center;
+        }
+
+        .profile-details, .household-details {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .detail-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-label {
+            display: block;
+            font-weight: 500;
+            color: #6B7280;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #1F2937;
+            font-size: 1rem;
+        }
+        
+        .section-header {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #E5E7EB;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ĐIỀU CHỈNH CSS ACTION BUTTONS ĐỂ PHÙ HỢP VỊ TRÍ MỚI */
+        .action-buttons {
+            margin-top: 30px;
+            padding: 20px 0; /* Loại bỏ border-top nếu nó chỉ dùng để tách nội dung trong thẻ cha */
+            display: flex;
+            gap: 15px;
+            /* Căn chỉnh nút sang bên phải hoặc toàn bộ chiều rộng, tùy theo thiết kế */
+            justify-content: flex-start; 
+        }
+
+        .btn-edit {
+             background-color: #F59E0B;
+             color: white;
+             padding: 10px 20px; /* Tăng padding cho nút */
+             border-radius: 8px;
+             text-decoration: none;
+             font-weight: 600;
+             display: inline-flex;
+             align-items: center;
+             gap: 8px; /* Tăng gap cho biểu tượng */
+             transition: background-color 0.3s;
+        }
+
+        .btn-edit.btn-primary { /* Chỉnh nút màu vàng thành màu cam/primary */
+            background-color: #F59E0B;
+        }
+        
+        .btn-edit:hover {
+            background-color: #D97706; /* Màu hover */
+        }
+        .btn-edit.btn-danger {
+            background-color: #EF4444; /* Màu đỏ cho nút rời đi */
+        }
+        .btn-edit.btn-danger:hover {
+            background-color: #DC2626;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo"> <i class="fas fa-building"></i> <span>BlueMoon Portal</span> </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Tên Người Dùng'">Tên Người Dùng</span>
+                    <span class="user-role" style="color: #7C3AED;">BAN QUẢN TRỊ</span>
+                </div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a th:href="@{/admin/dashboard}" class="nav-item"> <i class="fas fa-chart-line"></i> <span>Dashboard</span> </a>
+            <a th:href="@{/admin/resident-list}" class="nav-item active"> <i class="fas fa-users"></i> <span>Quản Lý Cư Dân</span> </a>
+            <a href="apartments.html" class="nav-item"> <i class="fas fa-home"></i> <span>Quản Lý Căn Hộ</span> </a>
+            <a th:href="@{/admin/household-list}" class="nav-item"> <i class="fas fa-users-cog"></i> <span>Quản Lý Hộ Gia Đình</span> </a> 
+            <a href="assets.html" class="nav-item"> <i class="fas fa-building"></i> <span>Quản Lý Tài Sản</span> </a>
+            <a href="fees.html" class="nav-item"> <i class="fas fa-file-invoice-dollar"></i> <span>Quản Lý Khoản Phí</span> </a>
+            <a href="#" class="nav-item"> <i class="fas fa-concierge-bell"></i> <span>Quản Lý Dịch Vụ</span> </a>
+            <a href="#" class="nav-item"> <i class="fas fa-exclamation-triangle"></i> <span>Xử Lý Sự Cố</span> </a>
+            <a href="#" class="nav-item"> <i class="fas fa-bell"></i> <span>Gửi Thông Báo</span> </a>
+            <a href="#" class="nav-item"> <i class="fas fa-chart-bar"></i> <span>Báo Cáo Thống Kê</span> </a>
+        </nav>
+        <div class="sidebar-footer">
+             <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+                <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none; text-align: left; padding: 0;"> <i class="fas fa-sign-out-alt"></i> Đăng Xuất </button>
+            </form>
+        </div>
+    </aside>
+
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()"> <i class="fas fa-bars"></i> </button>
+            <h1>Chi Tiết Cư Dân: <span th:text="${resident.hoVaTen}"></span></h1>
+        </div>
+        <div class="header-right">
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user.hoVaTen} ?: 'N/A'">Nguyễn Văn Thanh</span>
+                    <span class="user-role" style="color: #7C3AED;">BAN QUẢN TRỊ</span>
+                </div>
+                <div class="user-avatar"> <i class="fas fa-user-circle"></i> </div>
+                <div class="dropdown-menu">
+                    <a th:href="@{/admin/profile}"> <i class="fas fa-user"></i> Thông Tin Cá Nhân </a>
+                    <a th:href="@{/admin/settings}"> <i class="fas fa-cog"></i> Cài Đặt </a> <hr>
+                    <form th:action="@{/logout}" method="post"> <button type="submit" class="logout-btn"> <i class="fas fa-sign-out-alt"></i> Đăng Xuất </button> </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}">Thông báo thành công</div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}">Thông báo lỗi</div>
+
+            <div class="profile-card">
+                
+                <div class="profile-avatar">
+                    <i class="fas fa-user-circle fa-5x"></i>
+                    <h3 th:text="${resident.hoVaTen}" style="margin-top: 10px;">Nguyễn Văn A</h3>
+                    <span class="user-role" style="color: #7C3AED">CƯ DÂN</span>
+                </div>
+                
+                <div class="profile-details">
+                    <div class="detail-item">
+                        <span class="detail-label">CCCD:</span>
+                        <span class="detail-value" th:text="${resident.cccd}">012345678901</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Ngày Sinh:</span>
+                        <span class="detail-value" th:text="${resident.ngaySinh} ? ${#temporals.format(resident.ngaySinh, 'dd/MM/yyyy')} : 'Chưa cập nhật'">01/01/1995</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Giới Tính:</span>
+                        <span class="detail-value" th:text="${resident.gioiTinh?.dbValue} ?: 'Chưa cập nhật'">Nam</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">SĐT:</span>
+                        <span class="detail-value" th:text="${resident.soDienThoai} ?: 'Chưa cập nhật'">0901234567</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value" th:text="${resident.email} ?: 'Chưa cập nhật'">resident@mail.com</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Nghề Nghiệp:</span>
+                        <span class="detail-value" th:text="${resident.ngheNghiep} ?: 'Chưa cập nhật'">Kỹ Sư</span>
+                    </div>
+                    <div class="detail-item" style="grid-column: 1 / -1;">
+                        <span class="detail-label">Quê Quán/Địa chỉ:</span>
+                        <span class="detail-value" th:text="${resident.queQuan} ?: 'Chưa cập nhật'">TP. Hồ Chí Minh</span>
+                    </div>
+                </div>
+
+                <div class="profile-details" style="margin-top: 20px;">
+                    <h4 class="section-header" style="grid-column: 1 / -1;">Trạng Thái Hệ Thống</h4>
+                    <div class="detail-item">
+                        <span class="detail-label">Trạng Thái Dân Cư:</span>
+                        <span class="detail-value" th:text="${resident.trangThaiDanCu?.dbValue}">Ở Chung Cư</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Trạng Thái Tài Khoản:</span>
+                        <span class="detail-value" th:text="${resident.trangThaiTaiKhoan?.dbValue}">Hoạt Động</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Ngày Tạo:</span>
+                        <span class="detail-value" th:text="${resident.ngayTao} ? ${#temporals.format(resident.ngayTao, 'HH:mm dd/MM/yyyy')} : 'N/A'">10:30 01/01/2023</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Lần Đăng Nhập Cuối:</span>
+                        <span class="detail-value" th:text="${resident.lanDangNhapCuoi} ? ${#temporals.format(resident.lanDangNhapCuoi, 'HH:mm dd/MM/yyyy')} : 'Chưa có'">11:00 24/10/2025</span>
+                    </div>
+                </div>
+                
+                <div class="profile-details" style="margin-top: 20px;">
+                    <h4 class="section-header" style="grid-column: 1 / -1;">
+                        Thông Tin Hộ Gia Đình Hiện Tại
+                        <a th:if="${currentHousehold != null}" th:href="@{/admin/household-detail(maHo=${currentHousehold.maHo})}" class="btn-edit" style="background-color: #4F46E5;">
+                            <i class="fas fa-users-cog"></i> Chi Tiết Hộ
+                        </a>
+                    </h4>
+
+                    <div th:if="${currentHousehold != null}" class="household-details" style="grid-column: 1 / -1; gap: 10px;">
+                        <div class="detail-item">
+                            <span class="detail-label">Mã Hộ:</span>
+                            <span class="detail-value" th:text="${currentHousehold.maHo}">HGD-001</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tên Hộ:</span>
+                            <span class="detail-value" th:text="${currentHousehold.tenHo}">Hộ Gia Đình Nguyễn Văn A</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Quan Hệ với Chủ Hộ:</span>
+                            <span class="detail-value" th:text="${memberRelation.quanHeVoiChuHo}">Vợ/Chồng</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tư cách:</span>
+                            <span class="detail-value" th:text="${memberRelation.laChuHo ? 'CHỦ HỘ' : 'Thành viên'}">Thành viên</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Bắt đầu từ:</span>
+                            <span class="detail-value" th:text="${memberRelation.id.ngayBatDau} ? ${#temporals.format(memberRelation.id.ngayBatDau, 'dd/MM/yyyy')} : 'N/A'">01/01/2023</span>
+                        </div>
+
+                        <div th:if="${apartment != null}" class="detail-item" style="grid-column: 1 / -1; background-color: #f8f8ff; border-radius: 5px; padding: 10px; border: none;">
+                            <span class="detail-label" style="font-size: 0.85rem; color: #4F46E5;">Căn Hộ Liên Kết:</span>
+                            <span class="detail-value" th:text="${apartment.tenTaiSan} + ' (Diện tích: ' + ${apartment.dienTich} + ' m²)'">A-0501 (Diện tích: 75.5 m²)</span>
+                        </div>
+                    </div>
+
+                    <div th:unless="${currentHousehold != null}" class="alert alert-warning" style="grid-column: 1 / -1;">
+                        Cư dân này hiện chưa được gán vào Hộ gia đình nào.
+                    </div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <a th:href="@{/admin/resident-edit(cccd=${resident.cccd})}" class="btn-edit btn-primary">
+                    <i class="fas fa-edit"></i> Chỉnh Sửa Thông Tin
+                </a>
+                <a th:href="@{/admin/resident-delete(cccd=${resident.cccd}, lyDo=${T(BlueMoon.bluemoon.utils.ResidentStatus).roi_di})}" class="btn-edit btn-danger"
+                    onclick="return confirm('Xác nhận cập nhật trạng thái cư dân ${resident.hoVaTen} sang ĐÃ RỜI ĐI? Thao tác này là xóa mềm.')">
+                    <i class="fas fa-user-times"></i> Đánh Dấu Rời Đi
+                </a>
+            </div>
+
+            <p style="text-align: center; margin-top: 20px;">
+                <a th:href="@{/admin/resident-list}" style="color: #4F46E5; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Quay lại Danh Sách Cư Dân
+                </a>
+            </p>
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('shifted');
+            document.querySelector('.header').classList.toggle('shifted');
+        }
+        document.querySelector('.user-menu').addEventListener('click', function() {
+            this.querySelector('.dropdown-menu').classList.toggle('show');
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-menu')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

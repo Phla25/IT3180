@@ -79,11 +79,11 @@
         </div>
 
         <nav class="sidebar-nav">
-            <a th:href="@{/admin/dashboard}" class="nav-item">
+            <a th:href="@{/admin/dashboard}" class="nav-item active">
                 <i class="fas fa-chart-line"></i>
                 <span>Dashboard</span>
             </a>
-            <a th:href="@{/admin/resident-list}" class="nav-item active">
+            <a th:href="@{/admin/resident-list}" class="nav-item">
                 <i class="fas fa-users"></i>
                 <span>Quản Lý Cư Dân</span>
             </a>
@@ -91,7 +91,7 @@
                 <i class="fas fa-home"></i>
                 <span>Quản Lý Căn Hộ</span>
             </a>
-            <a href="#" class="nav-item">
+            <a th:href="@{/admin/household-list}" class="nav-item">
                 <i class="fas fa-users-cog"></i>
                 <span>Quản Lý Hộ Gia Đình</span>
             </a>
@@ -186,10 +186,6 @@
                     </div>
                 </div>
                 <div class="stat-value" th:text="${#numbers.formatInteger(tongCuDan, 0) ?: '0'}">248</div>
-                <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    <span>+12 so với tháng trước</span>
-                </div>
             </div>
 
             <div class="stat-card">
@@ -200,10 +196,6 @@
                     </div>
                 </div>
                 <div class="stat-value" th:text="${#numbers.formatInteger(tongHoGiaDinh, 0) ?: '0'}">156</div>
-                <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    <span>+5 hộ mới</span>
-                </div>
             </div>
             
             <div class="stat-card">
@@ -214,24 +206,13 @@
                     </div>
                 </div>
                 <div class="stat-value" th:text="${#numbers.formatInteger(suCoChuaXuLy, 0) ?: '0'}">8</div>
-                <div class="stat-change negative">
-                    <i class="fas fa-arrow-down"></i>
-                    <span>Cần xử lý gấp</span>
-                </div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-card-header">
                     <span class="stat-card-title">Doanh Thu Tháng</span>
-                    <div class="stat-icon purple">
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
                 </div>
                 <div class="stat-value" th:text="${#numbers.formatDecimal(doanhThuThang, 0, 'DEFAULT', 0, 'POINT')} ?: '0 ₫'">425M</div>
-                <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    <span>+8% so với tháng trước</span>
-                </div>
             </div>
         </div>
 
@@ -299,7 +280,7 @@
                     <div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span style="font-size: 14px; color: var(--gray);">Tỷ lệ thu phí</span>
-                            <span style="font-weight: 600;" th:text="${tyLeThuPhi} ?: '0%' + '%'">78%</span>
+                            <span style="font-weight: 600;" th:text="${tyLeThuPhi} ?: '0' + '%'">78%</span>
                         </div>
                         <div
                             style="background: var(--gray-lighter); border-radius: 10px; height: 8px; overflow: hidden;">
@@ -310,7 +291,7 @@
                     <div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span style="font-size: 14px; color: var(--gray);">Căn hộ đã bán</span>
-                            <span style="font-weight: 600;" th:text="${tyLeCanHoDaBan} ?: '0%' + '%'">92%</span>
+                            <span style="font-weight: 600;" th:text="${tyLeCanHoDaBan} ?: '0' + '%'">92%</span>
                         </div>
                         <div
                             style="background: var(--gray-lighter); border-radius: 10px; height: 8px; overflow: hidden;">
@@ -321,7 +302,7 @@
                     <div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span style="font-size: 14px; color: var(--gray);">Sự cố đã xử lý</span>
-                            <span style="font-weight: 600;" th:text="${tyLeSuCoDaXuLy} ?: '0%' + '%'">65%</span>
+                            <span style="font-weight: 600;" th:text="${tyLeSuCoDaXuLy} ?: '0' + '%'">65%</span>
                         </div>
                         <div
                             style="background: var(--gray-lighter); border-radius: 10px; height: 8px; overflow: hidden;">

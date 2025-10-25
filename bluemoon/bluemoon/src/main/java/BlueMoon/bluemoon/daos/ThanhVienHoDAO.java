@@ -44,5 +44,22 @@ public class ThanhVienHoDAO {
             return Optional.empty();
         }
     }
-    
+    /**
+     * Tìm bản ghi ThanhVienHo đang hoạt động là Chủ hộ của một Hộ gia đình.
+     */
+    public Optional<ThanhVienHo> findCurrentChuHoByHo(String maHo) {
+        String jpql = "SELECT tvh FROM ThanhVienHo tvh " +
+                      "WHERE tvh.hoGiaDinh.maHo = :maHo AND tvh.laChuHo = true AND tvh.ngayKetThuc IS NULL";
+        try {
+            return Optional.of(entityManager.createQuery(jpql, ThanhVienHo.class)
+                                            .setParameter("maHo", maHo)
+                                            .getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+    public ThanhVienHo save(ThanhVienHo thanhVien) {
+        return entityManager.merge(thanhVien);
+    }
 }

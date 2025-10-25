@@ -20,15 +20,22 @@ import BlueMoon.bluemoon.daos.HoGiaDinhDAO;
 import BlueMoon.bluemoon.daos.HoaDonDAO;
 import BlueMoon.bluemoon.entities.BaoCaoSuCo;
 import BlueMoon.bluemoon.entities.DoiTuong;
+import BlueMoon.bluemoon.entities.HoGiaDinh;
+import BlueMoon.bluemoon.entities.TaiSanChungCu;
+import BlueMoon.bluemoon.entities.ThanhVienHo;
 import BlueMoon.bluemoon.services.CuDanService;
+import BlueMoon.bluemoon.services.HoGiaDinhService;
 import BlueMoon.bluemoon.services.NguoiDungService;
 import BlueMoon.bluemoon.utils.AccountStatus;
 import BlueMoon.bluemoon.utils.Gender;
+import BlueMoon.bluemoon.utils.HouseholdStatus;
 import BlueMoon.bluemoon.utils.IncidentStatus;
 import BlueMoon.bluemoon.utils.InvoiceStatus;
 import BlueMoon.bluemoon.utils.PriorityLevel;
 import BlueMoon.bluemoon.utils.ResidentStatus;
+import BlueMoon.bluemoon.utils.TerminationReason;
 import BlueMoon.bluemoon.utils.UserRole;
+import jakarta.transaction.Transactional;
 
 @Controller
 @RequestMapping("/admin")
@@ -36,6 +43,8 @@ public class AdminController {
 
     @Autowired
     private NguoiDungService nguoiDungService;
+
+    @Autowired private HoGiaDinhService hoGiaDinhService;
 
     private DoiTuong getCurrentUser(Authentication auth) {
         String id = auth.getName();
@@ -269,6 +278,54 @@ public class AdminController {
         }
     }
 
+    /**
+     * HIỂN THỊ CHI TIẾT CƯ DÂN (GET)
+     * Đường dẫn: /admin/resident-details?cccd={cccd}
+     */
+    @GetMapping("/resident-details")
+    @Transactional // Đảm bảo Lazy Loading của ThanhVienHo hoạt động
+    public String showResidentDetails(@RequestParam("cccd") String cccd, Model model, Authentication auth) {
+        DoiTuong userAdmin = getCurrentUser(auth); 
+        if (userAdmin == null) {
+            return "redirect:/login?error=auth";
+        }
+        model.addAttribute("user", userAdmin);
+
+        // 1. Lấy thông tin cư dân chính
+        DoiTuong resident = cuDanService.timCuDanTheoCCCD(cccd)
+            .orElse(null);
+        
+        if (resident == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy cư dân với CCCD: " + cccd);
+            return "redirect:/admin/resident-list";
+        }
+        model.addAttribute("resident", resident);
+
+        // 2. Lấy mối quan hệ hộ gia đình hiện tại (ThanhVienHo)
+        // Cần inject ThanhVienHoService
+        // ⚠️ GIẢ ĐỊNH: Bạn sẽ inject ThanhVienHoService vào Controller này.
+        // @Autowired private ThanhVienHoService thanhVienHoService; 
+        
+        // Dùng HoGiaDinhService để lấy thông tin liên quan đến hộ (nếu có)
+        Optional<ThanhVienHo> tvhOpt = hoGiaDinhService.getThanhVienHoCurrentByCccd(cccd);
+        
+        if (tvhOpt.isPresent()) {
+            ThanhVienHo tvh = tvhOpt.get();
+            model.addAttribute("currentHousehold", tvh.getHoGiaDinh()); // Hộ gia đình
+            model.addAttribute("memberRelation", tvh);                   // Chi tiết quan hệ (Chủ hộ, Quan hệ, Ngày bắt đầu)
+            
+            // Lấy thông tin căn hộ (nếu có)
+            Optional<TaiSanChungCu> apartmentOpt = hoGiaDinhService.getApartmentByHousehold(tvh.getHoGiaDinh().getMaHo());
+            model.addAttribute("apartment", apartmentOpt.orElse(null));
+        } else {
+            model.addAttribute("currentHousehold", null);
+            model.addAttribute("memberRelation", null);
+            model.addAttribute("apartment", null);
+        }
+
+        return "resident-details"; // Trỏ đến file Thymeleaf mới
+    }
+
     // =======================================================
     // PROFILE EDIT / CHANGE PASSWORD
     // =======================================================
@@ -353,6 +410,258 @@ public class AdminController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi cập nhật: " + e.getMessage());
             return "redirect:/admin/profile/edit";
+        }
+    }
+    // =======================================================
+    // QUẢN LÝ HỘ GIA ĐÌNH
+    // =======================================================
+
+    /**
+     * Hiển thị danh sách hộ gia đình
+     */
+    @GetMapping("/household-list")
+    public String showHouseholdList(Model model, 
+                                    @RequestParam(required = false) String keyword,
+                                    Authentication auth) {
+        
+        model.addAttribute("user", getCurrentUser(auth));
+        
+        List<HoGiaDinh> households = hoGiaDinhService.getAllHouseholds(keyword);
+        
+        model.addAttribute("households", households);
+        model.addAttribute("keyword", keyword); // Để giữ lại giá trị tìm kiếm trên form
+        
+        return "household-list"; // Tên file Thymeleaf: household-list.html
+    }
+
+    /**
+     * Hiển thị form thêm hộ gia đình mới (GET)
+     */
+    @GetMapping("/household-add")
+    public String showAddHouseholdForm(Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+        model.addAttribute("newHousehold", new HoGiaDinh());
+        model.addAttribute("householdStatuses", HouseholdStatus.values());
+        
+        // Thêm DTO hoặc RequestParam để nhập CCCD Chủ hộ
+        // Giả định dùng RequestParam: chuHoCccd và quanHe
+        
+        return "household-add"; // Tên file Thymeleaf: household-add.html
+    }
+
+    /**
+     * Xử lý thêm hộ gia đình mới (POST)
+     */
+    @PostMapping("/household-add")
+    public String handleAddHousehold(@ModelAttribute("newHousehold") HoGiaDinh hoGiaDinh,
+                                     @RequestParam("chuHoCccd") String chuHoCccd,
+                                     @RequestParam(value = "quanHeVoiChuHo", defaultValue = "Chủ hộ") String quanHe,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            hoGiaDinhService.themHoGiaDinh(hoGiaDinh, chuHoCccd, quanHe);
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm Hộ gia đình " + hoGiaDinh.getTenHo() + " thành công!");
+            return "redirect:/admin/household-list";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/household-add";
+        }
+    }
+
+    /**
+     * Xem chi tiết hộ gia đình, danh sách thành viên và căn hộ đang ở (GET)
+     */
+    @GetMapping("/household-detail")
+    @Transactional // Cần thêm @Transactional để đảm bảo lazy loading List<ThanhVienHo> hoạt động
+    public String showHouseholdDetail(@RequestParam("maHo") String maHo, Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+        
+        HoGiaDinh hgd = hoGiaDinhService.getHouseholdById(maHo)
+            .orElse(null);
+        
+        if (hgd == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy Hộ gia đình.");
+            return "redirect:/admin/household-list";
+        }
+
+        // 1. Tải danh sách thành viên đang hoạt động
+        // Dùng Lazy loading List<ThanhVienHo> trên Entity HGD (Cần @Transactional)
+        List<ThanhVienHo> thanhVienList = hgd.getThanhVienHoList().stream()
+            .filter(tvh -> tvh.getNgayKetThuc() == null) 
+            .toList();
+        
+        // 2. Lấy thông tin căn hộ chính
+        Optional<TaiSanChungCu> apartmentOpt = hoGiaDinhService.getApartmentByHousehold(maHo);
+        
+        // 3. Thêm dữ liệu vào Model
+        model.addAttribute("household", hgd);
+        model.addAttribute("members", thanhVienList);
+        model.addAttribute("apartment", apartmentOpt.orElse(null)); // Thêm căn hộ (hoặc null)
+        model.addAttribute("terminationReasons", TerminationReason.values());
+        
+        return "household-details"; 
+    }
+    /**
+     * HIỂN THỊ FORM TÁCH HỘ (GET)
+     * Đường dẫn: /admin/household-split
+     * Yêu cầu: maHo (Hộ cũ)
+     */
+    @GetMapping("/household-split")
+    @Transactional
+    public String showSplitHouseholdForm(@RequestParam("maHo") String maHoCu, Model model, Authentication auth) {
+        DoiTuong user = getCurrentUser(auth); 
+        if (user == null) {
+            return "redirect:/login?error=auth";
+        }
+        
+        HoGiaDinh hgdCu = hoGiaDinhService.getHouseholdById(maHoCu)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Hộ gia đình cũ."));
+
+        // Lấy danh sách thành viên hiện tại của hộ cũ
+        List<DoiTuong> members = hgdCu.getThanhVienHoList().stream()
+            .filter(tvh -> tvh.getNgayKetThuc() == null)
+            .map(ThanhVienHo::getDoiTuong)
+            .toList();
+        
+        model.addAttribute("user", user);
+        model.addAttribute("household", hgdCu);
+        model.addAttribute("members", members); // Danh sách thành viên để chọn
+        model.addAttribute("newHousehold", new HoGiaDinh()); // DTO cho thông tin Hộ mới
+        
+        return "household-split"; // Tên file Thymeleaf mới
+    }
+
+    /**
+     * XỬ LÝ TÁCH HỘ (POST)
+     * Đường dẫn: /admin/household-split
+     */
+    @PostMapping("/household-split")
+    public String handleSplitHousehold(@RequestParam("maHoCu") String maHoCu,
+                                       @RequestParam("tenHoMoi") String tenHoMoi,
+                                       @RequestParam("chuHoMoiCccd") String chuHoMoiCccd,
+                                       @RequestParam("cccdDuocTach") List<String> cccdThanhVienDuocTach, // List CCCD được chọn
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            // Kiểm tra số lượng thành viên tối thiểu
+            if (cccdThanhVienDuocTach.isEmpty()) {
+                throw new IllegalArgumentException("Vui lòng chọn ít nhất một thành viên để tách hộ.");
+            }
+            
+            // Gọi logic Service Tách Hộ
+            HoGiaDinh hoGiaDinhMoi = hoGiaDinhService.tachHo(
+                maHoCu, 
+                cccdThanhVienDuocTach, 
+                chuHoMoiCccd, 
+                tenHoMoi
+            );
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Tách hộ thành công! Đã tạo Hộ gia đình mới: " + hoGiaDinhMoi.getTenHo());
+            
+            return "redirect:/admin/household-detail?maHo=" + hoGiaDinhMoi.getMaHo();
+
+        } catch (IllegalStateException e) {
+            // Lỗi khi Chủ hộ cũ bị tách nhưng hộ cũ vẫn còn thành viên
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/household-detail?maHo=" + maHoCu;
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi tách hộ: " + e.getMessage());
+            return "redirect:/admin/household-split?maHo=" + maHoCu; // Quay lại form Tách Hộ
+        }
+    }
+    /**
+    * HIỂN THỊ FORM THÊM THÀNH VIÊN (GET)
+     * Đường dẫn: /admin/household-member-add
+     * Yêu cầu: maHo (Mã hộ cần thêm)
+    */
+    @GetMapping("/household-member-add")
+    public String showAddMemberForm(@RequestParam("maHo") String maHo, Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+    
+        // Kiểm tra hộ gia đình tồn tại
+        HoGiaDinh hgd = hoGiaDinhService.getHouseholdById(maHo)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Hộ gia đình với Mã Hộ: " + maHo));
+
+        model.addAttribute("household", hgd);
+        // Truyền DTO/Form object nếu cần, nhưng ở đây ta dùng @RequestParam đơn giản hơn
+    
+        return "household-member-add"; // Trỏ đến file Thymeleaf mới
+    }
+
+    /**
+     * XỬ LÝ THÊM THÀNH VIÊN (POST)
+     * Đường dẫn: /admin/household-member-add
+     */
+    @PostMapping("/household-member-add")
+    public String handleAddMember(@RequestParam("maHo") String maHo,
+                                  @RequestParam("cccdThanhVien") String cccdThanhVien,
+                                  @RequestParam("quanHe") String quanHe,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            // Mặc định laChuHo = false khi thêm mới
+            // LyDoKetThuc = chuyen_ho (sẽ được ghi đè nếu thành viên này đang ở hộ khác)
+            hoGiaDinhService.themThanhVien(maHo, cccdThanhVien, false, quanHe, null);
+        
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Đã thêm thành viên CCCD " + cccdThanhVien + " vào Hộ " + maHo + " thành công.");
+        
+            return "redirect:/admin/household-detail?maHo=" + maHo;
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/household-member-add?maHo=" + maHo;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi thêm thành viên: " + e.getMessage());
+            return "redirect:/admin/household-member-add?maHo=" + maHo;
+        }
+    }
+
+    /**
+     * HIỂN THỊ FORM CHUYỂN CHỦ HỘ (GET)
+     * Đường dẫn: /admin/household-change-owner
+     * Yêu cầu: maHo (Mã hộ cần chuyển Chủ hộ)
+     */
+    @GetMapping("/household-change-owner")
+    @Transactional // Cần load danh sách thành viên
+    public String showChangeChuHoForm(@RequestParam("maHo") String maHo, Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+    
+        HoGiaDinh hgd = hoGiaDinhService.getHouseholdById(maHo)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Hộ gia đình với Mã Hộ: " + maHo));
+
+        // Lấy danh sách thành viên hiện tại (trừ Chủ hộ hiện tại)
+        List<DoiTuong> members = hgd.getThanhVienHoList().stream()
+            .filter(tvh -> tvh.getNgayKetThuc() == null && !tvh.getLaChuHo())
+            .map(ThanhVienHo::getDoiTuong)
+            .toList();
+
+        model.addAttribute("household", hgd);
+        model.addAttribute("members", members);
+    
+        return "household-change-owner"; // Trỏ đến file Thymeleaf mới
+    }
+
+    /**
+     * XỬ LÝ CHUYỂN CHỦ HỘ (POST)
+     * Đường dẫn: /admin/household-change-ch
+     */
+    @PostMapping("/household-change-owner")
+    public String handleChangeChuHo(@RequestParam("maHo") String maHo,
+                                     @RequestParam("cccdChuHoMoi") String cccdChuHoMoi,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            hoGiaDinhService.capNhatChuHo(maHo, cccdChuHoMoi);
+        
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Đã chuyển Chủ hộ cho Hộ " + maHo + " thành công (CCCD mới: " + cccdChuHoMoi + ").");
+        
+            return "redirect:/admin/household-detail?maHo=" + maHo;
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/household-change-owner?maHo=" + maHo;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi chuyển Chủ hộ: " + e.getMessage());
+            return "redirect:/admin/household-change-owner?maHo=" + maHo;
         }
     }
 }
