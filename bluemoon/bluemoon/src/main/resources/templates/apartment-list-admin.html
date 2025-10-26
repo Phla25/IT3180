@@ -48,6 +48,34 @@
             font-weight: 600;
             display: inline-flex;
             align-items: center;
+        }
+        
+        .btn-export {
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-export-excel {
+            background-color: #10B981;
+            color: white;
+        }
+        
+        .btn-export-pdf {
+            background-color: #EF4444;
+            color: white;
+        }
+        
+        .btn-export:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            transition: all 0.2s;
             gap: 8px;
         }
         .form-select { 
@@ -232,6 +260,16 @@
                         <a th:href="@{/admin/apartment-add}" class="btn-add">
                             <i class="fas fa-plus"></i> Thêm Căn Hộ Mới
                         </a>
+                        
+                        <!-- Export Buttons -->
+                        <div class="btn-group" style="margin-left: 10px;">
+                            <a th:href="@{/admin/export/apartments}" class="btn-export btn-export-excel" title="Xuất Excel">
+                                <i class="fas fa-file-excel"></i> Excel
+                            </a>
+                            <a th:href="@{/admin/export/apartments/pdf}" class="btn-export btn-export-pdf" title="Xuất PDF" style="margin-left: 5px;">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>

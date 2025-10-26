@@ -154,10 +154,20 @@
                         Quản lý thông tin tất cả cư dân trong chung cư
                     </p>
                 </div>
-                <a th:href="@{/admin/resident-add}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Thêm Cư Dân Mới
-                </a>
+                <div style="display: flex; gap: 10px;">
+                    <a th:href="@{/admin/resident-add}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Thêm Cư Dân Mới
+                    </a>
+                    
+                    <!-- Export Buttons -->
+                    <a th:href="@{/admin/export/residents}" class="btn" style="background-color: #10B981; color: white;" title="Xuất Excel">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </a>
+                    <a th:href="@{/admin/export/residents/pdf}" class="btn" style="background-color: #EF4444; color: white;" title="Xuất PDF">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
+                </div>
             </div>
 
 			<form th:action="@{/admin/resident-list}" method="get">

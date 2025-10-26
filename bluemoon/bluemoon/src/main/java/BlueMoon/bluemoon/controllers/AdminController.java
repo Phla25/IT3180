@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +30,15 @@ import BlueMoon.bluemoon.services.HoGiaDinhService;
 import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
 import BlueMoon.bluemoon.services.TaiSanChungCuService;
+import BlueMoon.bluemoon.services.ReportService;
+import BlueMoon.bluemoon.services.ExportService;
+import BlueMoon.bluemoon.models.ApartmentReportDTO;
+import BlueMoon.bluemoon.models.InvoiceReportDTO;
+import BlueMoon.bluemoon.models.HouseholdReportDTO;
+import BlueMoon.bluemoon.models.ResidentReportDTO;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import BlueMoon.bluemoon.utils.AccountStatus;
 import BlueMoon.bluemoon.utils.Gender;
 import BlueMoon.bluemoon.utils.HouseholdStatus;
@@ -62,6 +72,8 @@ public class AdminController {
     @Autowired private HoaDonDAO hoaDonDAO;
     @Autowired private TaiSanChungCuService taiSanChungCuService;
     @Autowired private HoaDonService hoaDonService;
+    @Autowired private ReportService reportService;
+    @Autowired private ExportService exportService;
 
     @GetMapping("/dashboard")
     public String showAdminDashboard(Model model, Authentication auth) {
@@ -1099,5 +1111,395 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xóa: " + e.getMessage());
         }
         return "redirect:/admin/fees";
+    }
+    
+    // ========== EXPORT REPORTS ==========
+    
+    /**
+     * Xuất báo cáo danh sách căn hộ ra file Excel
+     */
+    @GetMapping("/export/apartments")
+    public ResponseEntity<byte[]> exportApartments() {
+        try {
+            List<ApartmentReportDTO> apartments = reportService.getApartmentReportForAdmin();
+            byte[] excelData = exportService.exportApartmentsToExcel(apartments);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "BaoCao_CanHo_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo TẤT CẢ tài sản ra file Excel (không có bộ lọc)
+     * URL: GET /admin/export/assets (không có query parameter)
+     */
+    @GetMapping(value = "/export/assets", params = {})
+    public ResponseEntity<byte[]> exportAllAssets() {
+        try {
+            List<ApartmentReportDTO> assets = reportService.getAllAssetsReportForAdmin();
+            byte[] excelData = exportService.exportApartmentsToExcel(assets);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "BaoCao_TatCaTaiSan_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo TẤT CẢ tài sản ra file PDF
+     */
+    @GetMapping("/export/assets/pdf")
+    public ResponseEntity<byte[]> exportAllAssetsPdf() {
+        try {
+            List<ApartmentReportDTO> assets = reportService.getAllAssetsReportForAdmin();
+            byte[] pdfData = exportService.exportApartmentsToPdf(assets);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "BaoCao_TatCaTaiSan_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo danh sách hóa đơn ra file Excel
+     */
+    @GetMapping("/export/invoices")
+    public ResponseEntity<byte[]> exportInvoices() {
+        try {
+            List<InvoiceReportDTO> invoices = reportService.getInvoiceReportForAdmin();
+            byte[] excelData = exportService.exportInvoicesToExcel(invoices);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "BaoCao_HoaDon_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo danh sách hộ gia đình ra file Excel
+     */
+    @GetMapping("/export/households")
+    public ResponseEntity<byte[]> exportHouseholds() {
+        try {
+            List<HouseholdReportDTO> households = reportService.getHouseholdReportForAdmin();
+            byte[] excelData = exportService.exportHouseholdsToExcel(households);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "BaoCao_HoGiaDinh_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo tài sản chung ra file Excel (có bộ lọc theo loại)
+     * URL: GET /admin/export/assets?assetType=can_ho
+     * 
+     * @param assetType Loại tài sản (can_ho, tai_san_chung, etc.) - không bắt buộc
+     */
+    @GetMapping(value = "/export/assets", params = "assetType")
+    public ResponseEntity<byte[]> exportAssets(@RequestParam(required = false) String assetType) {
+        try {
+            BlueMoon.bluemoon.utils.AssetType type = null;
+            if (assetType != null && !assetType.isEmpty()) {
+                type = BlueMoon.bluemoon.utils.AssetType.valueOf(assetType);
+            }
+            
+            List<ApartmentReportDTO> assets = reportService.getAssetReportForAdmin(type);
+            byte[] excelData = exportService.exportApartmentsToExcel(assets);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "BaoCao_TaiSan_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    // ========== PDF EXPORT ENDPOINTS ==========
+    
+    /**
+     * Xuất báo cáo căn hộ ra file PDF
+     */
+    @GetMapping("/export/apartments/pdf")
+    public ResponseEntity<byte[]> exportApartmentsPdf() {
+        try {
+            List<ApartmentReportDTO> apartments = reportService.getApartmentReportForAdmin();
+            byte[] pdfData = exportService.exportApartmentsToPdf(apartments);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "BaoCao_CanHo_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo hóa đơn ra file PDF
+     */
+    @GetMapping("/export/invoices/pdf")
+    public ResponseEntity<byte[]> exportInvoicesPdf() {
+        try {
+            List<InvoiceReportDTO> invoices = reportService.getInvoiceReportForAdmin();
+            byte[] pdfData = exportService.exportInvoicesToPdf(invoices);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "BaoCao_HoaDon_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo hộ gia đình ra file PDF
+     */
+    @GetMapping("/export/households/pdf")
+    public ResponseEntity<byte[]> exportHouseholdsPdf() {
+        try {
+            List<HouseholdReportDTO> households = reportService.getHouseholdReportForAdmin();
+            byte[] pdfData = exportService.exportHouseholdsToPdf(households);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "BaoCao_HoGiaDinh_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo cư dân ra file Excel
+     */
+    @GetMapping("/export/residents")
+    public ResponseEntity<byte[]> exportResidents() {
+        try {
+            List<ResidentReportDTO> residents = reportService.getResidentReportForAdmin();
+            byte[] excelData = exportService.exportResidentsToExcel(residents);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "BaoCao_CuDan_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo cư dân ra file PDF
+     */
+    @GetMapping("/export/residents/pdf")
+    public ResponseEntity<byte[]> exportResidentsPdf() {
+        try {
+            List<ResidentReportDTO> residents = reportService.getResidentReportForAdmin();
+            byte[] pdfData = exportService.exportResidentsToPdf(residents);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "BaoCao_CuDan_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    // ========== EXPORT DETAIL ENDPOINTS ==========
+    
+    /**
+     * Xuất chi tiết căn hộ ra file Excel
+     */
+    @GetMapping("/export/apartment/{maTaiSan}")
+    public ResponseEntity<byte[]> exportApartmentDetail(@PathVariable Integer maTaiSan) {
+        try {
+            List<ApartmentReportDTO> apartment = reportService.getApartmentDetailReport(maTaiSan);
+            if (apartment.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            byte[] excelData = exportService.exportApartmentsToExcel(apartment);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "ChiTiet_CanHo_" + maTaiSan + "_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất chi tiết căn hộ ra file PDF
+     */
+    @GetMapping("/export/apartment/{maTaiSan}/pdf")
+    public ResponseEntity<byte[]> exportApartmentDetailPdf(@PathVariable Integer maTaiSan) {
+        try {
+            List<ApartmentReportDTO> apartment = reportService.getApartmentDetailReport(maTaiSan);
+            if (apartment.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            byte[] pdfData = exportService.exportApartmentsToPdf(apartment);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "ChiTiet_CanHo_" + maTaiSan + "_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất chi tiết cư dân ra file Excel
+     */
+    @GetMapping("/export/resident/{cccd}")
+    public ResponseEntity<byte[]> exportResidentDetail(@PathVariable String cccd) {
+        try {
+            List<ResidentReportDTO> resident = reportService.getResidentDetailReport(cccd);
+            if (resident.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            byte[] excelData = exportService.exportResidentsToExcel(resident);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "ChiTiet_CuDan_" + cccd + "_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất chi tiết cư dân ra file PDF
+     */
+    @GetMapping("/export/resident/{cccd}/pdf")
+    public ResponseEntity<byte[]> exportResidentDetailPdf(@PathVariable String cccd) {
+        try {
+            List<ResidentReportDTO> resident = reportService.getResidentDetailReport(cccd);
+            if (resident.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            byte[] pdfData = exportService.exportResidentsToPdf(resident);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "ChiTiet_CuDan_" + cccd + "_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất chi tiết hóa đơn ra file Excel
+     */
+    @GetMapping("/export/invoice/{maHoaDon}")
+    public ResponseEntity<byte[]> exportInvoiceDetail(@PathVariable Integer maHoaDon) {
+        try {
+            List<InvoiceReportDTO> invoice = reportService.getInvoiceDetailReport(maHoaDon);
+            if (invoice.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            byte[] excelData = exportService.exportInvoicesToExcel(invoice);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "ChiTiet_HoaDon_" + maHoaDon + "_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất chi tiết hóa đơn ra file PDF
+     */
+    @GetMapping("/export/invoice/{maHoaDon}/pdf")
+    public ResponseEntity<byte[]> exportInvoiceDetailPdf(@PathVariable Integer maHoaDon) {
+        try {
+            List<InvoiceReportDTO> invoice = reportService.getInvoiceDetailReport(maHoaDon);
+            if (invoice.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            byte[] pdfData = exportService.exportInvoicesToPdf(invoice);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "ChiTiet_HoaDon_" + maHoaDon + "_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

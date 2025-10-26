@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,7 +21,13 @@ import BlueMoon.bluemoon.models.HoaDonStatsDTO;
 import BlueMoon.bluemoon.services.HoGiaDinhService;
 import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
+import BlueMoon.bluemoon.services.ReportService;
+import BlueMoon.bluemoon.services.ExportService;
+import BlueMoon.bluemoon.models.InvoiceReportDTO;
 import BlueMoon.bluemoon.utils.InvoiceType;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 @Controller
 @RequestMapping("/accountant")
@@ -33,6 +40,8 @@ public class AccountantController {
     private HoaDonService hoaDonService;
 
     @Autowired private HoGiaDinhService hoGiaDinhService;
+    @Autowired private ReportService reportService;
+    @Autowired private ExportService exportService;
 
     /**
      * Helper: Lấy đối tượng DoiTuong hiện tại (Kế Toán)
@@ -320,5 +329,99 @@ public class AccountantController {
         model.addAttribute("paidInvoices", paidInvoices);
         
         return "financial-report-accountant"; // Tên file Thymeleaf mới
+    }
+    
+    // ========== EXPORT REPORTS ==========
+    
+    /**
+     * Xuất báo cáo danh sách hóa đơn ra file Excel
+     */
+    @GetMapping("/export/invoices")
+    public ResponseEntity<byte[]> exportInvoices() {
+        try {
+            List<InvoiceReportDTO> invoices = reportService.getInvoiceReportForAccountant();
+            byte[] excelData = exportService.exportInvoicesToExcel(invoices);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "BaoCao_HoaDon_KeToan_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo hóa đơn ra file PDF
+     */
+    @GetMapping("/export/invoices/pdf")
+    public ResponseEntity<byte[]> exportInvoicesPdf() {
+        try {
+            List<InvoiceReportDTO> invoices = reportService.getInvoiceReportForAccountant();
+            byte[] pdfData = exportService.exportInvoicesToPdf(invoices);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "BaoCao_HoaDon_KeToan_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    // ========== EXPORT DETAIL ENDPOINTS ==========
+    
+    /**
+     * Xuất chi tiết hóa đơn ra file Excel
+     */
+    @GetMapping("/export/invoice/{maHoaDon}")
+    public ResponseEntity<byte[]> exportInvoiceDetail(@PathVariable Integer maHoaDon) {
+        try {
+            List<InvoiceReportDTO> invoice = reportService.getInvoiceDetailReport(maHoaDon);
+            if (invoice.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            byte[] excelData = exportService.exportInvoicesToExcel(invoice);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "ChiTiet_HoaDon_" + maHoaDon + "_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất chi tiết hóa đơn ra file PDF
+     */
+    @GetMapping("/export/invoice/{maHoaDon}/pdf")
+    public ResponseEntity<byte[]> exportInvoiceDetailPdf(@PathVariable Integer maHoaDon) {
+        try {
+            List<InvoiceReportDTO> invoice = reportService.getInvoiceDetailReport(maHoaDon);
+            if (invoice.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            byte[] pdfData = exportService.exportInvoicesToPdf(invoice);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "ChiTiet_HoaDon_" + maHoaDon + "_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

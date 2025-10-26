@@ -71,6 +71,35 @@
             gap: 8px;
         }
         
+        /* CSS cho nút xuất file */
+        .btn-export {
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-export-excel {
+            background-color: #10B981;
+            color: white;
+        }
+        
+        .btn-export-pdf {
+            background-color: #EF4444;
+            color: white;
+        }
+        
+        .btn-export:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            transition: all 0.2s;
+        }
+        
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -212,9 +241,17 @@
                         <i class="fas fa-redo"></i> Đặt lại
                     </a>
                 </form>
-                <a th:href="@{/admin/general-asset-add}" class="btn-add">
-                    <i class="fas fa-plus"></i> Thêm Tài Sản Mới
-                </a>
+                <div style="display: flex; gap: 10px;">
+                    <a th:href="@{/admin/general-asset-add}" class="btn-add">
+                        <i class="fas fa-plus"></i> Thêm Tài Sản Mới
+                    </a>
+                    <a th:href="@{/admin/export/assets}" class="btn-export btn-export-excel" title="Xuất Excel">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </a>
+                    <a th:href="@{/admin/export/assets/pdf}" class="btn-export btn-export-pdf" title="Xuất PDF">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
+                </div>
             </div>
 
             <table class="data-table">

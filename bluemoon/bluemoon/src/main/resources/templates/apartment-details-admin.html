@@ -87,6 +87,36 @@
             align-items: center;
             gap: 5px;
         }
+        
+        /* CSS cho nút xuất file */
+        .btn-export {
+            padding: 8px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-export-excel {
+            background-color: #10B981;
+            color: white;
+        }
+        
+        .btn-export-excel:hover {
+            background-color: #059669;
+        }
+        
+        .btn-export-pdf {
+            background-color: #6366F1;
+            color: white;
+        }
+        
+        .btn-export-pdf:hover {
+            background-color: #4F46E5;
+        }
     </style>
 </head>
 
@@ -148,13 +178,19 @@
 
             <div class="detail-card">
                 
-                <div class="toolbar" style="margin-bottom: 20px; display: flex; justify-content: flex-end; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
+                <div class="toolbar" style="margin-bottom: 20px; display: flex; justify-content: flex-end; gap: 10px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
                     <a th:href="@{/admin/apartment-edit(maTaiSan=${apartment.maTaiSan})}" class="btn-edit" title="Chỉnh Sửa Thông Tin">
                         <i class="fas fa-edit"></i> Chỉnh Sửa
                     </a>
                     <a th:href="@{/admin/apartment-delete(maTaiSan=${apartment.maTaiSan})}" class="btn-delete" title="Xóa Căn Hộ" 
                        onclick="return confirm('Bạn có chắc chắn muốn XÓA căn hộ này không? Đây là hành động không thể hoàn tác!')">
                         <i class="fas fa-trash"></i> Xóa Căn Hộ
+                    </a>
+                    <a th:href="@{/admin/export/apartment/{maTaiSan}(maTaiSan=${apartment.maTaiSan})}" class="btn-export btn-export-excel" title="Xuất Excel">
+                        <i class="fas fa-file-excel"></i> Xuất Excel
+                    </a>
+                    <a th:href="@{/admin/export/apartment/{maTaiSan}/pdf(maTaiSan=${apartment.maTaiSan})}" class="btn-export btn-export-pdf" title="Xuất PDF">
+                        <i class="fas fa-file-pdf"></i> Xuất PDF
                     </a>
                 </div>
 
