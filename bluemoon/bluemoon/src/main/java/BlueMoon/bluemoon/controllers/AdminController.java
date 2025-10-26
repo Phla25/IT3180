@@ -21,10 +21,12 @@ import BlueMoon.bluemoon.daos.HoaDonDAO;
 import BlueMoon.bluemoon.entities.BaoCaoSuCo;
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.entities.HoGiaDinh;
+import BlueMoon.bluemoon.entities.HoaDon;
 import BlueMoon.bluemoon.entities.TaiSanChungCu;
 import BlueMoon.bluemoon.entities.ThanhVienHo;
 import BlueMoon.bluemoon.services.CuDanService;
 import BlueMoon.bluemoon.services.HoGiaDinhService;
+import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
 import BlueMoon.bluemoon.services.TaiSanChungCuService;
 import BlueMoon.bluemoon.utils.AccountStatus;
@@ -32,6 +34,7 @@ import BlueMoon.bluemoon.utils.Gender;
 import BlueMoon.bluemoon.utils.HouseholdStatus;
 import BlueMoon.bluemoon.utils.IncidentStatus;
 import BlueMoon.bluemoon.utils.InvoiceStatus;
+import BlueMoon.bluemoon.utils.InvoiceType;
 import BlueMoon.bluemoon.utils.PriorityLevel;
 import BlueMoon.bluemoon.utils.ResidentStatus;
 import BlueMoon.bluemoon.utils.TerminationReason;
@@ -58,6 +61,7 @@ public class AdminController {
     @Autowired private BaoCaoSuCoDAO suCoDAO;
     @Autowired private HoaDonDAO hoaDonDAO;
     @Autowired private TaiSanChungCuService taiSanChungCuService;
+    @Autowired private HoaDonService hoaDonService;
 
     @GetMapping("/dashboard")
     public String showAdminDashboard(Model model, Authentication auth) {
@@ -1012,5 +1016,86 @@ public class AdminController {
         }
 
         return "general-asset-details"; 
+    }
+    // =======================================================
+    // QUẢN LÝ HÓA ĐƠN (CRUD)
+    // =======================================================
+    
+    /**
+     * Admin list: URL: /admin/fees
+     */
+    @GetMapping("/fees")
+    public String showAdminFees(Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+        List<HoaDon> hoaDonList = hoaDonService.getAllHoaDon(); 
+        model.addAttribute("hoaDonList", hoaDonList);
+        return "fees-admin"; // Tên file Thymeleaf mới
+    }
+    
+    /**
+     * Admin form: URL: /admin/fee-form (Sử dụng lại logic của Kế toán)
+     */
+    @GetMapping("/fee-form")
+    public String showAdminFeeForm(@RequestParam(value = "id", required = false) Integer maHoaDon, 
+                              Model model, 
+                              Authentication auth) {
+        
+        model.addAttribute("user", getCurrentUser(auth));
+        HoaDon hoaDon = (maHoaDon != null) ? 
+                        hoaDonService.getHoaDonById(maHoaDon).orElse(new HoaDon()) : 
+                        new HoaDon();
+        
+        model.addAttribute("hoaDon", hoaDon);
+        model.addAttribute("pageTitle", (maHoaDon != null) ? "Chỉnh Sửa Hóa Đơn #" + maHoaDon : "Tạo Hóa Đơn Mới");
+        model.addAttribute("invoiceTypes", InvoiceType.values()); 
+        List<HoGiaDinh> allHo = hoGiaDinhService.getAllHouseholds(); 
+        model.addAttribute("allHo", allHo);
+        // model.addAttribute("allHo", hoGiaDinhService.getAllHouseholds()); // Cần Autowired HoGiaDinhService
+        
+        // Vẫn trỏ đến file form chung
+        return "invoice-add-edit-admin"; 
+    }
+    
+    /**
+     * Admin save: URL: /admin/fee-save (Tái sử dụng logic Service)
+     */
+    @PostMapping("/fee-save")
+    public String handleAdminFeeSave(@ModelAttribute("hoaDon") HoaDon hoaDon, 
+                                @RequestParam("maHo") String maHo,
+                                Authentication auth,
+                                RedirectAttributes redirectAttributes) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        
+        try {
+            hoaDonService.saveOrUpdateHoaDon(hoaDon, maHo, currentUser);
+            
+            String message = (hoaDon.getMaHoaDon() == null) 
+                             ? "Tạo mới Hóa đơn thành công (Admin)!" 
+                             : "Cập nhật Hóa đơn #" + hoaDon.getMaHoaDon() + " thành công (Admin)!";
+            
+            redirectAttributes.addFlashAttribute("successMessage", message);
+            return "redirect:/admin/fees";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/fee-form?id=" + (hoaDon.getMaHoaDon() != null ? hoaDon.getMaHoaDon() : "");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/fees";
+        }
+    }
+
+    /**
+     * Admin delete: URL: /admin/fee-delete (Tái sử dụng logic Service)
+     */
+    @PostMapping("/fee-delete")
+    public String handleAdminDeleteFee(@RequestParam("id") Integer maHoaDon, 
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            hoaDonService.deleteHoaDon(maHoaDon);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa Hóa đơn #" + maHoaDon + " thành công.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xóa: " + e.getMessage());
+        }
+        return "redirect:/admin/fees";
     }
 }

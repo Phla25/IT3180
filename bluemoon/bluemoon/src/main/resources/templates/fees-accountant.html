@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Hóa Đơn - Kế Toán - BlueMoon Portal</title>
+    
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn-add {
+            background-color: #10B981;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge-success { background-color: #D1FAE5; color: #065F46; }
+        .badge-warning { background-color: #FEF3C7; color: #B45309; }
+        .badge-danger { background-color: #FEE2E2; color: #991B1B; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Kế Toán'">Kế Toán</span>
+                    <span class="user-role" style="color: #7C3AED;">KẾ TOÁN</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a th:href="@{/accountant/dashboard}" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a th:href="@{/accountant/fees}" class="nav-item active">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Quản Lý Hóa Đơn</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Xác Nhận Thanh Toán', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-money-check"></i>
+                <span>Xác Nhận Thanh Toán</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Báo Cáo Tài Chính', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-chart-bar"></i>
+                <span>Báo Cáo Tài Chính</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showFeatureToggle('Lịch Sử Giao Dịch', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+                <i class="fas fa-receipt"></i>
+                <span>Lịch Sử Giao Dịch</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+                <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none; text-align: left; padding: 0;">
+                    <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Quản Lý Hóa Đơn</h1>
+        </div>
+        
+        <div class="header-right">
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Kế Toán'">Trần Thị Lan</span>
+                    <span class="user-role" style="color: #F59E0B">KẾ TOÁN</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a th:href="@{/accountant/profile}">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <hr>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}">Thông báo thành công</div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}">Thông báo lỗi</div>
+
+            <div class="toolbar">
+                <h2 style="margin: 0;">Danh Sách Hóa Đơn</h2>
+                <a th:href="@{/accountant/fee-form}" class="btn-add">
+                    <i class="fas fa-plus"></i> Tạo Hóa Đơn Mới
+                </a>
+            </div>
+
+            <div class="content-card">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Mã HĐ</th>
+                                <th>Hộ Gia Đình</th>
+                                <th>Loại Phí</th>
+                                <th>Số Tiền</th>
+                                <th>Hạn Thanh Toán</th>
+                                <th>Trạng Thái</th>
+                                <th>Hành Động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="hoaDon : ${hoaDonList}">
+                                <td><strong th:text="'#' + ${hoaDon.maHoaDon}">#HD001</strong></td>
+                                <td th:text="${hoaDon.hoGiaDinh?.tenHo} ?: 'N/A'">Hộ Nguyễn Văn A</td>
+                                <td th:text="${hoaDon.loaiHoaDon?.dbValue} ?: 'N/A'">Phí Quản Lý</td>
+                                <td th:text="${#numbers.formatInteger(hoaDon.soTien, 0, 'POINT')} + ' ₫'">2,500,000 ₫</td>
+                                <td th:text="${hoaDon.hanThanhToan != null ? #temporals.format(hoaDon.hanThanhToan, 'dd/MM/yyyy') : 'N/A'}">31/10/2024</td>
+                                <td>
+                                    <span class="status-badge" 
+                                          th:classappend="${hoaDon.trangThai?.name() == 'da_thanh_toan' ? 'badge-success' : (hoaDon.trangThai?.name() == 'qua_han' ? 'badge-danger' : 'badge-warning')}"
+                                          th:text="${hoaDon.trangThai?.dbValue} ?: 'N/A'">Chưa thanh toán</span>
+                                </td>
+<td>
+                                    <a th:href="@{/accountant/fee-form(id=${hoaDon.maHoaDon})}" class="btn-action" title="Chỉnh Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <form th:action="@{/accountant/fee-confirm}" method="post" style="display: inline;" 
+                                          th:if="${hoaDon.trangThai?.name() == 'cho_xac_nhan'}">
+                                        <input type="hidden" name="maHoaDon" th:value="${hoaDon.maHoaDon}">
+                                        <button type="submit" class="btn-action" title="Xác Nhận Thanh Toán" style="border: none; background: none; cursor: pointer; color: #10B981;"
+                                                th:onclick="|return confirm('Xác nhận thanh toán Hóa đơn #' + ${hoaDon.maHoaDon} + '?')|">
+                                            <i class="fas fa-check-circle"></i>
+                                        </button>
+                                    </form>
+                                    
+                                    <form th:action="@{/accountant/fee-reject}" method="post" style="display: inline;" 
+                                          th:if="${hoaDon.trangThai?.name() == 'cho_xac_nhan'}">
+                                        <input type="hidden" name="maHoaDon" th:value="${hoaDon.maHoaDon}">
+                                        <button type="submit" class="btn-action text-warning" title="Từ Chối Xác Nhận" style="border: none; background: none; cursor: pointer; color: #F59E0B;"
+                                                th:onclick="|return confirm('Từ chối xác nhận thanh toán Hóa đơn #' + ${hoaDon.maHoaDon} + '?')|">
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                    </form>
+
+                                    <form th:action="@{/accountant/fee-delete}" method="post" style="display: inline;"
+                                          th:if="${hoaDon.trangThai?.name() != 'da_thanh_toan'}"> 
+                                        <input type="hidden" name="id" th:value="${hoaDon.maHoaDon}">
+                                        <button type="submit" th:onclick="|return confirm('Xóa hóa đơn #' + ${hoaDon.maHoaDon} + '?')|" class="btn-action text-danger" title="Xóa" style="border: none; background: none; cursor: pointer;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(hoaDonList)}">
+                                <td colspan="7" style="text-align: center; padding: 24px; color: #6B7280;">
+                                    Không có hóa đơn nào.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('shifted');
+            document.querySelector('.header').classList.toggle('shifted');
+        }
+        document.querySelector('.user-menu').addEventListener('click', function() {
+            this.querySelector('.dropdown-menu').classList.toggle('show');
+        });
+    </script>
+</body>
+</html>

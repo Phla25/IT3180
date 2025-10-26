@@ -2,6 +2,7 @@ package BlueMoon.bluemoon.daos;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -11,6 +12,7 @@ import BlueMoon.bluemoon.entities.HoaDon;
 import BlueMoon.bluemoon.utils.InvoiceStatus;
 import BlueMoon.bluemoon.utils.InvoiceType;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
 
 @Repository
@@ -46,6 +48,33 @@ public class HoaDonDAO {
         return entityManager.createQuery(jpql, HoaDon.class)
                 .setParameter("hoGiaDinh", HoGiaDinh)
                 .getResultList();
+    }
+    public List<HoaDon> findByHoGiaDinhMaHo(String maHo) 
+    {
+            // Tối ưu hóa: Lọc bằng ID (maHo)
+            // JOIN FETCH hd.hoGiaDinh h để tránh N+1 query khi hiển thị
+            String jpql = "SELECT hd FROM HoaDon hd JOIN FETCH hd.hoGiaDinh h WHERE h.maHo = :maHo ORDER BY hd.ngayTao DESC";
+            return entityManager.createQuery(jpql, HoaDon.class)
+                    .setParameter("maHo", maHo)
+                    .getResultList();
+    }
+    public Optional<HoaDon> findById(Integer maHoaDon) {
+        // Sử dụng Integer cho maHoaDon
+        String jpql = "SELECT hd FROM HoaDon hd "
+                    + "JOIN FETCH hd.hoGiaDinh h " 
+                    // Tải người thực hiện giao dịch (cccd_thanh_vien)
+                    + "LEFT JOIN FETCH hd.nguoiThucHienGiaoDich ntdg " 
+                    // Tải người thanh toán/xác nhận (cccd_nguoi_thanh_toan)
+                    + "LEFT JOIN FETCH hd.nguoiThanhToanHoacXacNhan nttx "
+                    + "WHERE hd.maHoaDon = :maHoaDon";
+        try {
+             HoaDon hoaDon = entityManager.createQuery(jpql, HoaDon.class)
+                .setParameter("maHoaDon", maHoaDon)
+                .getSingleResult();
+             return Optional.of(hoaDon);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
     public BigDecimal sumSoTienByTrangThai(InvoiceStatus trangThai) {
         String jpql = "SELECT SUM(hd.soTien) FROM HoaDon hd WHERE hd.trangThai = :trangThai";
@@ -93,5 +122,13 @@ public class HoaDonDAO {
                 .setParameter("trangThai", trangThai)
                 .getSingleResult();
         return sum != null ? sum : BigDecimal.ZERO;
+    }
+
+    public HoaDon save(HoaDon hoaDon) {
+        return entityManager.merge(hoaDon);
+    }
+
+    public void delete(HoaDon hd) {
+        entityManager.remove(hd);
     }
 }

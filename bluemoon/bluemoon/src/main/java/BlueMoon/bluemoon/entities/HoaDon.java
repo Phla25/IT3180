@@ -36,6 +36,14 @@ public class HoaDon {
     @JoinColumn(name = "ma_ho", nullable = false)
     private HoGiaDinh hoGiaDinh;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cccd_thanh_vien", referencedColumnName = "cccd") 
+    private DoiTuong nguoiDangKyDichVu;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cccd_nguoi_thanh_toan", referencedColumnName = "cccd") // Cần thêm cột cccd_nguoi_thanh_toan vào DB
+    private DoiTuong nguoiThanhToan;
+
     // Số tiền của hóa đơn
     @Column(name = "so_tien", nullable = false, precision = 15, scale = 2)
     private BigDecimal soTien = BigDecimal.ZERO;
@@ -106,6 +114,22 @@ public class HoaDon {
 
     public void setHoGiaDinh(HoGiaDinh hoGiaDinh) {
         this.hoGiaDinh = hoGiaDinh;
+    }
+
+    public DoiTuong getNguoiDangKyDichVu(){
+        return this.nguoiDangKyDichVu;
+    }
+
+    public void setNguoiDangKyDichVu(DoiTuong nguoiDangKyDichVu){
+        this.nguoiDangKyDichVu = nguoiDangKyDichVu;
+    }
+
+    public DoiTuong getNguoiThanhToan(){
+        return this.nguoiThanhToan;
+    }
+
+    public void setNguoiThanhToan(DoiTuong nguoiThanhToan){
+        this.nguoiThanhToan = nguoiThanhToan;
     }
 
     public BigDecimal getSoTien() {

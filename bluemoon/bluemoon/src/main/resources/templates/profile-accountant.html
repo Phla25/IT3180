@@ -95,23 +95,19 @@
             <div class="user-profile">
                 <div class="user-info">
                     <span class="user-name" th:text="${user?.hoVaTen} ?: 'Kế Toán'">Kế Toán</span>
-                    <span class="user-role" style="color: #7C3AED;">KẾ TOÁN</span>
+                    <span class="user-role" style="color: #F59E0B;">KẾ TOÁN</span>
                 </div>
             </div>
         </div>
         
         <nav class="sidebar-nav">
-            <a th:href="@{/accountant/dashboard}" class="nav-item active">
+            <a th:href="@{/accountant/dashboard}" class="nav-item">
                 <i class="fas fa-chart-line"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="nav-item" onclick="showFeatureToggle('Quản Lý Hóa Đơn', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+            <a th:href="@{/accountant/fees}" class="nav-item">
                 <i class="fas fa-file-invoice-dollar"></i>
                 <span>Quản Lý Hóa Đơn</span>
-            </a>
-            <a href="#" class="nav-item" onclick="showFeatureToggle('Xác Nhận Thanh Toán', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
-                <i class="fas fa-money-check"></i>
-                <span>Xác Nhận Thanh Toán</span>
             </a>
             <a href="#" class="nav-item" onclick="showFeatureToggle('Báo Cáo Tài Chính', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
                 <i class="fas fa-chart-bar"></i>

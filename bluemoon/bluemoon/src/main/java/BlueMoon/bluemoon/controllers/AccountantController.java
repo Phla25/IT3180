@@ -17,9 +17,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.entities.HoaDon;
 import BlueMoon.bluemoon.models.HoaDonStatsDTO;
+import BlueMoon.bluemoon.services.HoGiaDinhService;
 import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
-import BlueMoon.bluemoon.utils.InvoiceStatus;
+import BlueMoon.bluemoon.utils.InvoiceType;
 
 @Controller
 @RequestMapping("/accountant")
@@ -30,6 +31,8 @@ public class AccountantController {
 
     @Autowired
     private HoaDonService hoaDonService;
+
+    @Autowired private HoGiaDinhService hoGiaDinhService;
 
     /**
      * Helper: Lấy đối tượng DoiTuong hiện tại (Kế Toán)
@@ -67,8 +70,8 @@ public class AccountantController {
         model.addAttribute("soHoaDonQuaHan", (long) stats.soHoaDonQuaHan);
         
         // 4. Lấy danh sách hóa đơn cần xử lý
-        List<HoaDon> hoaDonCanXacNhan = hoaDonService.getHoaDonCanXacNhan(InvoiceStatus.chua_thanh_toan, 5); 
-        model.addAttribute("hoaDonCanXacNhan", hoaDonCanXacNhan);
+        List<HoaDon> hoaDonChoXacNhan = hoaDonService.getHoaDonChoXacNhan(5); 
+        model.addAttribute("hoaDonCanXacNhan", hoaDonChoXacNhan); // Giữ tên biến để không sửa Thymeleaf quá nhiều
 
         return "dashboard-accountant"; 
     }
@@ -170,4 +173,152 @@ public class AccountantController {
             return "redirect:/accountant/profile/edit";
         }
     }    
+    // =======================================================
+    // QUẢN LÝ HÓA ĐƠN (CRUD)
+    // =======================================================
+
+    /**
+     * Hiển thị danh sách tất cả hóa đơn.
+     * URL: /accountant/fees
+     */
+    @GetMapping("/fees")
+    public String showAccountantFees(Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+        List<HoaDon> hoaDonList = hoaDonService.getAllHoaDon(); 
+        model.addAttribute("hoaDonList", hoaDonList);
+        return "fees-accountant"; // Tên file Thymeleaf mới
+    }
+    
+    /**
+     * Hiển thị form Tạo/Chỉnh sửa Hóa đơn (GET).
+     * URL: /accountant/fee-form?id={maHoaDon} (Edit) hoặc /accountant/fee-form (Add)
+     */
+    @GetMapping("/fee-form")
+    public String showFeeForm(@RequestParam(value = "id", required = false) Integer maHoaDon, 
+                              Model model, 
+                              Authentication auth) {
+        
+        model.addAttribute("user", getCurrentUser(auth));
+        HoaDon hoaDon = (maHoaDon != null) ? 
+                        hoaDonService.getHoaDonById(maHoaDon).orElse(new HoaDon()) : 
+                        new HoaDon();
+        
+        model.addAttribute("hoaDon", hoaDon);
+        model.addAttribute("pageTitle", (maHoaDon != null) ? "Chỉnh Sửa Hóa Đơn #" + maHoaDon : "Tạo Hóa Đơn Mới");
+        model.addAttribute("invoiceTypes", InvoiceType.values()); 
+        // Lấy danh sách Hộ gia đình cho Select box
+
+        model.addAttribute("allHo", hoGiaDinhService.getAllHouseholds()); // Cần Autowired HoGiaDinhService
+        
+        return "invoice-add-edit-accountant"; 
+    }
+    
+    /**
+     * Xử lý Tạo/Chỉnh sửa Hóa đơn (POST).
+     * URL: /accountant/fee-save
+     */
+    @PostMapping("/fee-save")
+    public String handleFeeSave(@ModelAttribute("hoaDon") HoaDon hoaDon, 
+                                @RequestParam("maHo") String maHo, 
+                                Authentication auth,
+                                RedirectAttributes redirectAttributes) {
+        
+        DoiTuong currentUser = getCurrentUser(auth);
+        
+        try {
+            hoaDonService.saveOrUpdateHoaDon(hoaDon, maHo, currentUser); 
+            
+            String message = (hoaDon.getMaHoaDon() == null) 
+                             ? "Tạo mới Hóa đơn thành công!" 
+                             : "Cập nhật Hóa đơn #" + hoaDon.getMaHoaDon() + " thành công!";
+            
+            redirectAttributes.addFlashAttribute("successMessage", message);
+            return "redirect:/accountant/fees";
+            
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/accountant/fee-form?id=" + (hoaDon.getMaHoaDon() != null ? hoaDon.getMaHoaDon() : "");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
+            return "redirect:/accountant/fees";
+        }
+    }
+
+    /**
+     * Xử lý Xóa Hóa đơn (POST).
+     * URL: /accountant/fee-delete
+     */
+    @PostMapping("/fee-delete")
+    public String handleDeleteFee(@RequestParam("id") Integer maHoaDon, 
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            hoaDonService.deleteHoaDon(maHoaDon); 
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa Hóa đơn #" + maHoaDon + " thành công.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa Hóa đơn #" + maHoaDon + ": " + e.getMessage());
+        }
+        return "redirect:/accountant/fees";
+    }
+
+    // =======================================================
+    // BÁO CÁO TÀI CHÍNH VÀ XÁC NHẬN THANH TOÁN
+    // =======================================================
+    
+    /**
+     * Chức năng Xác nhận Thanh Toán
+     * URL: /accountant/fee-confirm
+     */
+    @PostMapping("/fee-confirm")
+    public String handleFeeConfirm(@RequestParam("maHoaDon") Integer maHoaDon, 
+                                   Authentication auth,
+                                   RedirectAttributes redirectAttributes) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        
+        try {
+            hoaDonService.confirmPayment(maHoaDon, currentUser); 
+            redirectAttributes.addFlashAttribute("successMessage", "Xác nhận thanh toán Hóa đơn #" + maHoaDon + " thành công!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi xác nhận: " + e.getMessage());
+        }
+        return "redirect:/accountant/fees"; 
+    }
+    /**
+     * Chức năng Từ Chối Xác nhận Thanh Toán
+     * URL: /accountant/fee-reject
+     */
+    @PostMapping("/fee-reject")
+    public String handleFeeReject(@RequestParam("maHoaDon") Integer maHoaDon, 
+                                  Authentication auth,
+                                  RedirectAttributes redirectAttributes) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        
+        try {
+            hoaDonService.rejectPayment(maHoaDon, currentUser); 
+            redirectAttributes.addFlashAttribute("successMessage", "Đã từ chối xác nhận thanh toán Hóa đơn #" + maHoaDon + ". Hóa đơn chuyển về trạng thái 'Chưa thanh toán'.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi từ chối xác nhận: " + e.getMessage());
+        }
+        return "redirect:/accountant/fees"; 
+    }
+    /**
+     * Báo Cáo Tài Chính (Financial Report) & Lịch Sử Giao Dịch
+     * URL: /accountant/reports/financial
+     */
+    @GetMapping("/reports/financial")
+    public String showFinancialReports(Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+        
+        // Thống kê cơ bản
+        model.addAttribute("stats", hoaDonService.getAccountantStats());
+        
+        // Lịch sử giao dịch (Hóa đơn đã thanh toán)
+        List<HoaDon> paidInvoices = hoaDonService.getAllPaidHoaDon(); 
+        model.addAttribute("paidInvoices", paidInvoices);
+        
+        return "financial-report-accountant"; // Tên file Thymeleaf mới
+    }
 }

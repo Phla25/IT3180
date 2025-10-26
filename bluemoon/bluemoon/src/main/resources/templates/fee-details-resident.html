@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Hóa Đơn - BlueMoon Portal</title>
+    
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .detail-card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px dashed #E5E7EB;
+        }
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #4B5563;
+        }
+        .detail-value {
+            color: #1F2937;
+            text-align: right;
+            max-width: 60%;
+            word-wrap: break-word;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .badge-success { background-color: #D1FAE5; color: #065F46; }
+        .badge-warning { background-color: #FEF3C7; color: #B45309; }
+        .badge-danger { background-color: #FEE2E2; color: #991B1B; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+            <div class="user-profile-desktop" th:if="${user != null}">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user.hoVaTen}">Nguyễn Văn Cư Dân</span>
+                    <span class="user-role" style="color: #7C3AED;">CƯ DÂN</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a th:href="@{/resident/dashboard}" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a th:href="@{/resident/fees}" class="nav-item active">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Hóa Đơn Của Tôi</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+                <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none; text-align: left; padding: 0;">
+                    <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Chi Tiết Hóa Đơn</h1>
+        </div>
+        
+        <div class="header-right">
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user.hoVaTen} ?: 'N/A'">Nguyễn Văn Thanh</span>
+                    <span class="user-role" style="color: #7C3AED;">CƯ DÂN</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a th:href="@{/resident/profile}">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <hr>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+<main class="main-content">
+        <div class="content-card" style="background-color: #F9FAFB;">
+                <div class="content-card-header">
+                    <h2 class="content-card-title" style="color: #4F46E5;"><i class="fas fa-receipt"></i> Thanh Toán</h2>
+                </div>
+                
+                <div style="text-align: center; padding: 20px;">
+                    </div>
+                
+                <hr style="margin: 16px 0; border-top: 1px solid #E5E7EB;">
+                
+                <div th:if="${hoaDon.trangThai?.name() == 'chua_thanh_toan' || hoaDon.trangThai?.name() == 'qua_han'}" style="padding: 10px 0; text-align: center;">
+                    <p class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Nhấn **Thanh toán** ở trang danh sách để tạo yêu cầu chuyển khoản.
+                    </p>
+                </div>
+                
+                <div th:if="${hoaDon.trangThai?.name() == 'cho_xac_nhan'}" style="padding: 10px 0; text-align: center;">
+                    <p class="alert alert-info">
+                        <i class="fas fa-hourglass-half"></i> Yêu cầu thanh toán của bạn đang chờ chuyển khoản. Vui lòng thực hiện giao dịch:
+                    </p>
+                    
+                    <h4 style="color: #1E40AF; margin-top: 15px;">THÔNG TIN CHUYỂN KHOẢN (MOCK)</h4>
+                    <div style="border: 1px solid #DBEAFE; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                        <p style="font-size: 14px; text-align: left;">
+                            **Ngân hàng:** Vietcombank  <br>
+                            **STK:** **0978 1234 5678** <br>
+                            **Chủ TK:** Ban Quản Lý Chung Cư BlueMoon <br>
+                            **Nội dung:** HD<span th:text="${hoaDon.maHoaDon}"></span>.<span th:text="${user.cccd}"></span>
+                        </p>
+                    </div>
+                    
+                    <p style="margin-top: 15px; font-size: 12px; color: #6B7280;">
+                        Sau khi chuyển khoản, bộ phận Kế toán sẽ xác nhận giao dịch trong vòng 1-2 giờ làm việc.
+                    </p>
+                </div>
+
+                <div th:unless="${hoaDon.trangThai?.name() == 'chua_thanh_toan' || hoaDon.trangThai?.name() == 'qua_han' || hoaDon.trangThai?.name() == 'cho_xac_nhan'}" style="text-align: center; padding: 20px;">
+                    <p style="color: #059669; font-weight: 700;"><i class="fas fa-check-circle"></i> Hóa đơn này đã được <span th:text="${hoaDon.trangThai?.dbValue}">thanh toán</span>.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('shifted');
+            document.querySelector('.header').classList.toggle('shifted');
+        }
+        document.querySelector('.user-menu').addEventListener('click', function() {
+            this.querySelector('.dropdown-menu').classList.toggle('show');
+        });
+    </script>
+</body>
+</html>

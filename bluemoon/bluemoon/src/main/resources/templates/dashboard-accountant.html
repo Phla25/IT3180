@@ -66,13 +66,9 @@
                 <i class="fas fa-chart-line"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="nav-item" onclick="showFeatureToggle('Quản Lý Hóa Đơn', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
+            <a th:href="@{/accountant/fees}" class="nav-item">
                 <i class="fas fa-file-invoice-dollar"></i>
                 <span>Quản Lý Hóa Đơn</span>
-            </a>
-            <a href="#" class="nav-item" onclick="showFeatureToggle('Xác Nhận Thanh Toán', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
-                <i class="fas fa-money-check"></i>
-                <span>Xác Nhận Thanh Toán</span>
             </a>
             <a href="#" class="nav-item" onclick="showFeatureToggle('Báo Cáo Tài Chính', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
                 <i class="fas fa-chart-bar"></i>
@@ -187,12 +183,16 @@
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                 <button class="btn btn-primary" style="padding: 16px;">
+                    <a th:href="@{/accountant/fee-form}">
                     <i class="fas fa-plus-circle"></i>
                     <span>Tạo Hóa Đơn</span>
+                    </a>
                 </button>
                 <button class="btn btn-success" style="padding: 16px;">
+                    <a th:href="@{/accountant/fees}">
                     <i class="fas fa-check-double"></i>
                     <span>Xác Nhận Thanh Toán</span>
+                    </a>
                 </button>
                 <button class="btn btn-warning" style="padding: 16px; color: white;">
                     <i class="fas fa-envelope"></i>
@@ -205,61 +205,68 @@
             </div>
         </div>
 
-        <div class="content-card" style="width: 100%;"> 
-            <div class="content-card-header">
-                <h2 class="content-card-title">📋 Hóa Đơn Cần Xác Nhận</h2>
-                <a th:href="@{/accountant/fees}" class="btn btn-sm btn-outline">Xem tất cả</a>
+            <div class="content-card" style="width: 100%;"> 
+                <div class="content-card-header">
+                    <h2 class="content-card-title">⏳ Thanh Toán Cư Dân Chờ Kế Toán Xác Nhận</h2>
+                    <a th:href="@{/accountant/fees}" class="btn btn-sm btn-outline">Quản lý</a>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã HĐ</th>
+                                <th>Hộ Gia Đình</th>
+                                <th>Người Thanh Toán</th> <th>Số Tiền</th>
+                                <th>Ngày Gửi</th>
+                                <th>Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="hoaDon : ${hoaDonCanXacNhan}"> 
+
+                                <td th:text="'#' + ${hoaDon.maHoaDon}"><strong>#HD002</strong></td>
+
+                                <td th:text="${hoaDon.hoGiaDinh?.tenHo} ?: 'N/A'">Hộ Trần Thị B</td> 
+
+                                <td th:text="${hoaDon.nguoiThanhToan?.hoVaTen} ?: 'Cư Dân'">Nguyễn Văn A</td>
+
+                                <td th:text="${#numbers.formatDecimal(hoaDon.soTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                                    <strong>1.800.000 ₫</strong>
+                                </td>
+
+                                <td th:text="${#temporals.format(hoaDon.ngayTao, 'dd/MM/yyyy HH:mm')}">15/11/2024 10:30</td>
+
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <form th:action="@{/accountant/fee-confirm}" method="post" style="display: inline;">
+                                            <input type="hidden" name="maHoaDon" th:value="${hoaDon.maHoaDon}">
+                                            <button type="submit" class="btn btn-sm btn-success" title="Xác Nhận" 
+                                                    th:onclick="|return confirm('Xác nhận thanh toán Hóa đơn #' + ${hoaDon.maHoaDon} + '?')|">
+                                                <i class="fas fa-check"></i> Xác Nhận
+                                            </button>
+                                        </form>
+                                        
+                                        <form th:action="@{/accountant/fee-reject}" method="post" style="display: inline;">
+                                        <input type="hidden" name="maHoaDon" th:value="${hoaDon.maHoaDon}">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Từ Chối" 
+                                                    th:onclick="|return confirm('Từ chối thanh toán Hóa đơn #' + ${hoaDon.maHoaDon} + '?')|">
+                                                <i class="fas fa-times"></i> Từ Chối
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                
+                            <tr th:if="${hoaDonCanXacNhan == null or hoaDonCanXacNhan.isEmpty()}">
+                                <td colspan="6" style="text-align: center; color: #6B7280; padding: 20px;">
+                                    🎉 Không có thanh toán nào cần xác nhận lúc này.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Mã HĐ</th>
-                            <th>Hộ Gia Đình</th>
-                            <th>Số Tiền</th>
-                            <th>Hạn</th>
-                            <th>Thao Tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="hoaDon : ${hoaDonCanXacNhan}" 
-                            th:style="${hoaDon.hanThanhToan != null and hoaDon.hanThanhToan.isBefore(#dates.createNow().toLocalDate())} ? 'background: #FEF2F2;' : ''">
-                            
-                            <td th:text="'#' + ${hoaDon.maHoaDon}"><strong>#HD002</strong></td>
-                            <td th:text="${hoaDon.hoGiaDinh?.chuHo?.hoVaTen != null ? 'Hộ ' + hoaDon.hoGiaDinh.chuHo.hoVaTen : 'N/A'}">Hộ Trần Thị B</td>
-                            
-                            <td th:text="${#numbers.formatDecimal(hoaDon.soTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'" 
-                                th:style="${hoaDon.hanThanhToan != null and hoaDon.hanThanhToan.isBefore(#dates.createNow().toLocalDate())} ? 'color: var(--danger-color);' : ''">
-                                <strong>1.800.000 ₫</strong>
-                            </td>
-                            
-                            <td th:text="${#temporals.format(hoaDon.hanThanhToan, 'dd/MM/yyyy')}" 
-                                th:style="${hoaDon.hanThanhToan != null and hoaDon.hanThanhToan.isBefore(#dates.createNow().toLocalDate())} ? 'color: var(--danger-color);' : ''">15/11/2024</td>
-                            
-                            <td>
-                                <th:block th:if="${hoaDon.hanThanhToan != null and hoaDon.hanThanhToan.isBefore(#dates.createNow().toLocalDate())}">
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="fas fa-exclamation"></i> Cảnh báo
-                                    </button>
-                                </th:block>
-                                <th:block th:unless="${hoaDon.hanThanhToan != null and hoaDon.hanThanhToan.isBefore(#dates.createNow().toLocalDate())}">
-                                    <button class="btn btn-sm btn-success">
-                                        <i class="fas fa-check"></i> Xác nhận
-                                    </button>
-                                </th:block>
-                            </td>
-                        </tr>
-                        
-                        <tr th:if="${hoaDonCanXacNhan == null or hoaDonCanXacNhan.isEmpty()}">
-                            <td colspan="5" style="text-align: center; color: #6B7280; padding: 20px;">
-                                🎉 Không có hóa đơn nào cần xác nhận lúc này.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
         </main>
     
     <footer class="footer">

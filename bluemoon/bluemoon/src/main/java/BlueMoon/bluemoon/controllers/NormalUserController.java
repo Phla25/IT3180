@@ -1,6 +1,7 @@
 package BlueMoon.bluemoon.controllers;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.entities.HoGiaDinh;
+import BlueMoon.bluemoon.entities.HoaDon;
 import BlueMoon.bluemoon.models.DichVuStatsDTO;
 import BlueMoon.bluemoon.models.HoGiaDinhDTO;
 import BlueMoon.bluemoon.models.HoaDonStatsDTO;
@@ -186,6 +188,101 @@ public class NormalUserController {
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
             return "redirect:/resident/change-password";
+        }
+    }
+    // =======================================================
+    // QUẢN LÝ HÓA ĐƠN VÀ THANH TOÁN (MỚI)
+    // =======================================================
+
+    /**
+     * Hiển thị danh sách tất cả hóa đơn của hộ gia đình hiện tại.
+     * URL: /resident/fees
+     */
+    @GetMapping("/resident/fees")
+    public String showResidentFees(Model model, Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+            return "redirect:/login?error=notfound";
+        }
+        model.addAttribute("user", currentUser);
+
+        // 1. Lấy HoGiaDinh của người dùng
+        Optional<HoGiaDinh> hoGiaDinhOpt = thanhVienHoService.getHoGiaDinhByCccd(currentUser.getCccd()); 
+        HoGiaDinh hoGiaDinh = hoGiaDinhOpt.orElse(null);
+
+        if (hoGiaDinh == null) {
+            model.addAttribute("errorMessage", "Bạn chưa được liên kết với Hộ gia đình nào.");
+            model.addAttribute("hoaDonList", Collections.emptyList());
+        } else {
+            // 2. Lấy tất cả hóa đơn của hộ gia đình (Cần thêm hàm này vào HoaDonService/DAO)
+            List<HoaDon> hoaDonList = hoaDonService.getAllHoaDonByHo(hoGiaDinh); 
+            model.addAttribute("hoaDonList", hoaDonList);
+        }
+
+        return "fees-resident"; // Tên file Thymeleaf mới
+    }
+    
+    /**
+     * Hiển thị chi tiết hóa đơn.
+     * URL: /resident/fee-detail?id={maHoaDon}
+     */
+    @GetMapping("/resident/fee-detail")
+    public String showFeeDetail(@RequestParam("id") Integer maHoaDon, Model model, Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+            return "redirect:/login?error=notfound";
+        }
+        model.addAttribute("user", currentUser);
+
+        Optional<HoGiaDinh> hoGiaDinhOpt = thanhVienHoService.getHoGiaDinhByCccd(currentUser.getCccd()); 
+        HoGiaDinh hoGiaDinh = hoGiaDinhOpt.orElse(null);
+
+        if (hoGiaDinh == null) {
+            return "redirect:/resident/fees?error=no_household";
+        }
+
+        // 2. Lấy Hóa Đơn theo ID và Hộ gia đình (Cần thêm hàm này vào HoaDonService)
+        Optional<HoaDon> hoaDonOpt = hoaDonService.getHoaDonByIdAndHo(maHoaDon, hoGiaDinh);
+        
+        if (hoaDonOpt.isEmpty()) {
+            model.addAttribute("errorMessage", "Không tìm thấy Hóa đơn hoặc Hóa đơn không thuộc Hộ của bạn.");
+            return "redirect:/resident/fees";
+        }
+
+        model.addAttribute("hoaDon", hoaDonOpt.get());
+        
+        return "fee-details-resident"; // Tên file Thymeleaf mới
+    }
+    
+    /**
+     * CẬP NHẬT: Xử lý yêu cầu thanh toán hóa đơn.
+     * URL: /resident/fee-pay
+     */
+    @PostMapping("/resident/fee-pay")
+    public String handleFeePayment(@RequestParam("maHoaDon") Integer maHoaDon, 
+                                   Authentication auth,
+                                   RedirectAttributes redirectAttributes) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực.");
+            return "redirect:/resident/fees";
+        }
+        
+        try {
+            // Service cập nhật trạng thái và lưu CCCD của người yêu cầu thanh toán
+            hoaDonService.markAsPaidByResident(maHoaDon, currentUser); 
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Yêu cầu thanh toán Hóa đơn #" + maHoaDon + " đã được ghi nhận. Vui lòng thực hiện chuyển khoản.");
+            
+            // ✨ THAY ĐỔI: Chuyển hướng người dùng đến trang chi tiết để xem QR code
+            return "redirect:/resident/fee-detail?id=" + maHoaDon; 
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/resident/fee-detail?id=" + maHoaDon;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi thanh toán: " + e.getMessage());
+            return "redirect:/resident/fee-detail?id=" + maHoaDon;
         }
     }
 }
