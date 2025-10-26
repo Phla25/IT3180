@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xử lý yêu cầu - BlueMoon Admin</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .info-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            width: 180px;
+            color: #495057;
+        }
+
+        .info-value {
+            flex: 1;
+            color: #212529;
+        }
+
+        .form-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+        }
+
+        .btn-group {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #218838;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Admin'">Admin</span>
+                    <span class="user-role" style="color: #7C3AED;">BAN QUẢN TRỊ</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a th:href="@{/admin/dashboard}" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a th:href="@{/admin/service-requests}" class="nav-item active">
+                <i class="fas fa-tools"></i>
+                <span>Quản Lý Dịch Vụ</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng Xuất</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Chi Tiết Yêu Cầu #<span th:text="${request.id}">001</span></h1>
+        </div>
+
+        <div class="header-right">
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Admin BQT'">Admin BQT</span>
+                    <span class="user-role" style="color: #7C3AED;">BAN QUẢN TRỊ</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="/admin/profile">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <a href="/admin/settings">
+                        <i class="fas fa-cog"></i> Cài Đặt
+                    </a>
+                    <hr>
+                    <form th:action="@{/logout}" method="post" style="margin: 0; width: 100%;">
+                        <button type="submit" class="logout-btn" style="width: 100%; text-align: left; border: none; background: none; cursor: pointer; padding: 10px 16px; color: #dc3545;">
+                            <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content">
+        <div class="content-header">
+            <div class="breadcrumb">
+                <a th:href="@{/admin/dashboard}">Dashboard</a>
+                <span>/</span>
+                <a th:href="@{/admin/service-requests}">Yêu cầu dịch vụ</a>
+                <span>/</span>
+                <span th:text="'#' + ${request.id}">Chi tiết</span>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <!-- Request Info -->
+        <div class="card">
+            <div class="card-header">
+                <h3>📋 Thông tin yêu cầu</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-card">
+                    <div class="info-row">
+                        <div class="info-label">Cư dân:</div>
+                        <div class="info-value" th:text="${request.resident.fullName}">Nguyễn Văn A</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Số điện thoại:</div>
+                        <div class="info-value" th:text="${request.resident.phoneNumber}">0123456789</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Căn hộ:</div>
+                        <div class="info-value" th:text="${request.apartment.apartmentNumber}">A101</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Loại dịch vụ:</div>
+                        <div class="info-value" th:text="${request.serviceType}">Sửa chữa</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Ngày tạo:</div>
+                        <div class="info-value" th:text="${#temporals.format(request.createdAt, 'dd/MM/yyyy HH:mm')}">
+                            01/01/2025</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Mô tả:</div>
+                        <div class="info-value" th:text="${request.description}">Mô tả chi tiết...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Form -->
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+                <h3>✏️ Cập nhật trạng thái</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/service-requests/{id}/update-status(id=${request.id})}" method="post">
+                    <div class="form-group">
+                        <label>Trạng thái: <span style="color: red;">*</span></label>
+                        <select name="status" class="form-control" required>
+                            <option th:each="st : ${statuses}" th:value="${st.name()}" th:text="${st.displayName}"
+                                th:selected="${st == request.status}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ghi chú (cư dân sẽ thấy):</label>
+                        <textarea name="adminNote" class="form-control" rows="5" th:text="${request.adminNote}"
+                            placeholder="Nhập ghi chú về tiến trình xử lý..."></textarea>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Cập nhật
+                        </button>
+                        <a th:href="@{/admin/service-requests}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <p>&copy; 2025 BlueMoon Apartment Management System</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Toggle dropdown menu
+            $('.user-menu').click(function(e) {
+                e.stopPropagation();
+                $(this).toggleClass('active');
+            });
+
+            // Close dropdown when clicking outside
+            $(document).click(function() {
+                $('.user-menu').removeClass('active');
+            });
+
+            // Prevent dropdown from closing when clicking inside
+            $('.dropdown-menu').click(function(e) {
+                e.stopPropagation();
+            });
+
+            // Toggle sidebar
+            if (typeof window.toggleSidebar === 'undefined') {
+                window.toggleSidebar = function() {
+                    $('aside.sidebar').toggleClass('active');
+                    $('main.main-content').toggleClass('sidebar-open');
+                    $('header.header').toggleClass('sidebar-open');
+                };
+            }
+        });
+    </script>
+</body>
+
+</html>
+
+

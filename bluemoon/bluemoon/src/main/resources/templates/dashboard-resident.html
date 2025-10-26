@@ -1,150 +1,39 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Cư Dân - BlueMoon Portal</title>
-    
+
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ==================== FEATURE TOGGLE STYLES ==================== */
+        /* ==================== FEATURE BADGE STYLES ==================== */
         .feature-badge {
-            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
             font-size: 10px;
             font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 8px;
             margin-left: auto;
+            display: inline-block;
             animation: pulse 2s infinite;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
+
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
 
-        /* ==================== HEADER USER MENU ==================== */
-        .header-right {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 12px;
-            transition: background 0.2s;
-        }
-
-        .user-menu:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        .user-menu .avatar {
-            font-size: 32px;
-            color: var(--primary-color, #4F46E5);
-        }
-
-        .user-info {
-            text-align: right;
-            line-height: 1.4;
-            display: none;
-        }
-
-        .user-info .user-name {
-            font-weight: 600;
-            font-size: 14px;
-            color: #1f2937;
-        }
-
-        .user-info .user-role {
-            font-size: 12px;
-            color: #6b7280;
-            text-transform: capitalize;
-        }
-
-        /* Dropdown */
-        .user-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            min-width: 200px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.2s ease;
-            z-index: 1000;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-
-        .user-dropdown a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            color: #374151;
-            text-decoration: none;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-
-        .user-dropdown a:hover {
-            background: #f3f4f6;
-        }
-
-        .user-dropdown a.text-danger {
-            color: #ef4444;
-        }
-
-        .user-dropdown hr {
-            margin: 4px 0;
-            border: none;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .user-dropdown.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        /* Responsive */
-        @media (min-width: 768px) {
-            .user-info {
-                display: block;
+            0%,
+            100% {
+                opacity: 1;
             }
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            [style*="grid-template-columns: 2fr 1fr"] {
-                grid-template-columns: 2fr 1fr;
-            }
-        }
 
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            [style*="grid-template-columns: 2fr 1fr"] {
-                grid-template-columns: 1fr !important;
-            }
-            .user-info {
-                display: none;
-            }
-            .header h1 {
-                font-size: 1.2rem;
+            50% {
+                opacity: 0.7;
             }
         }
     </style>
@@ -158,13 +47,14 @@
                 <i class="fas fa-building"></i>
                 <span>BlueMoon Portal</span>
             </div>
-        
-            <!-- CHỈ HIỆN THÔNG TIN NGƯỜI DÙNG KHI SIDEBAR MỞ RỘNG (trên desktop) -->
-            <div class="user-profile-desktop" th:if="${user != null}">
+            <div class="user-profile">
+                <div class="avatar-circle" style="background: linear-gradient(135deg, #4CAF50, #45a049);">
+                    <i class="fas fa-user"></i>
+                </div>
                 <div class="user-info">
-                    <span class="user-name" th:text="${user.hoVaTen}">Nguyễn Văn Cư Dân</span>
-                    <span class="user-role" style="color: #7C3AED;">CƯ DÂN</span>
-            </div>
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Cư Dân Thường'">Cư Dân Thường</span>
+                    <span class="user-role" style="color: #4CAF50;">CƯ DÂN</span>
+                </div>
             </div>
         </div>
 
@@ -173,12 +63,24 @@
                 <i class="fas fa-chart-line"></i>
                 <span>Dashboard</span>
             </a>
-        <!-- Thêm menu khác nếu cần -->
+
+            <a th:href="@{/resident/service-requests}" class="nav-item">
+                <i class="fas fa-tools"></i>
+                <span>Yêu cầu dịch vụ</span>
+            </a>
+
+            <a th:href="@{/resident/profile}" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Hồ Sơ</span>
+            </a>
         </nav>
-            <div class="sidebar-footer">
-             <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
-                <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none; text-align: left; padding: 0;">
-                    <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button type="submit" class="logout-btn"
+                    style="width: 100%; border: none; background: none; text-align: left; padding: 15px 20px; color: #dc3545; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng Xuất</span>
                 </button>
             </form>
         </div>
@@ -187,32 +89,27 @@
     <!-- ==================== HEADER ==================== -->
     <header class="header">
         <div class="header-left">
-            <button class="menu-toggle" onclick="toggleSidebar()">
-                <i class="fas fa-bars"></i>
-            </button>
-            <h1>Dashboard Cư Dân</h1>
+            <h1>📊 Dashboard - Cư Dân</h1>
         </div>
-        
         <div class="header-right">
-
+            <div class="notification-bell">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
             <div class="user-menu">
-                <div class="user-info">
-                    <span class="user-name" th:text="${user.hoVaTen} ?: 'N/A'">Nguyễn Văn Thanh</span>
-                    <span class="user-role" style="color: #7C3AED;">CƯ DÂN</span>
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
                 </div>
-                <div class="user-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="dropdown-menu">
-                    <a href="/resident/profile">
-                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                <div class="user-dropdown">
+                    <a th:href="@{/resident/profile}">
+                        <i class="fas fa-user-circle"></i> Hồ Sơ
                     </a>
-                    <a href="/resident/settings">
-                        <i class="fas fa-cog"></i> Cài Đặt
+                    <a th:href="@{/resident/change-password}">
+                        <i class="fas fa-key"></i> Đổi Mật Khẩu
                     </a>
-                    <hr>
-                    <form th:action="@{/logout}" method="post">
-                        <button type="submit" class="logout-btn">
+                    <form th:action="@{/logout}" method="post" style="margin: 0;">
+                        <button type="submit"
+                            style="width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; cursor: pointer; color: #dc3545;">
                             <i class="fas fa-sign-out-alt"></i> Đăng Xuất
                         </button>
                     </form>
@@ -223,212 +120,102 @@
 
     <!-- ==================== MAIN CONTENT ==================== -->
     <main class="main-content">
-        <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 32px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">
-                Xin chào, <span th:text="${user?.hoVaTen} ?: 'Cư Dân'">Nguyễn Văn Cư Dân</span>!
-            </h1>
-            <p style="font-size: 16px; opacity: 0.9;">
-                Chào mừng bạn đến với BlueMoon Portal - Căn <span th:text="${canHoInfo?.maCanHo} ?: 'N/A'">A-1205</span>
-            </p>
+        <div class="content-header">
+            <div class="breadcrumb">
+                <a th:href="@{/resident/dashboard}">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+            </div>
         </div>
-        
+
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h2>Xin chào, <span th:text="${user?.hoVaTen} ?: 'Cư Dân'">Cư Dân</span>! 👋</h2>
+            <p>Chào mừng bạn đến với BlueMoon Portal. Quản lý căn hộ của bạn một cách dễ dàng.</p>
+        </div>
+
         <!-- Stats Grid -->
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <span class="stat-card-title">Hóa Đơn Tháng Này</span>
-                    <div class="stat-icon blue">
-                        <i class="fas fa-file-invoice"></i>
-                    </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="stat-icon">
+                    <i class="fas fa-home"></i>
                 </div>
-                <div class="stat-value" 
-                     th:text="${hoaDonStats?.tongChuaThanhToan != null ? #numbers.formatDecimal(hoaDonStats.tongChuaThanhToan, 1, 0, 'WHITESPACE') + ' ₫' : '0 ₫'}">
-                    2 500 000 ₫
-                </div>
-                <div th:with="isPaid=${hoaDonStats?.trangThai == 'Đã thanh toán'}"
-                     th:class="|stat-change ${isPaid ? 'positive' : 'negative'}|">
-                    <i th:class="|fas ${isPaid ? 'fa-check-circle' : 'fa-clock'}|"></i>
-                    <span th:text="${hoaDonStats?.trangThai} ?: 'Chưa có hóa đơn'">Chưa thanh toán</span>
+                <div class="stat-info">
+                    <h3>Căn hộ của tôi</h3>
+                    <p class="stat-number">2</p>
+                    <span class="stat-label">Căn hộ đang sở hữu</span>
                 </div>
             </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <span class="stat-card-title">Dịch Vụ Đã Đăng Ký</span>
-                    <div class="stat-icon green">
-                        <i class="fas fa-concierge-bell"></i>
-                    </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stat-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
                 </div>
-                <div class="stat-value" th:text="${dichVuStats?.tongDichVu ?: 0}">5</div>
-                <div class="stat-change">
-                    <i class="fas fa-info-circle"></i>
-                    <span th:text="${dichVuStats?.trangThai} ?: 'N/A'">Đang hoạt động</span>
+                <div class="stat-info">
+                    <h3>Khoản phí</h3>
+                    <p class="stat-number">1</p>
+                    <span class="stat-label">Chờ thanh toán</span>
                 </div>
             </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <span class="stat-card-title">Sự Cố Đã Báo</span>
-                    <div class="stat-icon orange">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="stat-icon">
+                    <i class="fas fa-tools"></i>
                 </div>
-                <div class="stat-value" th:text="${suCoStats?.tongSuCo ?: 0}">2</div>
-                <div th:with="progress=${suCoStats?.tiLeHoanThanh ?: 0}, isGood=${progress > 50}"
-                     th:class="|stat-change ${isGood ? 'positive' : 'negative'}|">
-                    <i th:class="|fas ${isGood ? 'fa-check' : 'fa-hourglass-half'}|"></i>
-                    <span th:text="${#numbers.formatDecimal(progress, 0, 0)} + '% Đã xử lý'">60% Đã xử lý</span>
+                <div class="stat-info">
+                    <h3>Yêu cầu dịch vụ</h3>
+                    <p class="stat-number">0</p>
+                    <span class="stat-label">Đang xử lý</span>
                 </div>
             </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <span class="stat-card-title">Thông Báo Mới</span>
-                    <div class="stat-icon purple">
-                        <i class="fas fa-bell"></i>
-                    </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="stat-icon">
+                    <i class="fas fa-bell"></i>
                 </div>
-                <div class="stat-value" th:text="${thongBaoStats?.soLuongMoi ?: 0}">6</div>
-                <div class="stat-change">
-                    <i class="fas fa-envelope"></i>
-                    <span th:text="${thongBaoStats?.trangThai} ?: 'N/A'">Có thông báo mới</span>
+                <div class="stat-info">
+                    <h3>Thông báo</h3>
+                    <p class="stat-number">3</p>
+                    <span class="stat-label">Thông báo mới</span>
                 </div>
             </div>
         </div>
 
-        <!-- Main Grid -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 24px;">
-            <!-- Hóa Đơn Gần Đây -->
-            <div class="content-card">
-                <div class="content-card-header">
-                    <h2 class="content-card-title">Hóa Đơn Gần Đây</h2>
-                    <a th:href="@{/resident/fees}" class="btn btn-sm btn-outline">Xem tất cả</a>
-                </div>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Mã HĐ</th>
-                                <th>Loại Phí</th>
-                                <th>Số Tiền</th>
-                                <th>Hạn</th>
-                                <th>Trạng Thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:if="${#lists.isEmpty(recentHoaDon)}">
-                                <td colspan="5" style="text-align: center; color: var(--gray); padding: 24px;">
-                                    Chưa có hóa đơn nào được phát hành.
-                                </td>
-                            </tr>
-                            <tr th:each="hd : ${recentHoaDon}" 
-                                th:with="isDue=${hd.trangThai?.name() == 'chua_thanh_toan' || hd.trangThai?.name() == 'qua_han'}">
-                                <td>
-                                    <a th:href="@{/resident/fee-detail(id=${hd.maHoaDon})}" 
-                                       style="color: var(--primary-color); font-weight: 600; text-decoration: none;">
-                                        #HD<span th:text="${hd.maHoaDon}">001</span>
-                                    </a>
-                                </td>
-                                <td th:text="${hd.loaiHoaDon?.dbValue}">Phí Quản Lý</td>
-                                <td>
-                                    <strong th:style="${isDue} ? 'color: var(--danger-color);' : ''" 
-                                            th:text="${#numbers.formatDecimal(hd.soTien, 1, 0, 'WHITESPACE')} + ' ₫'">
-                                        2 500 000 ₫
-                                    </strong>
-                                </td>
-                                <td th:text="${#temporals.format(hd.hanThanhToan, 'dd/MM/yyyy')}" 
-                                    th:style="${isDue} ? 'color: var(--danger-color);'">31/10/2024</td>
-                                <td>
-                                    <span th:class="|badge badge-${isDue ? 'warning' : 'success'}|" 
-                                          th:text="${hd.trangThai?.dbValue}">Chưa thanh toán</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Quick Actions -->
+        <div class="card" style="margin-top: 30px;">
+            <div class="card-header">
+                <h3><i class="fas fa-bolt"></i> Thao tác nhanh</h3>
             </div>
-
-            <!-- Thông Tin Hộ Gia Đình -->
-            <div class="content-card">
-                <div class="content-card-header">
-                    <h2 class="content-card-title">Thông Tin Hộ Gia Đình</h2>
-                    <a href="javascript:void(0)" 
-                       class="btn btn-sm btn-outline" 
-                       onclick="featureToggle('Thông Tin Hộ Gia Đình', 'Tính năng đang được phát triển và sẽ sớm ra mắt!')">
-                       Xem chi tiết
+            <div class="card-body">
+                <div class="quick-actions">
+                    <a th:href="@{/resident/service-requests/new}" class="action-btn"
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Tạo yêu cầu dịch vụ</span>
                     </a>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; padding: 8px 0;">
-                    <div>
-                        <label style="font-size: 12px; color: var(--gray); display: block; margin-bottom: 4px;">Căn Hộ</label>
-                        <p style="font-weight: 600; font-size: 18px; margin: 0;" th:text="${canHoInfo?.maCanHo} ?: 'N/A'">A-1205</p>
-                    </div>
-                    <div>
-                        <label style="font-size: 12px; color: var(--gray); display: block; margin-bottom: 4px;">Chủ Hộ</label>
-                        <p style="font-weight: 600; font-size: 18px; margin: 0;" 
-                           th:text="${canHoInfo?.chuHo ?: user?.hoVaTen ?: 'N/A'}">Nguyễn Văn Cư Dân</p>
-                    </div>
-                    <div>
-                        <label style="font-size: 12px; color: var(--gray); display: block; margin-bottom: 4px;">Tình Trạng</label>
-                        <p style="margin: 0;">
-                            <span th:class="${canHoInfo?.tinhTrang == 'Hoạt động'} ? 'badge badge-success' : 'badge badge-warning'" 
-                                  th:text="${canHoInfo?.tinhTrang} ?: 'N/A'" style="font-size: 13px;">Đang ở</span>
-                        </p>
-                    </div>
-                    <div>
-                        <label style="font-size: 12px; color: var(--gray); display: block; margin-bottom: 4px;">Thành Viên</label>
-                        <p style="font-weight: 600; font-size: 18px; margin: 0;" th:text="${hoGiaDinhStats?.tongThanhVien ?: 1}">4</p>
-                    </div>
+                    <a href="#" class="action-btn"
+                        style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Thanh toán phí</span>
+                    </a>
+                    <a th:href="@{/resident/profile}" class="action-btn"
+                        style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <i class="fas fa-user-edit"></i>
+                        <span>Cập nhật thông tin</span>
+                    </a>
                 </div>
             </div>
         </div>
     </main>
-    
+
     <!-- ==================== FOOTER ==================== -->
     <footer class="footer">
-        <div class="footer-content">
-            <p>© 2025 BlueMoon Apartment Management System. All rights reserved.</p>
-        </div>
+        <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
     </footer>
-    
-    <!-- ==================== SCRIPTS ==================== -->
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/main.js"></script>
-    
-    <script>
-        // Toggle Sidebar
-        function toggleSidebar() {
-            $('aside.sidebar').toggleClass('active');
-            $('main.main-content, header.header').toggleClass('sidebar-open');
-        }
-
-        // Toggle User Dropdown
-        function toggleUserDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('userMenu');
-            if (!menu.contains(e.target)) {
-                document.getElementById('userDropdown').classList.remove('show');
-            }
-        });
-
-        // Feature Toggle Alert
-        function featureToggle(title, message) {
-            Swal.fire({
-                icon: 'info',
-                title: title,
-                text: message,
-                confirmButtonText: 'Đóng',
-                customClass: { popup: 'animated fadeIn faster' }
-            });
-        }
-    </script>
 </body>
+
 </html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo yêu cầu dịch vụ - BlueMoon Portal</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 800px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .required {
+            color: #dc3545;
+            margin-left: 3px;
+        }
+
+        .btn-group {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .help-text {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Cư Dân'">Cư Dân</span>
+                    <span class="user-role" style="color: #4CAF50;">CƯ DÂN</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a th:href="@{/resident/dashboard}" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a th:href="@{/resident/service-requests}" class="nav-item active">
+                <i class="fas fa-tools"></i>
+                <span>Yêu cầu dịch vụ</span>
+            </a>
+            <a th:href="@{/resident/profile}" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Hồ Sơ</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng Xuất</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Tạo Yêu Cầu Dịch Vụ</h1>
+        </div>
+
+        <div class="header-right">
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Cư Dân'">Cư Dân</span>
+                    <span class="user-role" style="color: #10b981;">CƯ DÂN</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a th:href="@{/resident/profile}">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <a href="/resident/settings">
+                        <i class="fas fa-cog"></i> Cài Đặt
+                    </a>
+                    <hr>
+                    <form th:action="@{/logout}" method="post" style="margin: 0; width: 100%;">
+                        <button type="submit" class="logout-btn" style="width: 100%; text-align: left; border: none; background: none; cursor: pointer; padding: 10px 16px; color: #dc3545;">
+                            <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content">
+        <div class="content-header">
+            <div class="breadcrumb">
+                <a th:href="@{/resident/dashboard}">Dashboard</a>
+                <span>/</span>
+                <a th:href="@{/resident/service-requests}">Yêu cầu dịch vụ</a>
+                <span>/</span>
+                <span>Tạo mới</span>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <!-- Form -->
+        <div class="card form-container">
+            <div class="card-header">
+                <h3>Thông tin yêu cầu</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/resident/service-requests/new}" method="post">
+
+                    <div class="form-group">
+                        <label for="apartmentId">
+                            Căn hộ <span class="required">*</span>
+                        </label>
+                        <select id="apartmentId" name="apartmentId" class="form-control" required>
+                            <option value="">-- Chọn căn hộ --</option>
+                            <option th:each="apt : ${apartments}" th:value="${apt.id}"
+                                th:text="${apt.apartmentNumber + ' - Tầng ' + apt.floor}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="serviceType">
+                            Loại dịch vụ <span class="required">*</span>
+                        </label>
+                        <select id="serviceType" name="serviceType" class="form-control" required>
+                            <option value="">-- Chọn loại dịch vụ --</option>
+                            <option value="Sửa chữa">🔧 Sửa chữa (điện, nước, cửa, khóa...)</option>
+                            <option value="Vệ sinh">🧹 Vệ sinh (dọn dẹp, vệ sinh công cộng...)</option>
+                            <option value="Bảo trì">⚙️ Bảo trì (thang máy, hệ thống...)</option>
+                            <option value="Điện nước">💡 Điện nước (sự cố điện, nước...)</option>
+                            <option value="An ninh">🔒 An ninh (camera, khóa cửa...)</option>
+                            <option value="Cây xanh">🌳 Cây xanh (cắt tỉa, chăm sóc...)</option>
+                            <option value="Khác">📌 Khác</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">
+                            Mô tả chi tiết <span class="required">*</span>
+                        </label>
+                        <textarea id="description" name="description" class="form-control" rows="6"
+                            maxlength="500"
+                            placeholder="Vui lòng mô tả chi tiết vấn đề bạn gặp phải:&#10;- Vị trí cụ thể&#10;- Mức độ khẩn cấp&#10;- Thời gian phát hiện&#10;- Bất kỳ thông tin nào giúp xử lý nhanh hơn..."
+                            required></textarea>
+                        <div class="help-text">Tối đa 500 ký tự</div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Gửi yêu cầu
+                        </button>
+                        <a th:href="@{/resident/service-requests}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <p>&copy; 2025 BlueMoon Apartment Management System</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/main.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Toggle dropdown menu
+            $('.user-menu').click(function(e) {
+                e.stopPropagation();
+                $(this).toggleClass('active');
+            });
+
+            // Close dropdown when clicking outside
+            $(document).click(function() {
+                $('.user-menu').removeClass('active');
+            });
+
+            // Prevent dropdown from closing when clicking inside
+            $('.dropdown-menu').click(function(e) {
+                e.stopPropagation();
+            });
+
+            // Toggle sidebar
+            if (typeof window.toggleSidebar === 'undefined') {
+                window.toggleSidebar = function() {
+                    $('aside.sidebar').toggleClass('active');
+                    $('main.main-content').toggleClass('sidebar-open');
+                    $('header.header').toggleClass('sidebar-open');
+                };
+            }
+        });
+
+        // Character counter for description
+        const textarea = document.getElementById('description');
+        const helpText = textarea.nextElementSibling;
+
+        textarea.addEventListener('input', function () {
+            const remaining = 500 - this.value.length;
+            helpText.textContent = `Còn lại ${remaining} ký tự`;
+            if (remaining < 50) {
+                helpText.style.color = '#dc3545';
+            } else {
+                helpText.style.color = '#6c757d';
+            }
+        });
+    </script>
+</body>
+
+</html>
+

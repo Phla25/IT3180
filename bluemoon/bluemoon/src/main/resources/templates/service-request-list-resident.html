@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yêu cầu dịch vụ - BlueMoon Portal</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-create {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-create:hover {
+            background: #45a049;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-in_progress {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status-completed {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .btn-view {
+            padding: 6px 12px;
+            font-size: 13px;
+            text-decoration: none;
+            border-radius: 4px;
+            background: #17a2b8;
+            color: white;
+            display: inline-block;
+        }
+
+        .btn-view:hover {
+            background: #138496;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #dee2e6;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <span>BlueMoon Portal</span>
+            </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Cư Dân'">Cư Dân</span>
+                    <span class="user-role" style="color: #4CAF50;">CƯ DÂN</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a th:href="@{/resident/dashboard}" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a th:href="@{/resident/service-requests}" class="nav-item active">
+                <i class="fas fa-tools"></i>
+                <span>Yêu cầu dịch vụ</span>
+            </a>
+            <a th:href="@{/resident/profile}" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Hồ Sơ</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button type="submit" class="logout-btn"
+                    style="width: 100%; border: none; background: none; text-align: left; padding: 0;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng Xuất</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Yêu Cầu Dịch Vụ</h1>
+        </div>
+
+        <div class="header-right">
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name" th:text="${user?.hoVaTen} ?: 'Cư Dân'">Cư Dân</span>
+                    <span class="user-role" style="color: #10b981;">CƯ DÂN</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a th:href="@{/resident/profile}">
+                        <i class="fas fa-user"></i> Thông Tin Cá Nhân
+                    </a>
+                    <a href="/resident/settings">
+                        <i class="fas fa-cog"></i> Cài Đặt
+                    </a>
+                    <hr>
+                    <form th:action="@{/logout}" method="post" style="margin: 0; width: 100%;">
+                        <button type="submit" class="logout-btn" style="width: 100%; text-align: left; border: none; background: none; cursor: pointer; padding: 10px 16px; color: #dc3545;">
+                            <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content">
+        <div class="content-header">
+            <div class="breadcrumb">
+                <a th:href="@{/resident/dashboard}">Dashboard</a>
+                <span>/</span>
+                <span>Yêu cầu dịch vụ</span>
+            </div>
+        </div>
+
+        <!-- Page Header with Create Button -->
+        <div class="page-header">
+            <div></div>
+            <a th:href="@{/resident/service-requests/new}" class="btn-create">
+                <i class="fas fa-plus"></i> Tạo yêu cầu mới
+            </a>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <!-- Data Table -->
+        <div class="card">
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(requests)}" class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>Chưa có yêu cầu nào</h3>
+                    <p>Bạn chưa tạo yêu cầu dịch vụ nào.</p>
+                    <a th:href="@{/resident/service-requests/new}" class="btn-create" style="margin-top: 20px;">
+                        <i class="fas fa-plus"></i> Tạo yêu cầu đầu tiên
+                    </a>
+                </div>
+
+                <table th:if="${!#lists.isEmpty(requests)}" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã YC</th>
+                            <th>Căn hộ</th>
+                            <th>Loại dịch vụ</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                            <th>Cập nhật</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="request : ${requests}">
+                            <td><strong th:text="'#' + ${request.id}">001</strong></td>
+                            <td th:text="${request.apartment.apartmentNumber}">A101</td>
+                            <td th:text="${request.serviceType}">Sửa chữa</td>
+                            <td th:text="${#temporals.format(request.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025</td>
+                            <td>
+                                <span th:class="'status-badge status-' + ${#strings.toLowerCase(request.status.name())}"
+                                    th:text="${request.status.displayName}">Đang chờ</span>
+                            </td>
+                            <td
+                                th:text="${request.updatedAt != null ? #temporals.format(request.updatedAt, 'dd/MM/yyyy HH:mm') : '-'}">
+                                -</td>
+                            <td>
+                                <a th:href="@{/resident/service-requests/{id}(id=${request.id})}" class="btn-view">
+                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <p>&copy; 2025 BlueMoon Apartment Management System</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Toggle dropdown menu
+            $('.user-menu').click(function(e) {
+                e.stopPropagation();
+                $(this).toggleClass('active');
+            });
+
+            // Close dropdown when clicking outside
+            $(document).click(function() {
+                $('.user-menu').removeClass('active');
+            });
+
+            // Prevent dropdown from closing when clicking inside
+            $('.dropdown-menu').click(function(e) {
+                e.stopPropagation();
+            });
+
+            // Toggle sidebar
+            if (typeof window.toggleSidebar === 'undefined') {
+                window.toggleSidebar = function() {
+                    $('aside.sidebar').toggleClass('active');
+                    $('main.main-content').toggleClass('sidebar-open');
+                    $('header.header').toggleClass('sidebar-open');
+                };
+            }
+        });
+    </script>
+</body>
+
+</html>
+
