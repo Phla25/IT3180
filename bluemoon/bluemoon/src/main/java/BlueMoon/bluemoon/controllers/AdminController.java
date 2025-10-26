@@ -841,4 +841,176 @@ public class AdminController {
 
         return "apartment-details-admin";
     }
+    // =======================================================
+    // QUẢN LÝ TẤT CẢ TÀI SẢN (GENERAL ASSETS) - Bao gồm cả Căn Hộ
+    // =======================================================
+
+    /**
+     * Hiển thị danh sách TẤT CẢ Tài Sản (GET) có hỗ trợ lọc theo loại và tìm kiếm.
+     * URL: /admin/general-asset-list
+     */
+    @GetMapping("/general-asset-list")
+    public String showGeneralAssetList(
+            Model model, 
+            Authentication auth,
+            @RequestParam(required = false) String keyword, 
+            @RequestParam(required = false) BlueMoon.bluemoon.utils.AssetType loaiTaiSan // Lọc theo loại
+        ) {
+        model.addAttribute("user", getCurrentUser(auth));
+    
+        // Lấy danh sách tài sản dựa trên các bộ lọc
+        List<TaiSanChungCu> assets;
+    
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            // Nếu có keyword, tìm kiếm theo tên, bỏ qua loaiTaiSan (hoặc bạn có thể thêm logic lọc kép)
+            assets = taiSanChungCuService.findAssetsByFilters(keyword, null); 
+        } else {
+            // Nếu không có keyword, lọc theo loại tài sản (loaiTaiSan = null sẽ lấy tất cả)
+            assets = taiSanChungCuService.getAllAssets(loaiTaiSan); 
+        }
+    
+        model.addAttribute("assets", assets);
+        // Lưu trữ các giá trị lọc để giữ lại trên form
+        model.addAttribute("currentAssetType", loaiTaiSan);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("assetTypes", BlueMoon.bluemoon.utils.AssetType.values()); // Cần hiển thị tất cả loại
+        model.addAttribute("assetStatuses", BlueMoon.bluemoon.utils.AssetStatus.values());
+
+        return "general-asset-list"; // Tên file Thymeleaf mới
+    }
+
+    /**
+     * Hiển thị form thêm Tài Sản Chung mới (GET)
+     * URL: /admin/general-asset-add
+     */
+    @GetMapping("/general-asset-add")
+    public String showAddGeneralAssetForm(Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+        model.addAttribute("newAsset", new TaiSanChungCu());
+        model.addAttribute("assetStatuses", BlueMoon.bluemoon.utils.AssetStatus.values());
+        model.addAttribute("assetTypes", BlueMoon.bluemoon.utils.AssetType.values());
+        // Lấy danh sách hộ gia đình để liên kết
+        model.addAttribute("households", hoGiaDinhService.getAllHouseholds()); 
+
+        return "general-asset-add"; 
+    }
+
+    /**
+     * Xử lý thêm Tài Sản Chung mới (POST)
+     * URL: /admin/general-asset-add
+     */
+    @PostMapping("/general-asset-add")
+    public String handleAddGeneralAsset(@ModelAttribute("newAsset") TaiSanChungCu asset,
+                                     @RequestParam(value = "maHoLienKet", required = false) String maHoLienKet,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            TaiSanChungCu savedAsset = taiSanChungCuService.themTaiSanChung(asset, maHoLienKet);
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Thêm Tài sản " + savedAsset.getTenTaiSan() + " (Mã: " + savedAsset.getMaTaiSan() + ") thành công!");
+            return "redirect:/admin/general-asset-list";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/general-asset-add";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
+            return "redirect:/admin/general-asset-add";
+        }
+    }
+
+    /**
+     * Hiển thị form chỉnh sửa Tài Sản Chung (GET)
+     * URL: /admin/general-asset-edit?maTaiSan={id}
+     */
+    @GetMapping("/general-asset-edit")
+    public String showEditGeneralAssetForm(@RequestParam("maTaiSan") Integer maTaiSan, Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+
+        TaiSanChungCu assetToEdit = taiSanChungCuService.getAssetById(maTaiSan)
+            .orElse(null);
+
+        if (assetToEdit == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy Tài Sản.");
+            return "redirect:/admin/general-asset-list";
+        }
+
+        model.addAttribute("asset", assetToEdit);
+        model.addAttribute("assetStatuses", BlueMoon.bluemoon.utils.AssetStatus.values());
+        model.addAttribute("assetTypes", BlueMoon.bluemoon.utils.AssetType.values());
+        model.addAttribute("households", hoGiaDinhService.getAllHouseholds()); 
+
+        return "general-asset-edit"; 
+    }
+
+    /**
+     * Xử lý cập nhật Tài Sản Chung (POST)
+     * URL: /admin/general-asset-edit
+     */
+    @PostMapping("/general-asset-edit")
+    public String handleEditGeneralAsset(@ModelAttribute("asset") TaiSanChungCu asset,
+                                      @RequestParam("maTaiSan") Integer maTaiSan,
+                                      @RequestParam(value = "maHoLienKet", required = false) String maHoLienKet,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            taiSanChungCuService.capNhatTaiSanChung(maTaiSan, asset, maHoLienKet);
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Cập nhật Tài sản Mã " + maTaiSan + " thành công!");
+            return "redirect:/admin/general-asset-list";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/general-asset-edit?maTaiSan=" + maTaiSan;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
+            return "redirect:/admin/general-asset-edit?maTaiSan=" + maTaiSan;
+        }
+    }
+
+    /**
+     * Xử lý xóa Tài Sản Chung (GET cho đơn giản)
+     * URL: /admin/general-asset-delete?maTaiSan={id}
+     */
+    @GetMapping("/general-asset-delete")
+    public String handleDeleteGeneralAsset(@RequestParam("maTaiSan") Integer maTaiSan, RedirectAttributes redirectAttributes) {
+        try {
+            taiSanChungCuService.xoaTaiSanChung(maTaiSan);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa tài sản Mã " + maTaiSan + " thành công.");
+            return "redirect:/admin/general-asset-list";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/general-asset-list";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi xóa: " + e.getMessage());
+            return "redirect:/admin/general-asset-list";
+        }
+    }
+
+    /**
+    * Xem chi tiết Tài Sản Chung (GET)
+    * URL: /admin/general-asset-details?maTaiSan={id}
+    */
+    @GetMapping("/general-asset-details")
+    public String showAdminGeneralAssetDetails(@RequestParam("maTaiSan") Integer maTaiSan, Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+
+        TaiSanChungCu asset = taiSanChungCuService.getAssetById(maTaiSan)
+            .orElse(null);
+    
+        if (asset == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy Tài Sản với Mã Tài Sản: " + maTaiSan);
+            return "redirect:/admin/general-asset-list";
+        }
+
+        model.addAttribute("asset", asset);
+
+        // Tùy chọn: Thêm danh sách thành viên hộ liên kết (nếu có)
+        if (asset.getHoGiaDinh() != null) {
+            List<BlueMoon.bluemoon.entities.ThanhVienHo> members = asset.getHoGiaDinh().getThanhVienHoList().stream()
+                .filter(tvh -> tvh.getNgayKetThuc() == null) 
+                .toList();
+            model.addAttribute("members", members);
+        } else {
+             model.addAttribute("members", List.of());
+        }
+
+        return "general-asset-details"; 
+    }
 }

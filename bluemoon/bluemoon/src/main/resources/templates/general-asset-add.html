@@ -4,75 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chỉnh Sửa Căn Hộ - Ban Quản Trị - BlueMoon Portal</title>
-
-    <link rel="stylesheet" href="/css/main.css"> 
+    <title>Thêm Tài Sản Chung Mới - BlueMoon Portal</title>
+    <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS cho form */
-        .form-card {
+        /* CSS form chung */
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
             background-color: white;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: 30px;
-            margin-top: 20px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
         }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-        }
-
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
-
-        .form-label {
+        .form-group label {
             display: block;
-            font-weight: 500;
-            color: #1F2937;
             margin-bottom: 8px;
+            font-weight: 600;
+            color: #4B5563;
         }
-
-        .form-control, .form-select, .form-textarea {
+        .form-input, .form-select {
             width: 100%;
-            padding: 10px 15px;
+            padding: 10px;
             border: 1px solid #D1D5DB;
             border-radius: 8px;
             box-sizing: border-box;
-            transition: border-color 0.3s;
         }
-
-        .form-control:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #4F46E5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-        
-        .form-textarea {
-            resize: vertical;
-        }
-
-        .btn-submit {
-            background-color: #F59E0B;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 20px;
-        }
-        .btn-submit:hover {
-            background-color: #D97706;
+        .form-actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
         }
     </style>
 </head>
@@ -91,8 +57,8 @@
         <nav class="sidebar-nav">
             <a th:href="@{/admin/dashboard}" class="nav-item"> <i class="fas fa-chart-line"></i> <span>Dashboard</span> </a>
             <a th:href="@{/admin/resident-list}" class="nav-item"> <i class="fas fa-users"></i> <span>Quản Lý Cư Dân</span> </a>
-            <a th:href="@{/admin/apartment-list}" class="nav-item active"> <i class="fas fa-home"></i> <span>Quản Lý Căn Hộ</span> </a>
-            <a th:href="@{/admin/household-list}" class="nav-item"> <i class="fas fa-users-cog"></i> <span>Quản Lý Hộ Gia Đình</span> </a>
+            <a th:href="@{/admin/apartment-list}" class="nav-item"> <i class="fas fa-home"></i> <span>Quản Lý Căn Hộ</span> </a>
+            <a th:href="@{/admin/household-list}" class="nav-item"> <i class="fas fa-users-cog"></i> <span>Quản Lý Hộ Gia Đình</span> </a> 
             <a th:href="@{/admin/general-asset-list}" class="nav-item"> <i class="fas fa-building"></i> <span>Quản Lý Tài Sản</span> </a>
             <a href="fees.html" class="nav-item"> <i class="fas fa-file-invoice-dollar"></i> <span>Quản Lý Khoản Phí</span> </a>
             <a href="#" class="nav-item"> <i class="fas fa-concierge-bell"></i> <span>Quản Lý Dịch Vụ</span> </a>
@@ -110,7 +76,7 @@
     <header class="header">
         <div class="header-left">
             <button class="menu-toggle" onclick="toggleSidebar()"> <i class="fas fa-bars"></i> </button>
-            <h1>Chỉnh Sửa Căn Hộ: <span th:text="${apartment.tenTaiSan}"></span></h1>
+            <h1>Thêm Tài Sản Chung Mới</h1>
         </div>
         <div class="header-right">
             <div class="user-menu">
@@ -130,82 +96,81 @@
 
     <main class="main-content">
         <div class="container">
+            <a th:href="@{/admin/general-asset-list}" class="btn btn-secondary btn-sm" style="margin-bottom: 20px;"><i class="fas fa-arrow-left"></i> Quay lại Danh sách</a>
+            
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}">Thông báo thành công</div>
             <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}">Thông báo lỗi</div>
 
-            <div class="form-card">
-                <form th:action="@{/admin/apartment-edit}" method="post" th:object="${apartment}">
-                    <input type="hidden" name="maTaiSan" th:value="*{maTaiSan}">
-                    
-                    <h3 style="margin-bottom: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">Thông Tin Chi Tiết Căn Hộ</h3>
-                    
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="maTaiSan" class="form-label">Mã Tài Sản:</label>
-                            <input type="text" id="maTaiSan" th:field="*{maTaiSan}" class="form-control" disabled>
-                        </div>
+            <div class="form-container">
+                <form th:action="@{/admin/general-asset-add}" th:object="${newAsset}" method="post">
+                    <h2 style="font-size: 1.5rem; margin-bottom: 20px; color: #1F2937;">Thông Tin Tài Sản</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         
                         <div class="form-group">
-                            <label for="tenTaiSan" class="form-label">Tên Căn Hộ (*):</label>
-                            <input type="text" id="tenTaiSan" th:field="*{tenTaiSan}" class="form-control" required maxlength="100">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="dienTich" class="form-label">Diện Tích (m²) (*):</label>
-                            <input type="number" id="dienTich" th:field="*{dienTich}" class="form-control" required step="0.01" min="10">
+                            <label for="tenTaiSan">Tên Tài Sản (*)</label>
+                            <input type="text" th:field="*{tenTaiSan}" id="tenTaiSan" class="form-input" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="giaTri" class="form-label">Giá Trị (₫) (*):</label>
-                            <input type="number" id="giaTri" th:field="*{giaTri}" class="form-control" required min="1000000">
+                            <label for="loaiTaiSan">Loại Tài Sản (*)</label>
+                            <select th:field="*{loaiTaiSan}" id="loaiTaiSan" class="form-select" required>
+                                <option value="">-- Chọn Loại Tài Sản --</option>
+                                <option th:each="type : ${assetTypes}" 
+                                        th:value="${type}" 
+                                        th:text="${type.dbValue}">Căn Hộ</option>
+                            </select>
                         </div>
-                        
+
                         <div class="form-group">
-                            <label for="trangThai" class="form-label">Trạng Thái (*):</label>
-                                <select id="trangThai" th:field="*{trangThai}" class="form-select" required>
-                                    <option th:each="status : ${assetStatuses}" 
+                            <label for="trangThai">Trạng Thái (*)</label>
+                            <select th:field="*{trangThai}" id="trangThai" class="form-select" required>
+                                <option th:each="status : ${assetStatuses}" 
                                         th:value="${status}" 
                                         th:text="${status.dbValue}"
-                                        th:selected="${status.name() == apartment.trangThai.name()}"></option>
-                                </select>
+                                        th:selected="${status.name() == 'hoat_dong'}">Hoạt động</option>
+                            </select>
                         </div>
-                        
+
                         <div class="form-group">
-                            <label for="maHoLienKet" class="form-label">Liên Kết với Hộ gia đình (Tùy chọn):</label>
-                            <select id="maHoLienKet" name="maHoLienKet" class="form-select">
-                                <option value="">-- Chưa gán Hộ --</option>
+                            <label for="dienTich">Diện Tích (m²)</label>
+                            <input type="number" step="0.01" th:field="*{dienTich}" id="dienTich" class="form-input" placeholder="Ví dụ: 80.5">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="giaTri">Giá Trị (₫)</label>
+                            <input type="number" step="1000" th:field="*{giaTri}" id="giaTri" class="form-input" placeholder="Ví dụ: 1500000000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="maHoLienKet">Liên Kết với Hộ Gia Đình (Mã Hộ)</label>
+                            <select name="maHoLienKet" id="maHoLienKet" class="form-select">
+                                <option value="">-- Không liên kết --</option>
                                 <option th:each="hgd : ${households}" 
                                         th:value="${hgd.maHo}" 
-                                        th:text="${hgd.tenHo} + ' (' + ${hgd.maHo} + ')'"
-                                        th:selected="${hgd.maHo == apartment.hoGiaDinh?.maHo}"></option>
+                                        th:text="|${hgd.maHo} - ${hgd.tenHo} (${hgd.trangThai.dbValue})|">HGD001 - Nguyễn Văn A</option>
                             </select>
-                            <small class="text-muted">Hộ đang sở hữu hiện tại: <span th:text="${apartment.hoGiaDinh?.tenHo} ?: 'N/A'"></span></small>
-                        </div>
-                        
-                        <div class="form-group" style="grid-column: 1 / -1;">
-                            <label for="viTri" class="form-label">Vị Trí Cụ Thể / Mô tả:</label>
-                            <textarea id="viTri" th:field="*{viTri}" class="form-textarea" rows="2"></textarea>
                         </div>
                     </div>
-                    
 
-                    <div style="text-align: right;">
-                        <button type="submit" class="btn-submit">
-                            <i class="fas fa-save"></i> Lưu Thay Đổi
-                        </button>
+                    <div class="form-group">
+                        <label for="viTri">Vị Trí/Mô Tả</label>
+                        <textarea th:field="*{viTri}" id="viTri" class="form-input" rows="3" placeholder="Ví dụ: Tầng hầm B1, vị trí P102; hoặc: Máy bơm nước chính khu A"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-add"><i class="fas fa-save"></i> Lưu Tài Sản</button>
+                        <a th:href="@{/admin/general-asset-list}" class="btn-reset" style="background-color: #EF4444;">
+                            <i class="fas fa-times-circle"></i> Hủy
+                        </a>
                     </div>
                 </form>
             </div>
-            
-            <p style="text-align: center; margin-top: 20px;">
-                <a th:href="@{/admin/apartment-list}" style="color: #4F46E5; text-decoration: none;">
-                    <i class="fas fa-arrow-left"></i> Quay lại Danh Sách Căn Hộ
-                </a>
-            </p>
-
         </div>
     </main>
 
+    <script src="/js/main.js"></script>
     <script>
+        // Hàm JS đơn giản từ template gốc
         function toggleSidebar() {
             document.querySelector('.sidebar').classList.toggle('collapsed');
             document.querySelector('.main-content').classList.toggle('shifted');
@@ -223,4 +188,5 @@
         });
     </script>
 </body>
+
 </html>

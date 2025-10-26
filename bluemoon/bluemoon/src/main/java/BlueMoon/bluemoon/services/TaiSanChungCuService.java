@@ -23,7 +23,32 @@ public class TaiSanChungCuService {
     // =======================================================
     // 1. CHỨC NĂNG READ (Đọc)
     // =======================================================
-    
+     /**
+     * Lấy danh sách tất cả các Tài sản Chung Cư (bao gồm cả căn hộ).
+     * @param loaiTaiSan Loại tài sản cần lọc (null để lấy tất cả).
+     * @return List<TaiSanChungCu>
+     */
+    public List<TaiSanChungCu> getAllAssets(AssetType loaiTaiSan) {
+        return taiSanChungCuDAO.findAllAssets(loaiTaiSan);
+    }
+
+    /**
+     * Lấy một Tài Sản Chung Cư theo Mã Tài Sản.
+     */
+    public Optional<TaiSanChungCu> getAssetById(Integer maTaiSan) {
+        // Có thể dùng findByID chung từ DAO
+        return taiSanChungCuDAO.findByID(maTaiSan); 
+    }
+
+    /**
+     * Tìm kiếm tài sản theo tên hoặc loại (sử dụng cho Controller).
+     */
+    public List<TaiSanChungCu> findAssetsByFilters(String keyword, AssetType loaiTaiSan) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            return taiSanChungCuDAO.findAssetsByName(keyword);
+        }
+        return taiSanChungCuDAO.findAllAssets(loaiTaiSan);
+    }
     /**
      * Lấy danh sách tất cả các Căn hộ (loaiTaiSan = can_ho).
      * @return List<TaiSanChungCu> là danh sách các căn hộ.
@@ -98,7 +123,32 @@ public class TaiSanChungCuService {
     // =======================================================
     // 2. CHỨC NĂNG CREATE (Tạo)
     // =======================================================
+    /**
+     * Thêm một Tài Sản Chung Cư mới (áp dụng cho mọi loại tài sản).
+     * @param taiSanMoi Entity TaiSanChungCu chứa thông tin tài sản.
+     * @param maHo Mã Hộ gia đình liên kết (có thể là null hoặc chuỗi rỗng).
+     * @return TaiSanChungCu đã được lưu.
+     */
+    @Transactional
+    public TaiSanChungCu themTaiSanChung(TaiSanChungCu taiSanMoi, String maHo) {
+        // 1. Kiểm tra và thiết lập Hộ gia đình liên kết
+        if (maHo != null && !maHo.trim().isEmpty()) {
+            HoGiaDinh hgd = hoGiaDinhDAO.findById(maHo)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Hộ gia đình với Mã Hộ: " + maHo));
 
+            taiSanMoi.setHoGiaDinh(hgd);
+        } else {
+            taiSanMoi.setHoGiaDinh(null);
+        }   
+
+        // 2. Loại tài sản phải được set từ Controller/Form (taiSanMoi đã có)
+        if (taiSanMoi.getLoaiTaiSan() == null) {
+            throw new IllegalArgumentException("Loại Tài Sản không được để trống.");
+        }
+    
+        // 3. Lưu
+        return taiSanChungCuDAO.save(taiSanMoi);
+    }
     /**
      * Thêm một Căn hộ mới.
      * @param canHoMoi Entity TaiSanChungCu chứa thông tin căn hộ (TenTaiSan, DienTich, GiaTri, TrangThai, ViTri).
@@ -129,7 +179,37 @@ public class TaiSanChungCuService {
     // =======================================================
     // 3. CHỨC NĂNG UPDATE (Cập nhật)
     // =======================================================
+    /**
+     * Cập nhật thông tin Tài Sản Chung Cư (áp dụng cho mọi loại tài sản).
+     * @param maTaiSan Mã tài sản cần cập nhật.
+     * @param taiSanCapNhat Entity TaiSanChungCu chứa dữ liệu mới.
+     * @param maHo Mã Hộ gia đình mới liên kết (có thể là null để gỡ liên kết).
+     * @return TaiSanChungCu đã được cập nhật.
+     */
+    @Transactional
+    public TaiSanChungCu capNhatTaiSanChung(Integer maTaiSan, TaiSanChungCu taiSanCapNhat, String maHo) {
+        TaiSanChungCu taiSanHienTai = taiSanChungCuDAO.findByID(maTaiSan)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Tài Sản với Mã Tài Sản: " + maTaiSan));
     
+        // 1. Cập nhật thông tin cơ bản
+        taiSanHienTai.setTenTaiSan(taiSanCapNhat.getTenTaiSan());
+        taiSanHienTai.setLoaiTaiSan(taiSanCapNhat.getLoaiTaiSan()); // Cho phép đổi loại tài sản
+        taiSanHienTai.setTrangThai(taiSanCapNhat.getTrangThai());
+        taiSanHienTai.setDienTich(taiSanCapNhat.getDienTich());
+        taiSanHienTai.setGiaTri(taiSanCapNhat.getGiaTri());
+        taiSanHienTai.setViTri(taiSanCapNhat.getViTri());
+    
+        // 2. Cập nhật Hộ gia đình liên kết
+        if (maHo != null && !maHo.trim().isEmpty()) {
+            HoGiaDinh hgd = hoGiaDinhDAO.findById(maHo)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Hộ gia đình với Mã Hộ: " + maHo));
+            taiSanHienTai.setHoGiaDinh(hgd);
+        } else {
+             taiSanHienTai.setHoGiaDinh(null); // Gỡ liên kết
+        }
+
+        return taiSanChungCuDAO.save(taiSanHienTai);
+    }
     /**
      * Cập nhật thông tin Căn hộ.
      * @param maTaiSan Mã căn hộ cần cập nhật.
@@ -169,7 +249,19 @@ public class TaiSanChungCuService {
     // =======================================================
     // 4. CHỨC NĂNG DELETE (Xóa)
     // =======================================================
+    /**
+     * Xóa vật lý một Tài Sản Chung Cư khỏi hệ thống.
+     * @param maTaiSan Mã tài sản cần xóa.
+     */
+    @Transactional
+    public void xoaTaiSanChung(Integer maTaiSan) {
+        TaiSanChungCu taiSan = taiSanChungCuDAO.findByID(maTaiSan)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Tài Sản với Mã Tài Sản: " + maTaiSan));
     
+        // ... (Thêm logic kiểm tra ràng buộc nghiệp vụ trước khi xóa) ...
+    
+        taiSanChungCuDAO.delete(taiSan);
+    }
     /**
      * Xóa vật lý một Căn hộ khỏi hệ thống.
      * @param maTaiSan Mã căn hộ cần xóa.

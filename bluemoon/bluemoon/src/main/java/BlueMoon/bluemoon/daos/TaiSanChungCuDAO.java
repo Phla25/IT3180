@@ -82,11 +82,30 @@ public class TaiSanChungCuDAO {
     public List<TaiSanChungCu> findAllParkingSpots() {
         String jpql = "SELECT ts FROM TaiSanChungCu ts WHERE ts.tenTaiSan =: ten AND ts.loaiTaiSan = :loai";
         return entityManager.createQuery(jpql, TaiSanChungCu.class)
-                            .setParameter("ten", "cho_do_xe")
+                            .setParameter("ten", "Chỗ đỗ xe")
                             .setParameter("loai", BlueMoon.bluemoon.utils.AssetType.tien_ich)
                             .getResultList();
     }
+    /**
+     * Tìm kiếm tất cả tài sản, có thể lọc theo loại tài sản.
+     * Nếu loaiTaiSan là null, trả về tất cả.
+     */
+    public List<TaiSanChungCu> findAllAssets(BlueMoon.bluemoon.utils.AssetType loaiTaiSan) {
+        String jpql = "SELECT ts FROM TaiSanChungCu ts WHERE (:loai is null OR ts.loaiTaiSan = :loai)";
+        return entityManager.createQuery(jpql, TaiSanChungCu.class)
+                            .setParameter("loai", loaiTaiSan)
+                            .getResultList();
+    }
 
+    /**
+     * Tìm kiếm tài sản theo tên (sử dụng LIKE).
+     */
+    public List<TaiSanChungCu> findAssetsByName(String keyword) {
+        String jpql = "SELECT ts FROM TaiSanChungCu ts WHERE ts.tenTaiSan LIKE :keyword";
+        return entityManager.createQuery(jpql, TaiSanChungCu.class)
+                            .setParameter("keyword", "%" + keyword + "%")
+                            .getResultList();
+    }
     /**
      * Sửa thông tin căn hộ
      */
