@@ -125,6 +125,7 @@ public class AdminController {
     public String showResidentList(Model model, 
                                @RequestParam(required = false) String keyword,
                                @RequestParam(required = false) ResidentStatus trangThaiDanCu,
+                               @RequestParam(required = false) AccountStatus accountStatus,
                                Authentication auth) {
     
         // 1. Lấy thông tin người dùng đang đăng nhập (header)
@@ -137,8 +138,8 @@ public class AdminController {
         // 2. Lấy danh sách đối tượng (có áp dụng tìm kiếm/lọc)
         // Nếu có tham số tìm kiếm, gọi hàm lọc; nếu không, lấy tất cả.
         List<DoiTuong> danhSachDoiTuong;
-        if (keyword != null || trangThaiDanCu != null) {
-            danhSachDoiTuong = cuDanService.timKiemvaLoc(keyword, trangThaiDanCu);
+        if (keyword != null || trangThaiDanCu != null || accountStatus != null) {
+            danhSachDoiTuong = cuDanService.timKiemvaLoc(keyword, trangThaiDanCu, accountStatus);
         } else {
             danhSachDoiTuong = cuDanService.layDanhSachCuDan();
         }
@@ -148,7 +149,8 @@ public class AdminController {
     
         // 4. (Tùy chọn) Thêm thông tin phân trang
         model.addAttribute("totalResidents", danhSachDoiTuong.size()); // Giả định không phân trang
-    
+        
+        model.addAttribute("accountStatuses", AccountStatus.values());
         return "residents"; // Giả định tên file Thymeleaf là residents-list.html
     }
     /**
