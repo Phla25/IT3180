@@ -1,0 +1,371 @@
+package BlueMoon.bluemoon.controllers;
+
+import java.security.Principal;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import BlueMoon.bluemoon.daos.DoiTuongDAO;
+import BlueMoon.bluemoon.entities.DoiTuong;
+import BlueMoon.bluemoon.entities.HoGiaDinh;
+import BlueMoon.bluemoon.entities.HoaDon;
+import BlueMoon.bluemoon.entities.PhanHoiThongBao;
+import BlueMoon.bluemoon.entities.ThongBao;
+import BlueMoon.bluemoon.models.DichVuStatsDTO;
+import BlueMoon.bluemoon.models.HoGiaDinhDTO;
+import BlueMoon.bluemoon.models.HoaDonStatsDTO;
+import BlueMoon.bluemoon.models.PhanHoiThongBaoDTO;
+import BlueMoon.bluemoon.models.SuCoStatsDTO;
+import BlueMoon.bluemoon.models.ThongBaoDTO;
+import BlueMoon.bluemoon.models.ThongBaoStatsDTO;
+import BlueMoon.bluemoon.services.HoaDonService;
+import BlueMoon.bluemoon.services.NguoiDungService;
+import BlueMoon.bluemoon.services.ThanhVienHoService;
+import BlueMoon.bluemoon.services.ThongBaoService;
+
+@Controller
+public class NormalUserController {
+
+    @Autowired
+    private NguoiDungService nguoiDungService;
+
+    @Autowired
+    private ThanhVienHoService thanhVienHoService;
+    
+    @Autowired private HoaDonService hoaDonService;
+
+    /**
+     * Helper: Lấy đối tượng DoiTuong hiện tại
+     * Giả sử username của principal là CCCD (đã được cấu hình trong UserDetailsService)
+     */
+    private DoiTuong getCurrentUser(Authentication auth) {
+        String cccd = auth.getName(); // Lấy CCCD từ principal/username
+        Optional<DoiTuong> userOpt = nguoiDungService.timNguoiDungThuongTheoCCCD(cccd);
+        return userOpt.orElse(null); 
+    }
+
+    @GetMapping("/resident/dashboard")
+    public String residentDashboard(Model model, Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+            return "redirect:/login?error=notfound";
+        }
+        model.addAttribute("user", currentUser);
+
+        // B1: Lấy thông tin Căn hộ/Hộ gia đình
+        HoGiaDinhDTO canHoInfo = thanhVienHoService.getCanHoInfo(currentUser.getCccd(), currentUser.getHoVaTen());
+        model.addAttribute("canHoInfo", canHoInfo);
+
+        // B2: Lấy đối tượng HoGiaDinh (CẦN LOGIC THỰC TẾ TRONG TVH SERVICE)
+        Optional<HoGiaDinh> hoGiaDinhOpt = thanhVienHoService.getHoGiaDinhByCccd(currentUser.getCccd()); 
+        HoGiaDinh hoGiaDinh = hoGiaDinhOpt.orElse(null);
+    
+        // B3: Lấy Dữ liệu Hóa Đơn
+        if (hoGiaDinh != null) {
+            model.addAttribute("hoaDonStats", hoaDonService.getHoaDonStats(hoGiaDinh));
+            model.addAttribute("recentHoaDon", hoaDonService.getRecentHoaDon(hoGiaDinh, 3));
+        } else {
+            // Tránh lỗi khi HoGiaDinh null
+            model.addAttribute("hoaDonStats", new HoaDonStatsDTO()); 
+            model.addAttribute("recentHoaDon", Collections.emptyList());
+        }
+    
+        // B4: MOCK Dữ liệu còn lại (SỬA DỤNG DTO CÓ THUỘC TÍNH)
+        
+        // Mock DichVuStatsDTO
+        // Mock DichVuStatsDTO (Bổ sung thiết lập trạng thái mặc định)
+        DichVuStatsDTO dichVuStats = new DichVuStatsDTO();
+        dichVuStats.setTongDichVu(0); // Đảm bảo số lượng dịch vụ là 0 khi mock
+        dichVuStats.setTrangThai("Chưa đăng ký dịch vụ"); // Đặt giá trị cho trangThai
+        model.addAttribute("dichVuStats", dichVuStats);
+        
+        // Mock SuCoStatsDTO (Sử dụng constructor có tham số)
+        model.addAttribute("suCoStats", new SuCoStatsDTO(0, 0.0, 0.0));
+        
+        // Mock ThongBaoStatsDTO (Sử dụng constructor có tham số)
+        model.addAttribute("thongBaoStats", new ThongBaoStatsDTO(0, "Không có thông báo mới")); 
+        
+        // Mock HoGiaDinhStatsDTO (Giả định đã tạo HoGiaDinhStatsDTO với constructor mặc định)
+        model.addAttribute("hoGiaDinhStats", new HoGiaDinhDTO());
+
+        return "dashboard-resident";
+    }
+
+    @GetMapping("/resident/profile")
+    public String showResidentProfile(Model model, Authentication auth) {
+        
+        DoiTuong currentUser = getCurrentUser(auth); 
+        
+        if (currentUser == null) {
+            // Trường hợp lỗi (ví dụ: Session hết hạn hoặc không tìm thấy user)
+            return "redirect:/login?error=auth";
+        }
+
+        // 1. Thêm đối tượng user vào Model để hiển thị trong Thymeleaf
+        model.addAttribute("user", currentUser);
+
+        // 2. Trả về tên file Thymeleaf
+        // Sử dụng tên mới để tránh nhầm lẫn với dashboard: profile-resident-detail.html
+        return "profile-resident"; 
+    }
+    // NEW: Hiển thị form Cập Nhật Thông Tin Cá Nhân
+    @GetMapping("/resident/profile/edit")
+    public String showEditProfileForm(Model model, Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth); 
+        if (currentUser == null) {
+            return "redirect:/login?error=auth";
+        }
+        model.addAttribute("user", currentUser); 
+        return "edit-profile-resident";
+    }
+    @PostMapping("/resident/profile/edit")
+    public String handleEditProfile(@ModelAttribute("user") DoiTuong doiTuongCapNhat,
+                                    Authentication auth,
+                                    RedirectAttributes redirectAttributes) {
+        
+        DoiTuong currentUser = getCurrentUser(auth); 
+        if (currentUser == null || !currentUser.getCccd().equals(doiTuongCapNhat.getCccd())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực người dùng hoặc thông tin CCCD không khớp.");
+            return "redirect:/resident/profile";
+        }
+        
+        try {
+            // Gọi Service để xử lý logic cập nhật thông tin
+            nguoiDungService.capNhatThongTinNguoiDung(doiTuongCapNhat);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin cá nhân thành công!");
+            return "redirect:/resident/profile";
+            
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/resident/profile/edit"; // Quay lại form chỉnh sửa
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi cập nhật: " + e.getMessage());
+            return "redirect:/resident/profile/edit";
+        }
+    }
+    // Hiến thị trang đổi mật khẩu
+    @GetMapping("/resident/change-password")
+    public String showChangePasswordForm(Model model, Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth); 
+        if (currentUser == null) {
+            return "redirect:/login?error=auth";
+        }
+        model.addAttribute("user", currentUser); 
+        return "change-password-resident";
+    }
+    // Ghi nhận, cập nhật đổi mật khẩu
+    @PostMapping("/resident/change-password")
+    public String handleChangePassword(@RequestParam("matKhauCu") String matKhauCu,
+                                     @RequestParam("matKhauMoi") String matKhauMoi,
+                                     @RequestParam("xacNhanMatKhau") String xacNhanMatKhau,
+                                     Authentication auth,
+                                     RedirectAttributes redirectAttributes) {
+        
+        DoiTuong currentUser = getCurrentUser(auth); 
+        if (currentUser == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực người dùng.");
+            return "redirect:/resident/profile";
+        }
+
+        if (!matKhauMoi.equals(xacNhanMatKhau)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu mới và xác nhận mật khẩu không khớp.");
+            return "redirect:/resident/change-password";
+        }
+        
+        try {
+            // Gọi Service để xử lý logic đổi mật khẩu
+            nguoiDungService.doiMatKhau(currentUser.getCccd(), matKhauCu, matKhauMoi);
+            redirectAttributes.addFlashAttribute("successMessage", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại với mật khẩu mới.");
+            // Chuyển hướng về trang đăng nhập sau khi đổi thành công để buộc người dùng đăng nhập lại
+            return "redirect:/logout"; 
+            
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/resident/change-password";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
+            return "redirect:/resident/change-password";
+        }
+    }
+    // =======================================================
+    // QUẢN LÝ HÓA ĐƠN VÀ THANH TOÁN (MỚI)
+    // =======================================================
+
+    /**
+     * Hiển thị danh sách tất cả hóa đơn của hộ gia đình hiện tại.
+     * URL: /resident/fees
+     */
+    @GetMapping("/resident/fees")
+    public String showResidentFees(Model model, Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+            return "redirect:/login?error=notfound";
+        }
+        model.addAttribute("user", currentUser);
+
+        // 1. Lấy HoGiaDinh của người dùng
+        Optional<HoGiaDinh> hoGiaDinhOpt = thanhVienHoService.getHoGiaDinhByCccd(currentUser.getCccd()); 
+        HoGiaDinh hoGiaDinh = hoGiaDinhOpt.orElse(null);
+
+        if (hoGiaDinh == null) {
+            model.addAttribute("errorMessage", "Bạn chưa được liên kết với Hộ gia đình nào.");
+            model.addAttribute("hoaDonList", Collections.emptyList());
+        } else {
+            // 2. Lấy tất cả hóa đơn của hộ gia đình (Cần thêm hàm này vào HoaDonService/DAO)
+            List<HoaDon> hoaDonList = hoaDonService.getAllHoaDonByHo(hoGiaDinh); 
+            model.addAttribute("hoaDonList", hoaDonList);
+        }
+
+        return "fees-resident"; // Tên file Thymeleaf mới
+    }
+    
+    /**
+     * Hiển thị chi tiết hóa đơn.
+     * URL: /resident/fee-detail?id={maHoaDon}
+     */
+    @GetMapping("/resident/fee-detail")
+    public String showFeeDetail(@RequestParam("id") Integer maHoaDon, Model model, Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+            return "redirect:/login?error=notfound";
+        }
+        model.addAttribute("user", currentUser);
+
+        Optional<HoGiaDinh> hoGiaDinhOpt = thanhVienHoService.getHoGiaDinhByCccd(currentUser.getCccd()); 
+        HoGiaDinh hoGiaDinh = hoGiaDinhOpt.orElse(null);
+
+        if (hoGiaDinh == null) {
+            return "redirect:/resident/fees?error=no_household";
+        }
+
+        // 2. Lấy Hóa Đơn theo ID và Hộ gia đình (Cần thêm hàm này vào HoaDonService)
+        Optional<HoaDon> hoaDonOpt = hoaDonService.getHoaDonByIdAndHo(maHoaDon, hoGiaDinh);
+        
+        if (hoaDonOpt.isEmpty()) {
+            model.addAttribute("errorMessage", "Không tìm thấy Hóa đơn hoặc Hóa đơn không thuộc Hộ của bạn.");
+            return "redirect:/resident/fees";
+        }
+
+        model.addAttribute("hoaDon", hoaDonOpt.get());
+        
+        return "fee-details-resident"; // Tên file Thymeleaf mới
+    }
+    
+    /**
+     * CẬP NHẬT: Xử lý yêu cầu thanh toán hóa đơn.
+     * URL: /resident/fee-pay
+     */
+    @PostMapping("/resident/fee-pay")
+    public String handleFeePayment(@RequestParam("maHoaDon") Integer maHoaDon, 
+                                   Authentication auth,
+                                   RedirectAttributes redirectAttributes) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực.");
+            return "redirect:/resident/fees";
+        }
+        
+        try {
+            // Service cập nhật trạng thái và lưu CCCD của người yêu cầu thanh toán
+            hoaDonService.markAsPaidByResident(maHoaDon, currentUser); 
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Yêu cầu thanh toán Hóa đơn #" + maHoaDon + " đã được ghi nhận. Vui lòng thực hiện chuyển khoản.");
+            
+            // ✨ THAY ĐỔI: Chuyển hướng người dùng đến trang chi tiết để xem QR code
+            return "redirect:/resident/fee-detail?id=" + maHoaDon; 
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/resident/fee-detail?id=" + maHoaDon;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi thanh toán: " + e.getMessage());
+            return "redirect:/resident/fee-detail?id=" + maHoaDon;
+        }
+    }
+    
+    @Autowired
+    private ThongBaoService thongBaoService;
+
+    @Autowired
+    private DoiTuongDAO doiTuongDAO; // ✅ Dùng DAO có sẵn
+    
+    @GetMapping("/resident/notifications")
+    public String hienThiThongBaoChoCuDan(Model model, Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+            return "redirect:/login?error=auth";
+        }
+
+        // Thêm thông tin người dùng vào model
+        model.addAttribute("user", currentUser);
+
+        // Lấy danh sách thông báo Entity từ service
+        List<ThongBao> thongBaos = thongBaoService.layTatCaThongBaoMoiNhat();
+        
+        // ✅ CHUYỂN ĐỔI Entity sang DTO
+        List<ThongBaoDTO> thongBaoDTOs = thongBaos.stream()
+            .map(ThongBaoDTO::new) // Sử dụng constructor DTO
+            .collect(Collectors.toList());
+            
+        // Truyền danh sách DTO vào model
+        model.addAttribute("thongBaos", thongBaoDTOs);
+
+        return "resident-notifications"; 
+    }
+    
+    @GetMapping("/resident/notifications/{maThongBao}/replies")
+    @ResponseBody
+    public List<PhanHoiThongBaoDTO> layDanhSachPhanHoi(@PathVariable Integer maThongBao) {
+        return thongBaoService.layPhanHoiTheoThongBao(maThongBao)
+                .stream()
+                .map(PhanHoiThongBaoDTO::new)
+                .collect(Collectors.toList());
+    }
+
+
+
+    // B. Phương thức POST: Xử lý việc gửi phản hồi từ cư dân
+    @PostMapping("/resident/notifications/reply")
+    public String guiPhanHoi(@RequestParam("maThongBao") Integer maThongBao,
+                             @RequestParam("noiDungPhanHoi") String noiDung,
+                             Authentication auth,
+                             RedirectAttributes redirectAttributes) {
+
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực người dùng.");
+            return "redirect:/resident/notifications";
+        }
+
+        if (noiDung.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Nội dung phản hồi không được để trống.");
+            return "redirect:/resident/notifications"; // hoặc quay lại trang modal
+        }
+
+        try {
+            thongBaoService.themPhanHoi(maThongBao, currentUser, noiDung);
+            redirectAttributes.addFlashAttribute("successMessage", "Phản hồi đã được gửi thành công!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi gửi phản hồi.");
+        }
+        
+        // Quay lại trang danh sách thông báo
+        return "redirect:/resident/notifications"; 
+    }
+
+}
