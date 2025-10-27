@@ -19,7 +19,7 @@ import jakarta.transaction.Transactional;
 // Sử dụng @Repository để cho Spring quản lý DAO này
 @Repository
 public class DoiTuongDAO {
-
+	
 	// Tiêm EntityManager để truy vấn thủ công
 	@Autowired
 	@PersistenceContext
