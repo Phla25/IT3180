@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.hibernate.annotations.DynamicUpdate;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -19,6 +22,7 @@ public class PhanHoiThongBao {
     // SỬA ĐỔI: Thay thế BaoCaoSuCo bằng ThongBao
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_thong_bao", nullable = false)
+    @JsonBackReference
     private ThongBao thongBao; // <-- Dùng trực tiếp entity, không dùng Optional
 
 

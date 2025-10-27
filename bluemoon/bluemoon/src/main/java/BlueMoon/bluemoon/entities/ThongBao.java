@@ -1,11 +1,17 @@
 package BlueMoon.bluemoon.entities;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.DynamicUpdate;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+
 import BlueMoon.bluemoon.utils.NotificationType;
 import BlueMoon.bluemoon.utils.RecipientType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,6 +22,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
@@ -38,6 +45,11 @@ public class ThongBao {
 
     @Column(name = "noi_dung_thong_bao", columnDefinition = "TEXT", nullable = false)
     private String noiDung;
+    
+    @OneToMany(mappedBy = "thongBao", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<PhanHoiThongBao> phanHois = new ArrayList<>();
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "loai_thong_bao", length = 30)
