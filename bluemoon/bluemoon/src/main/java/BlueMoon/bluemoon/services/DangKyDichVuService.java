@@ -56,7 +56,7 @@ public class DangKyDichVuService {
         // 3. Thiết lập thông tin cho đối tượng DangKyDichVu
         dangKyYeuCau.setNguoiDung(nguoiDangKy);
         dangKyYeuCau.setDichVu(dichVu); // Đảm bảo đối tượng DichVu được set đầy đủ
-        dangKyYeuCau.setTrangThai(RegistrationStatus.cho_duyet);
+        dangKyYeuCau.setTrangThai(RegistrationStatus.dang_su_dung);
         dangKyYeuCau.setNgayDangKy(LocalDateTime.now());
         // Giả định các trường Ngày Bắt Đầu/Kết Thúc đã được set từ form nếu cần
 

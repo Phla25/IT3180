@@ -71,7 +71,7 @@
             </a>
         </nav>
         <div class="sidebar-footer">
-             <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+            <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
                 <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none; text-align: left; padding: 0;">
                     <i class="fas fa-sign-out-alt"></i> Đăng Xuất
                 </button>
@@ -84,7 +84,7 @@
             <button class="menu-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <h1>Thông Tin Cá Nhân</h1>
+            <h1>Chi Tiết Đăng Ký Dịch Vụ</h1>
         </div>
         
         <div class="header-right">
@@ -115,8 +115,14 @@
         </div>
     </header>
 
-    <main class="main-content">
-        <div class="container">
+<main class="main-content">
+    <div class="container">
+        
+        <div th:if="${registration == null}" class="alert alert-danger">
+            Không thể tải chi tiết đăng ký dịch vụ. Vui lòng kiểm tra lại ID.
+        </div>
+
+        <div th:if="${registration != null}"> 
             <h1>Chi Tiết Đăng Ký Dịch Vụ #<span th:text="${registration.maDangKy}"></span></h1>
             
             <a th:href="@{/resident/my-services}" class="btn btn-secondary btn-sm" style="margin-bottom: 20px;">
@@ -138,7 +144,7 @@
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Loại Dịch Vụ</span>
-                    <span class="detail-value" th:text="${registration.dichVu?.loaiDichVu?.dbValue}">Định kỳ</span>
+                    <span class="detail-value" th:text="${registration.dichVu?.loaiDichVu?.getDbValue()}">Định kỳ</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Người Phụ Trách</span>
@@ -155,7 +161,7 @@
                 <div class="detail-item">
                     <span class="detail-label">Trạng Thái</span>
                     <span class="detail-value">
-                        <span class="status-badge" th:text="${registration.trangThai?.dbValue}">Chờ Duyệt</span>
+                        <span class="status-badge" th:text="${registration.trangThai?.getDescription()}">Chờ Duyệt</span>
                     </span>
                 </div>
                 <div class="detail-item">
@@ -188,8 +194,13 @@
                     <i class="fas fa-times-circle"></i> Hủy Yêu Cầu Đăng Ký
                 </button>
             </form>
-
         </div>
-    </main>
+    </div>
+</main>
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>

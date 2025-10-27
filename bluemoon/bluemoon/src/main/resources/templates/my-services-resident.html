@@ -140,7 +140,7 @@
                                 <td th:text="${#temporals.format(reg.ngayDangKy, 'dd/MM/yyyy')}">10/10/2025</td>
                                 <td th:text="${reg.ngayBatDauSuDung != null ? #temporals.format(reg.ngayBatDauSuDung, 'dd/MM/yyyy') : 'N/A'}">15/10/2025</td>
                                 <td>
-                                    <span class="status-badge" th:text="${reg.trangThai?.dbValue}">Chờ Duyệt</span>
+                                    <span class="status-badge" th:text="${reg.trangThai?.getDescription()}">Chờ Duyệt</span>
                                 </td>
                                 <td>
                                     <a th:href="@{/resident/service-registration-detail(id=${reg.maDangKy})}" class="btn-action btn-info" title="Xem Chi Tiết">

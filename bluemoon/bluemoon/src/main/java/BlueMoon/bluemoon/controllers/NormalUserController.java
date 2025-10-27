@@ -389,7 +389,7 @@ public class NormalUserController {
 
         DangKyDichVu dkdv = dangKyDichVuService.getDangKyById(maDangKy)
             .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đăng ký dịch vụ."));
-        
+        model.addAttribute("registration", dkdv);
         if (!dkdv.getNguoiDung().getCccd().equals(currentUser.getCccd())) {
             model.addAttribute("errorMessage", "Bạn không có quyền xem chi tiết đăng ký này.");
             return "redirect:/resident/my-services";

@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Styles cho các badge trạng thái */
         .status-badge {
             display: inline-block;
             padding: 4px 8px;
@@ -54,17 +53,14 @@
                 <i class="fas fa-file-invoice-dollar"></i>
                 <span>Hóa Đơn Của Tôi</span>
             </a>
-            
             <a th:href="@{/resident/my-services}" class="nav-item">
                 <i class="fas fa-handshake"></i>
                 <span>Dịch Vụ Của Tôi</span>
             </a>
-            
             <a th:href="@{/resident/services}" class="nav-item active">
                 <i class="fas fa-concierge-bell"></i>
                 <span>Đăng Ký Dịch Vụ</span>
             </a>
-            
             <a href="javascript:void(0)" class="nav-item" onclick="featureToggle('Báo Cáo Sự Cố', 'Nộp yêu cầu xử lý sự cố tại căn hộ hoặc khu vực chung.')">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>Báo Cáo Sự Cố</span>
@@ -76,7 +72,7 @@
             </a>
         </nav>
         <div class="sidebar-footer">
-             <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+            <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
                 <button type="submit" class="logout-btn" style="width: 100%; border: none; background: none; text-align: left; padding: 0;">
                     <i class="fas fa-sign-out-alt"></i> Đăng Xuất
                 </button>
@@ -89,11 +85,10 @@
             <button class="menu-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <h1>Thông Tin Cá Nhân</h1>
+            <h1>Danh Sách Dịch Vụ</h1>
         </div>
         
         <div class="header-right">
-
             <div class="user-menu">
                 <div class="user-info">
                     <span class="user-name" th:text="${user.hoVaTen} ?: 'N/A'">Nguyễn Văn Thanh</span>
@@ -144,13 +139,13 @@
                             <tr th:each="service : ${activeServices}">
                                 <td th:text="${service.maDichVu}">1</td>
                                 <td><strong th:text="${service.tenDichVu}">Phí Gửi Xe Máy</strong></td>
-                                <td th:text="${service.loaiDichVu?.dbValue}">Phí Định Kỳ</td>
+                                <td th:text="${service.loaiDichVu?.getDbValue()}">Phí Định Kỳ</td>
                                 <td>
                                     <span th:text="${#numbers.formatInteger(service.giaThanh, 0, 'POINT')}">50,000</span>
                                     <span th:text="' ₫ / ' + ${service.donVi}">₫ / tháng</span>
                                 </td>
                                 <td>
-                                    <span th:text="${service.trangThai?.dbValue}">Hoạt Động</span>
+                                    <span th:text="${service.trangThai?.name()}">Hoạt Động</span>
                                 </td>
                                 <td>
                                     <a th:href="@{/resident/service-register-form(id=${service.maDichVu})}" class="btn btn-sm btn-primary" title="Đăng Ký">
@@ -167,5 +162,10 @@
             </div>
         </div>
     </main>
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 BlueMoon Apartment Management System. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>
