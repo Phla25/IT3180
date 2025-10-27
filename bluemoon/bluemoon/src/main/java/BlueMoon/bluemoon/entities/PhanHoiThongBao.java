@@ -1,6 +1,8 @@
 package BlueMoon.bluemoon.entities;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+
 import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 
@@ -17,7 +19,8 @@ public class PhanHoiThongBao {
     // SỬA ĐỔI: Thay thế BaoCaoSuCo bằng ThongBao
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_thong_bao", nullable = false)
-    private ThongBao thongBao; // LIÊN KẾT VỚI THÔNG BÁO
+    private ThongBao thongBao; // <-- Dùng trực tiếp entity, không dùng Optional
+
 
     // SỬA ĐỔI: Đổi tên cột và biến cho rõ ràng hơn
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,15 +43,14 @@ public class PhanHoiThongBao {
     }
 
     // SỬA ĐỔI: Cập nhật Constructor
+ // Constructor
     public PhanHoiThongBao(ThongBao thongBao, DoiTuong nguoiGui, String noiDung) {
         this.thongBao = thongBao;
         this.nguoiGui = nguoiGui;
         this.noiDung = noiDung;
     }
 
-    // -------------------- Getter & Setter --------------------
-
-    // SỬA ĐỔI: Cập nhật Getter/Setter
+    // Getter/Setter
     public ThongBao getThongBao() {
         return thongBao;
     }
@@ -56,9 +58,18 @@ public class PhanHoiThongBao {
     public void setThongBao(ThongBao thongBao) {
         this.thongBao = thongBao;
     }
+
+
+    // -------------------- Getter & Setter --------------------
+
+    // SỬA ĐỔI: Cập nhật Getter/Setter
     
     public void setNoiDung(String noiDung) {
     	this.noiDung = noiDung;
+    }
+    
+    public String getNoiDung() {
+    	return noiDung;
     }
 
     public DoiTuong getNguoiGui() {
@@ -77,4 +88,8 @@ public class PhanHoiThongBao {
             this.thoiGianGui = LocalDateTime.now();
         }
     }
+    public LocalDateTime getThoiGianGui() {
+        return thoiGianGui;
+    }
+
 }
