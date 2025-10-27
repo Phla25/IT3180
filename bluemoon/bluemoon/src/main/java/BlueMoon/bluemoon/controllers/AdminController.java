@@ -1,6 +1,7 @@
 package BlueMoon.bluemoon.controllers;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import BlueMoon.bluemoon.daos.BaoCaoSuCoDAO;
+import BlueMoon.bluemoon.daos.DoiTuongDAO;
 import BlueMoon.bluemoon.daos.HoGiaDinhDAO;
 import BlueMoon.bluemoon.daos.HoaDonDAO;
 import BlueMoon.bluemoon.entities.BaoCaoSuCo;
@@ -24,11 +26,13 @@ import BlueMoon.bluemoon.entities.HoGiaDinh;
 import BlueMoon.bluemoon.entities.HoaDon;
 import BlueMoon.bluemoon.entities.TaiSanChungCu;
 import BlueMoon.bluemoon.entities.ThanhVienHo;
+import BlueMoon.bluemoon.entities.ThongBao;
 import BlueMoon.bluemoon.services.CuDanService;
 import BlueMoon.bluemoon.services.HoGiaDinhService;
 import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
 import BlueMoon.bluemoon.services.TaiSanChungCuService;
+import BlueMoon.bluemoon.services.ThongBaoService;
 import BlueMoon.bluemoon.utils.AccountStatus;
 import BlueMoon.bluemoon.utils.Gender;
 import BlueMoon.bluemoon.utils.HouseholdStatus;
@@ -125,6 +129,7 @@ public class AdminController {
     public String showResidentList(Model model, 
                                @RequestParam(required = false) String keyword,
                                @RequestParam(required = false) ResidentStatus trangThaiDanCu,
+                               @RequestParam(required = false) AccountStatus accountStatus,
                                Authentication auth) {
     
         // 1. Lấy thông tin người dùng đang đăng nhập (header)
@@ -137,8 +142,8 @@ public class AdminController {
         // 2. Lấy danh sách đối tượng (có áp dụng tìm kiếm/lọc)
         // Nếu có tham số tìm kiếm, gọi hàm lọc; nếu không, lấy tất cả.
         List<DoiTuong> danhSachDoiTuong;
-        if (keyword != null || trangThaiDanCu != null) {
-            danhSachDoiTuong = cuDanService.timKiemvaLoc(keyword, trangThaiDanCu);
+        if (keyword != null || trangThaiDanCu != null || accountStatus != null) {
+            danhSachDoiTuong = cuDanService.timKiemvaLoc(keyword, trangThaiDanCu, accountStatus);
         } else {
             danhSachDoiTuong = cuDanService.layDanhSachCuDan();
         }
@@ -148,7 +153,8 @@ public class AdminController {
     
         // 4. (Tùy chọn) Thêm thông tin phân trang
         model.addAttribute("totalResidents", danhSachDoiTuong.size()); // Giả định không phân trang
-    
+        
+        model.addAttribute("accountStatuses", AccountStatus.values());
         return "residents"; // Giả định tên file Thymeleaf là residents-list.html
     }
     /**
@@ -1098,4 +1104,55 @@ public class AdminController {
         }
         return "redirect:/admin/fees";
     }
+    
+    @Autowired
+    private ThongBaoService thongBaoService;
+
+    @Autowired
+    private DoiTuongDAO doiTuongDAO; // ✅ Dùng DAO có sẵn
+
+    // 📨 Hiển thị danh sách thông báo
+    @GetMapping("/notifications")
+    public String hienThiThongBao(Model model, Principal principal) {
+        List<ThongBao> thongBaos = thongBaoService.layTatCaThongBaoMoiNhat();
+        model.addAttribute("thongBaos", thongBaos);
+
+        // ✅ Lấy thông tin người đang đăng nhập
+        DoiTuong user = null;
+        if (principal != null) {
+            user = doiTuongDAO.findByCccd(principal.getName()).orElse(null);
+        }
+        model.addAttribute("user", user);
+
+        return "admin-notifications";
+    }
+
+    // 🆕 Gửi thông báo mới
+    @PostMapping("/notifications/send")
+    public String guiThongBao(
+            @RequestParam("tieuDe") String tieuDe,
+            @RequestParam("noiDung") String noiDung,
+            Principal principal
+    ) {
+        // ✅ Lấy người gửi thật từ tài khoản đang đăng nhập
+        DoiTuong nguoiTao = null;
+        if (principal != null) {
+            nguoiTao = doiTuongDAO.findByCccd(principal.getName()).orElse(null);
+        }
+
+        // Nếu không có người đăng nhập (trường hợp test), dùng giả lập
+        if (nguoiTao == null) {
+            nguoiTao = new DoiTuong();
+            nguoiTao.setCccd("BQT");
+            nguoiTao.setHoVaTen("Ban Quản Trị");
+        }
+
+        // ✅ Gọi service để lưu thông báo
+        thongBaoService.taoVaGuiThongBao(tieuDe, noiDung, nguoiTao);
+
+        return "redirect:/admin/notifications?success=true";
+    }
 }
+
+
+
