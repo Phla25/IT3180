@@ -3,6 +3,7 @@ package BlueMoon.bluemoon.services;
 import BlueMoon.bluemoon.daos.ThongBaoDAO;
 import BlueMoon.bluemoon.daos.PhanHoiThongBaoDAO;
 import BlueMoon.bluemoon.entities.ThongBao;
+import BlueMoon.bluemoon.models.PhanHoiThongBaoDTO;
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.entities.PhanHoiThongBao;
 
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ThongBaoService {
@@ -63,4 +65,21 @@ public class ThongBaoService {
         // Sửa để gọi phương thức FETCH JOIN
         return phanHoiThongBaoDAO.findByThongBaoMaThongBaoWithNguoiGuiEagerly(maThongBao); 
     }
+    
+    public List<PhanHoiThongBao> getPhanHoiByThongBao(Integer maThongBao) {
+        return phanHoiThongBaoDAO.findByThongBaoMaThongBaoWithNguoiGuiEagerly(maThongBao);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PhanHoiThongBaoDTO> getPhanHoiDTOByThongBao(Integer maThongBao) {
+        List<PhanHoiThongBao> list = phanHoiThongBaoDAO
+            .findByThongBaoMaThongBaoWithNguoiGuiEagerly(maThongBao);
+
+        return list.stream()
+            .map(ph -> new PhanHoiThongBaoDTO(ph))
+            .collect(Collectors.toList());
+    }
+
+
+
 }
