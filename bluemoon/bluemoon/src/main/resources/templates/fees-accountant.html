@@ -62,10 +62,6 @@
                 <i class="fas fa-file-invoice-dollar"></i>
                 <span>Quản Lý Hóa Đơn</span>
             </a>
-            <a href="#" class="nav-item" onclick="showFeatureToggle('Xác Nhận Thanh Toán', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
-                <i class="fas fa-money-check"></i>
-                <span>Xác Nhận Thanh Toán</span>
-            </a>
             <a href="#" class="nav-item" onclick="showFeatureToggle('Báo Cáo Tài Chính', 'Tính năng này đang được phát triển và sẽ sớm ra mắt.')">
                 <i class="fas fa-chart-bar"></i>
                 <span>Báo Cáo Tài Chính</span>
@@ -136,7 +132,8 @@
                             <tr>
                                 <th>Mã HĐ</th>
                                 <th>Hộ Gia Đình</th>
-                                <th>Loại Phí</th>
+                                <th>Người Gốc</th> 
+                                <th>Người TT</th> <th>Loại Phí</th>
                                 <th>Số Tiền</th>
                                 <th>Hạn Thanh Toán</th>
                                 <th>Trạng Thái</th>
@@ -147,6 +144,11 @@
                             <tr th:each="hoaDon : ${hoaDonList}">
                                 <td><strong th:text="'#' + ${hoaDon.maHoaDon}">#HD001</strong></td>
                                 <td th:text="${hoaDon.hoGiaDinh?.tenHo} ?: 'N/A'">Hộ Nguyễn Văn A</td>
+                                
+                                <td th:text="${hoaDon.nguoiDangKyDichVu?.hoVaTen} ?: 'BQT/Hộ Gốc'">Admin/Người đăng ký</td>
+                                
+                                <td th:text="${hoaDon.nguoiThanhToan?.hoVaTen} ?: 'N/A'">Cư dân/Kế toán</td>
+
                                 <td th:text="${hoaDon.loaiHoaDon?.dbValue} ?: 'N/A'">Phí Quản Lý</td>
                                 <td th:text="${#numbers.formatInteger(hoaDon.soTien, 0, 'POINT')} + ' ₫'">2,500,000 ₫</td>
                                 <td th:text="${hoaDon.hanThanhToan != null ? #temporals.format(hoaDon.hanThanhToan, 'dd/MM/yyyy') : 'N/A'}">31/10/2024</td>
@@ -155,7 +157,12 @@
                                           th:classappend="${hoaDon.trangThai?.name() == 'da_thanh_toan' ? 'badge-success' : (hoaDon.trangThai?.name() == 'qua_han' ? 'badge-danger' : 'badge-warning')}"
                                           th:text="${hoaDon.trangThai?.dbValue} ?: 'N/A'">Chưa thanh toán</span>
                                 </td>
-<td>
+                                <td>
+                                    <span class="status-badge" 
+                                          th:classappend="${hoaDon.trangThai?.name() == 'da_thanh_toan' ? 'badge-success' : (hoaDon.trangThai?.name() == 'qua_han' ? 'badge-danger' : 'badge-warning')}"
+                                          th:text="${hoaDon.trangThai?.dbValue} ?: 'N/A'">Chưa thanh toán</span>
+                                </td>
+                                <td>
                                     <a th:href="@{/accountant/fee-form(id=${hoaDon.maHoaDon})}" class="btn-action" title="Chỉnh Sửa">
                                         <i class="fas fa-edit"></i>
                                     </a>

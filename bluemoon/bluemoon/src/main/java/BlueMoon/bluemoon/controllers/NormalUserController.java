@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import BlueMoon.bluemoon.entities.DangKyDichVu;
+import BlueMoon.bluemoon.entities.DichVu;
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.entities.HoGiaDinh;
 import BlueMoon.bluemoon.entities.HoaDon;
@@ -22,6 +24,8 @@ import BlueMoon.bluemoon.models.HoGiaDinhDTO;
 import BlueMoon.bluemoon.models.HoaDonStatsDTO;
 import BlueMoon.bluemoon.models.SuCoStatsDTO;
 import BlueMoon.bluemoon.models.ThongBaoStatsDTO;
+import BlueMoon.bluemoon.services.DangKyDichVuService;
+import BlueMoon.bluemoon.services.DichVuService;
 import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
 import BlueMoon.bluemoon.services.ThanhVienHoService;
@@ -36,6 +40,8 @@ public class NormalUserController {
     private ThanhVienHoService thanhVienHoService;
     
     @Autowired private HoaDonService hoaDonService;
+    @Autowired private DichVuService dichVuService;
+    @Autowired private DangKyDichVuService dangKyDichVuService;
 
     /**
      * Helper: Lấy đối tượng DoiTuong hiện tại
@@ -284,5 +290,132 @@ public class NormalUserController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi thanh toán: " + e.getMessage());
             return "redirect:/resident/fee-detail?id=" + maHoaDon;
         }
+    }
+    /**
+     * Hiển thị danh sách Dịch vụ có thể đăng ký (Đang hoạt động)
+     * URL: /resident/services
+     */
+    @GetMapping("/resident/services")
+    public String showResidentServiceList(Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+        
+        // 1. Lấy danh sách dịch vụ đang hoạt động
+        List<DichVu> activeServices = dichVuService.getAllActiveDichVu(); // CẦN THÊM TRONG DichVuService
+        
+        model.addAttribute("activeServices", activeServices);
+        return "service-list-resident"; 
+    }
+    /**
+     * Hiển thị form Đăng ký Dịch vụ (GET)
+     * URL: /resident/service-register-form?id={maDichVu}
+     */
+    @GetMapping("/resident/service-register-form")
+    public String showServiceRegistrationForm(@RequestParam("id") Integer maDichVu, 
+                                              Model model, 
+                                              Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        model.addAttribute("user", currentUser);
+        
+        // 1. Lấy thông tin dịch vụ
+        DichVu dichVu = dichVuService.getDichVuById(maDichVu)
+            .orElseThrow(() -> new IllegalArgumentException("Dịch vụ không tồn tại."));
+        
+        // 2. Tạo đối tượng form mới
+        DangKyDichVu dangKyYeuCau = new DangKyDichVu();
+        dangKyYeuCau.setDichVu(dichVu);
+        
+        model.addAttribute("dichVu", dichVu);
+        model.addAttribute("dangKyYeuCau", dangKyYeuCau);
+        return "service-registration-resident";
+    }
+    /**
+     * Xử lý Đăng ký Dịch vụ (POST)
+     * URL: /resident/service-register-save
+     */
+    @PostMapping("/resident/service-register-save")
+    public String handleServiceRegistration(@ModelAttribute("dangKyYeuCau") DangKyDichVu dangKyYeuCau,
+                                            @RequestParam("maDichVu") Integer maDichVu, // Dùng maDichVu thay vì lấy từ object
+                                            Authentication auth,
+                                            RedirectAttributes redirectAttributes) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        
+        // Thiết lập lại DichVu (do form chỉ gửi maDichVu)
+        DichVu dichVu = dichVuService.getDichVuById(maDichVu)
+            .orElseThrow(() -> new IllegalArgumentException("Dịch vụ không tồn tại."));
+        dangKyYeuCau.setDichVu(dichVu);
+        
+        try {
+            dangKyDichVuService.taoYeuCauDangKy(dangKyYeuCau, currentUser.getCccd());
+            
+            String message = dichVu.getGiaThanh().signum() > 0 
+                             ? "Đăng ký dịch vụ thành công! Vui lòng thanh toán hóa đơn phí đăng ký."
+                             : "Yêu cầu đăng ký dịch vụ đã được gửi, đang chờ Ban Quản Trị duyệt.";
+                             
+            redirectAttributes.addFlashAttribute("successMessage", message);
+            return "redirect:/resident/my-services";
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi đăng ký dịch vụ: " + e.getMessage());
+            return "redirect:/resident/service-register-form?id=" + maDichVu;
+        }
+    }
+    
+    /**
+     * Hiển thị danh sách Dịch vụ đã đăng ký
+     * URL: /resident/my-services
+     */
+    @GetMapping("/resident/my-services")
+    public String showMyServices(Model model, Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        model.addAttribute("user", currentUser);
+        
+        // Lấy danh sách dịch vụ đã đăng ký của người dùng
+        List<DangKyDichVu> myRegistrations = dangKyDichVuService.getDichVuDaDangKyByCccd(currentUser.getCccd()); 
+        
+        model.addAttribute("myRegistrations", myRegistrations);
+        return "my-services-resident"; 
+    }
+    
+    /**
+     * Chi tiết Đăng ký Dịch vụ
+     * URL: /resident/service-registration-detail?id={maDangKy}
+     */
+    @GetMapping("/resident/service-registration-detail")
+    public String showServiceRegistrationDetail(@RequestParam("id") Integer maDangKy, 
+                                                Model model, 
+                                                Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        model.addAttribute("user", currentUser);
+
+        DangKyDichVu dkdv = dangKyDichVuService.getDangKyById(maDangKy)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đăng ký dịch vụ."));
+        
+        if (!dkdv.getNguoiDung().getCccd().equals(currentUser.getCccd())) {
+            model.addAttribute("errorMessage", "Bạn không có quyền xem chi tiết đăng ký này.");
+            return "redirect:/resident/my-services";
+        }
+        
+        model.addAttribute("registration", dkdv);
+        return "service-details-resident"; 
+    }
+    
+    /**
+     * Xử lý Hủy Đăng ký Dịch vụ
+     * URL: /resident/service-cancel
+     */
+    @PostMapping("/resident/service-cancel")
+    public String handleServiceCancel(@RequestParam("maDangKy") Integer maDangKy, 
+                                      Authentication auth,
+                                      RedirectAttributes redirectAttributes) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        
+        try {
+            dangKyDichVuService.huyDangKyDichVu(maDangKy, currentUser.getCccd());
+            redirectAttributes.addFlashAttribute("successMessage", "Đã hủy yêu cầu đăng ký #" + maDangKy + " thành công.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hủy đăng ký: " + e.getMessage());
+        }
+        
+        return "redirect:/resident/my-services";
     }
 }

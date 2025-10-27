@@ -19,12 +19,16 @@ import BlueMoon.bluemoon.daos.BaoCaoSuCoDAO;
 import BlueMoon.bluemoon.daos.HoGiaDinhDAO;
 import BlueMoon.bluemoon.daos.HoaDonDAO;
 import BlueMoon.bluemoon.entities.BaoCaoSuCo;
+import BlueMoon.bluemoon.entities.DangKyDichVu;
+import BlueMoon.bluemoon.entities.DichVu;
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.entities.HoGiaDinh;
 import BlueMoon.bluemoon.entities.HoaDon;
 import BlueMoon.bluemoon.entities.TaiSanChungCu;
 import BlueMoon.bluemoon.entities.ThanhVienHo;
 import BlueMoon.bluemoon.services.CuDanService;
+import BlueMoon.bluemoon.services.DangKyDichVuService;
+import BlueMoon.bluemoon.services.DichVuService;
 import BlueMoon.bluemoon.services.HoGiaDinhService;
 import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
@@ -49,6 +53,7 @@ public class AdminController {
     private NguoiDungService nguoiDungService;
 
     @Autowired private HoGiaDinhService hoGiaDinhService;
+    @Autowired private DichVuService dichVuService;
 
     private DoiTuong getCurrentUser(Authentication auth) {
         String id = auth.getName();
@@ -62,6 +67,7 @@ public class AdminController {
     @Autowired private HoaDonDAO hoaDonDAO;
     @Autowired private TaiSanChungCuService taiSanChungCuService;
     @Autowired private HoaDonService hoaDonService;
+    @Autowired private DangKyDichVuService dangKyDichVuService;
 
     @GetMapping("/dashboard")
     public String showAdminDashboard(Model model, Authentication auth) {
@@ -125,6 +131,7 @@ public class AdminController {
     public String showResidentList(Model model, 
                                @RequestParam(required = false) String keyword,
                                @RequestParam(required = false) ResidentStatus trangThaiDanCu,
+                               @RequestParam(required = false) AccountStatus accountStatus,
                                Authentication auth) {
     
         // 1. Lấy thông tin người dùng đang đăng nhập (header)
@@ -137,8 +144,8 @@ public class AdminController {
         // 2. Lấy danh sách đối tượng (có áp dụng tìm kiếm/lọc)
         // Nếu có tham số tìm kiếm, gọi hàm lọc; nếu không, lấy tất cả.
         List<DoiTuong> danhSachDoiTuong;
-        if (keyword != null || trangThaiDanCu != null) {
-            danhSachDoiTuong = cuDanService.timKiemvaLoc(keyword, trangThaiDanCu);
+        if (keyword != null || trangThaiDanCu != null || accountStatus != null) {
+            danhSachDoiTuong = cuDanService.timKiemvaLoc(keyword, trangThaiDanCu, accountStatus);
         } else {
             danhSachDoiTuong = cuDanService.layDanhSachCuDan();
         }
@@ -148,7 +155,8 @@ public class AdminController {
     
         // 4. (Tùy chọn) Thêm thông tin phân trang
         model.addAttribute("totalResidents", danhSachDoiTuong.size()); // Giả định không phân trang
-    
+        
+        model.addAttribute("accountStatuses", AccountStatus.values());
         return "residents"; // Giả định tên file Thymeleaf là residents-list.html
     }
     /**
@@ -1097,5 +1105,125 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xóa: " + e.getMessage());
         }
         return "redirect:/admin/fees";
+    }
+    // =======================================================
+    // QUẢN LÝ DỊCH VỤ (SERVICES)
+    // =======================================================
+
+    /**
+     * HIỂN THỊ DANH SÁCH DỊCH VỤ (GET)
+     * URL: /admin/service-list
+     */
+    @GetMapping("/service-list")
+    public String showServiceList(Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+    
+        // 1. Lấy danh sách tất cả dịch vụ
+        List<DichVu> dichVuList = dichVuService.getAllDichVu();
+    
+        model.addAttribute("services", dichVuList);
+        model.addAttribute("serviceTypes", BlueMoon.bluemoon.utils.ServiceType.values());
+        model.addAttribute("assetStatuses", BlueMoon.bluemoon.utils.AssetStatus.values());
+
+        return "service-list-admin"; // Trỏ đến file Thymeleaf mới
+    }
+
+    // -------------------------------------------------------
+
+    /**
+     * HIỂN THỊ FORM THÊM/SỬA DỊCH VỤ (GET)
+     * URL: /admin/service-form?id={id}
+     */
+    @GetMapping("/service-form")
+    public String showServiceForm(@RequestParam(value = "id", required = false) Integer maDichVu, 
+                                  Model model, 
+                                  Authentication auth) {
+    
+        model.addAttribute("user", getCurrentUser(auth));
+        DichVu dichVu = new DichVu();
+        String pageTitle = "Tạo Dịch Vụ Mới";
+
+        if (maDichVu != null) {
+            // Chế độ chỉnh sửa
+            dichVu = dichVuService.getDichVuById(maDichVu)
+                       .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Dịch Vụ Mã: " + maDichVu));
+            pageTitle = "Chỉnh Sửa Dịch Vụ #" + maDichVu;
+        }
+    
+        model.addAttribute("dichVu", dichVu);
+        model.addAttribute("pageTitle", pageTitle);
+        model.addAttribute("serviceTypes", BlueMoon.bluemoon.utils.ServiceType.values());
+        model.addAttribute("assetStatuses", BlueMoon.bluemoon.utils.AssetStatus.values());
+        // Thêm Admin/Ban Quản Trị để chọn người phụ trách (nếu cần, tạm bỏ qua)
+        // model.addAttribute("adminList", nguoiDungService.getUsersByRole(UserRole.ADMIN)); 
+
+        return "service-add-edit-admin"; // Trỏ đến file Thymeleaf mới
+    }
+
+    // -------------------------------------------------------
+
+    /**
+     * XỬ LÝ LƯU DỊCH VỤ (POST)
+     * URL: /admin/service-save
+     */
+    @PostMapping("/service-save")
+    public String handleServiceSave(@ModelAttribute("dichVu") DichVu dichVu, 
+                                    Authentication auth,
+                                    RedirectAttributes redirectAttributes) {
+        DoiTuong currentUser = getCurrentUser(auth); // Admin là người tạo/cập nhật
+    
+        try {
+            // Tên Ban Quản Trị (Admin) phải được lấy từ currentUser (CCCD)
+            DichVu savedDichVu = dichVuService.saveOrUpdateDichVu(dichVu, currentUser.getCccd());
+        
+            String message = (savedDichVu.getMaDichVu() == null) 
+                             ? "Tạo mới Dịch vụ thành công!" 
+                             : "Cập nhật Dịch vụ #" + savedDichVu.getMaDichVu() + " thành công!";
+        
+            redirectAttributes.addFlashAttribute("successMessage", message);
+            return "redirect:/admin/service-list";
+        
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            // Quay lại form với ID (nếu có)
+            String idParam = (dichVu.getMaDichVu() != null) ? "?id=" + dichVu.getMaDichVu() : "";
+            return "redirect:/admin/service-form" + idParam;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi lưu: " + e.getMessage());
+            return "redirect:/admin/service-list";
+        }
+    }
+
+    // -------------------------------------------------------
+
+    /**
+     * XỬ LÝ XÓA DỊCH VỤ (GET/Chuyển trạng thái)
+     * URL: /admin/service-delete?id={id}
+     */
+    @GetMapping("/service-delete")
+    public String handleServiceDelete(@RequestParam("id") Integer maDichVu, 
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            // Giả định logic xóa/chuyển trạng thái nằm trong Service
+            dichVuService.deleteDichVu(maDichVu); // Thực tế nên là thay đổi trạng thái sang KHÔNG HOẠT ĐỘNG
+            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa (hoặc chuyển trạng thái) Dịch vụ #" + maDichVu + " thành công.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi xóa: " + e.getMessage());
+        }
+        return "redirect:/admin/service-list";
+    }
+    @GetMapping("/service-registrations")
+    public String showServiceRegistrations(Model model, Authentication auth) {
+        model.addAttribute("user", getCurrentUser(auth));
+        
+        // 1. Lấy danh sách tất cả đăng ký dịch vụ
+        List<DangKyDichVu> allRegistrations = dangKyDichVuService.getAllDangKyDichVu(); // CẦN THÊM TRONG DangKyDichVuService
+        
+        model.addAttribute("allRegistrations", allRegistrations);
+        model.addAttribute("registrationStatuses", BlueMoon.bluemoon.utils.RegistrationStatus.values());
+        
+        return "service-registrations-admin"; // Trỏ đến file Thymeleaf mới
     }
 }

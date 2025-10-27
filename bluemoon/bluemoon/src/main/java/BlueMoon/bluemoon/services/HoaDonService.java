@@ -25,6 +25,7 @@ public class HoaDonService {
 
     @Autowired private HoaDonDAO hoaDonDAO;
     @Autowired private HoGiaDinhService hoGiaDinhService;
+    @Autowired private ThanhVienHoService thanhVienHoService;
 
     /**
      * Lấy thông tin thống kê hóa đơn chính cho dashboard cư dân.
@@ -64,8 +65,8 @@ public class HoaDonService {
             list.sort(Comparator.comparing(HoaDon::getNgayTao, Comparator.reverseOrder()));
             
             return list.size() > limit ? list.subList(0, limit) : list;
-        }
-    
+    }
+        
     /**
      * Lấy danh sách hóa đơn cần Kế toán xử lý/xác nhận.
      */
@@ -160,7 +161,11 @@ public class HoaDonService {
     }
     /**
      * CẬP NHẬT: Lưu hoặc Cập nhật Hóa đơn (Chức năng CRUD) bởi Admin/Kế toán.
-     * @param hoaDon Đối tượng HoaDon được bind từ form.
+     * * Quy tắc logic mới cho nguoiDangKyDichVu:
+     * 1. TẠO MỚI (bởi Admin/Kế toán): nguoiDangKyDichVu = Chủ hộ.
+     * 2. CẬP NHẬT: Giữ lại nguoiDangKyDichVu cũ (có thể là Chủ hộ hoặc người đăng ký dịch vụ).
+     * 3. HỆ THỐNG TỰ SINH (Đăng ký DV): logic này nằm trong DangKyDichVuService, không bị ảnh hưởng.
+     * * @param hoaDon Đối tượng HoaDon được bind từ form.
      * @param maHo Mã Hộ gia đình được chọn từ form.
      * @param nguoiThucHien Đối tượng Admin/Kế toán đang thực hiện thao tác.
      * @return HoaDon đã được lưu.
@@ -171,27 +176,25 @@ public class HoaDonService {
         final boolean isNewInvoice = hoaDon.getMaHoaDon() == null;
     
         // 1. Tải lại/Thiết lập HoGiaDinh từ maHo
-        // ⚠️ CHÚ Ý: Cần có HoGiaDinhService để tải đối tượng HoGiaDinh từ maHo (String)
         HoGiaDinh hoGiaDinh = hoGiaDinhService.getHouseholdById(maHo)
             .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Hộ gia đình với Mã Hộ: " + maHo));
         hoaDon.setHoGiaDinh(hoGiaDinh);
 
         // 2. Xử lý Logic Cập nhật (Nếu không phải tạo mới)
         if (!isNewInvoice) {
-            // Tải hóa đơn gốc từ DB bằng phương thức findById() mới tạo
-            HoaDon hdOriginal = hoaDonDAO.findById(hoaDon.getMaHoaDon()) 
+            HoaDon hdOriginal = hoaDonDAO.findAllWithHoGiaDinh().stream()
+                .filter(h -> h.getMaHoaDon().equals(hoaDon.getMaHoaDon()))
+                .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Hóa đơn cần cập nhật."));
             
-            // Kiểm tra logic:
-            // Nếu hóa đơn gốc đã thanh toán VÀ trạng thái mới KHÔNG phải là đã thanh toán
+            // [Logic kiểm tra trạng thái thanh toán giữ nguyên]
             if (hdOriginal.getTrangThai() == InvoiceStatus.da_thanh_toan && hoaDon.getTrangThai() != InvoiceStatus.da_thanh_toan) {
-                // Đây là lỗi logic nếu bạn cấm kế toán hoàn tác trạng thái đã thanh toán.
-                throw new IllegalArgumentException("Không thể chuyển Hóa đơn đã thanh toán về trạng thái chưa thanh toán.");
+                 throw new IllegalArgumentException("Không thể chuyển Hóa đơn đã thanh toán về trạng thái chưa thanh toán.");
             }
         
-            // Giữ lại người tạo hóa đơn ban đầu nếu người dùng không thiết lập lại
+            // Giữ lại người tạo/người gốc hóa đơn ban đầu (Quan trọng để giữ người đăng ký dịch vụ)
             if (hoaDon.getNguoiDangKyDichVu() == null) {
-                 hoaDon.setNguoiDangKyDichVu(hdOriginal.getNguoiDangKyDichVu());
+                hoaDon.setNguoiDangKyDichVu(hdOriginal.getNguoiDangKyDichVu());
             }
         
             // Giữ lại người thanh toán/xác nhận ban đầu
@@ -200,13 +203,18 @@ public class HoaDonService {
             }
         }
     
-        // 3. Thiết lập Người Tạo/Người Xác Nhận & Trạng Thái Ban Đầu (Chung cho Create/Update)
-    
+        // 3. Thiết lập Người Tạo/Người Gốc & Trạng Thái Ban Đầu (Quan trọng cho Create)
         if (isNewInvoice) {
-            // Thiết lập người tạo Hóa đơn (Admin/Kế toán)
-            hoaDon.setNguoiDangKyDichVu(nguoiThucHien);
+            
+        // ✨ QUY TẮC MỚI: TÌM CHỦ HỘ VÀ SET LÀM NGƯỜI ĐĂNG KÝ DỊCH VỤ/NGƯỜI GỐC
+            Optional<DoiTuong> chuHoOpt = thanhVienHoService.getChuHoByMaHo(maHo);
+            DoiTuong chuHo = chuHoOpt
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Chủ hộ cho Hộ gia đình này. Không thể tạo hóa đơn."));
+            
+            // Set người gốc hóa đơn là Chủ hộ
+            hoaDon.setNguoiDangKyDichVu(chuHo); 
         
-            // Thiết lập ngày tạo và trạng thái mặc định
+            // Thiết lập ngày tạo và trạng thái mặc định (giữ nguyên)
             if (hoaDon.getNgayTao() == null) {
                 hoaDon.setNgayTao(LocalDateTime.now());
             }
@@ -216,13 +224,12 @@ public class HoaDonService {
         }
     
         // 4. Logic Xử lý Trạng Thái "ĐÃ THANH TOÁN" (Áp dụng cho cả Create/Update)
-        // Nếu trạng thái được set là ĐÃ THANH TOÁN và chưa có Ngày Thanh Toán
+        // [Logic này giữ nguyên]
         if (hoaDon.getTrangThai() == InvoiceStatus.da_thanh_toan && hoaDon.getNgayThanhToan() == null) {
             hoaDon.setNgayThanhToan(LocalDateTime.now());
         
-            // Kế toán/Admin là người xác nhận thanh toán
             if (hoaDon.getNguoiThanhToan() == null) {
-                 hoaDon.setNguoiThanhToan(nguoiThucHien);
+                 hoaDon.setNguoiThanhToan(nguoiThucHien); // Admin/Kế toán là người xác nhận
             }
         }   
     
@@ -284,8 +291,6 @@ public class HoaDonService {
         // Chuyển trạng thái sang đã thanh toán
         hd.setTrangThai(InvoiceStatus.da_thanh_toan);
         hd.setNgayThanhToan(LocalDateTime.now());
-        // Lưu thông tin người xác nhận
-        hd.setNguoiDangKyDichVu(nguoiXacNhan);
     }
     
     /**
@@ -317,5 +322,4 @@ public class HoaDonService {
         
         hoaDonDAO.save(hd);
     }
-    
 }

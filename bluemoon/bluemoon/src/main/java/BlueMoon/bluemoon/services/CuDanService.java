@@ -192,4 +192,10 @@ public void xoaCuDan(String cccd, ResidentStatus lyDo) {
         }
         return doiTuongDAO.searchResidents(keyword);
     }
+    public List<DoiTuong> timKiemvaLoc(String keyword, ResidentStatus trangThaiDanCu, AccountStatus accountStatus) {
+        if ((keyword != null && !keyword.trim().isEmpty()) || trangThaiDanCu != null|| accountStatus != null) {
+            return doiTuongDAO.searchResidentsAndFilter(keyword, trangThaiDanCu, accountStatus);
+        }
+        return doiTuongDAO.findResidentsInComplex(ResidentStatus.o_chung_cu);
+    }
 }

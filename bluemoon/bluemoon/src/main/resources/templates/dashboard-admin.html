@@ -103,9 +103,14 @@
                 <i class="fas fa-file-invoice-dollar"></i> 
                 <span>Quản Lý Khoản Phí</span>
             </a>
-            <a href="#" class="nav-item">
+            <a th:href="@{/admin/service-list}" class="nav-item">
                 <i class="fas fa-concierge-bell"></i>
                 <span>Quản Lý Dịch Vụ</span>
+            </a>
+            <a th:href="@{/admin/service-registrations}" class="nav-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Quản Lý Đăng Ký Dịch Vụ</span>
+                <span class="feature-badge">MỚI</span>
             </a>
             <a href="#" class="nav-item">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -229,7 +234,7 @@
                     <i class="fas fa-building"></i>
                     <span>Thêm Tài Sản</span>
                 </a>
-                <a href="fees.html" class="btn btn-warning" style="padding: 16px; color: white;">
+                <a th:href="@{/admin/fees}" class="btn btn-warning" style="padding: 16px; color: white;">
                     <i class="fas fa-file-invoice"></i>
                     <span>Quản Lý Khoản Phí</span>
                 </a>
