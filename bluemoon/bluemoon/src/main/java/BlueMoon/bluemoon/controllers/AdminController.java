@@ -2,6 +2,7 @@ package BlueMoon.bluemoon.controllers;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import BlueMoon.bluemoon.daos.BaoCaoSuCoDAO;
+import BlueMoon.bluemoon.daos.DoiTuongDAO;
 import BlueMoon.bluemoon.daos.HoGiaDinhDAO;
 import BlueMoon.bluemoon.daos.HoaDonDAO;
 import BlueMoon.bluemoon.entities.BaoCaoSuCo;
@@ -31,9 +33,11 @@ import BlueMoon.bluemoon.entities.HoGiaDinh;
 import BlueMoon.bluemoon.entities.HoaDon;
 import BlueMoon.bluemoon.entities.TaiSanChungCu;
 import BlueMoon.bluemoon.entities.ThanhVienHo;
+import BlueMoon.bluemoon.entities.ThongBao;
 import BlueMoon.bluemoon.models.ApartmentReportDTO;
 import BlueMoon.bluemoon.models.HouseholdReportDTO;
 import BlueMoon.bluemoon.models.InvoiceReportDTO;
+import BlueMoon.bluemoon.models.PhanHoiThongBaoDTO;
 import BlueMoon.bluemoon.models.ResidentReportDTO;
 import BlueMoon.bluemoon.services.CuDanService;
 import BlueMoon.bluemoon.services.DangKyDichVuService;
@@ -42,8 +46,10 @@ import BlueMoon.bluemoon.services.ExportService;
 import BlueMoon.bluemoon.services.HoGiaDinhService;
 import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
+import BlueMoon.bluemoon.services.PhanHoiThongBaoService;
 import BlueMoon.bluemoon.services.ReportService;
 import BlueMoon.bluemoon.services.TaiSanChungCuService;
+import BlueMoon.bluemoon.services.ThongBaoService;
 import BlueMoon.bluemoon.utils.AccountStatus;
 import BlueMoon.bluemoon.utils.Gender;
 import BlueMoon.bluemoon.utils.HouseholdStatus;
@@ -81,6 +87,9 @@ public class AdminController {
     @Autowired private DangKyDichVuService dangKyDichVuService;
     @Autowired private ReportService reportService;
     @Autowired private ExportService exportService;
+    @Autowired private ThongBaoService thongBaoService;
+    @Autowired private DoiTuongDAO doiTuongDAO;
+    @Autowired private PhanHoiThongBaoService phanHoiThongBaoService;
 
     @GetMapping("/dashboard")
     public String showAdminDashboard(Model model, Authentication auth) {
@@ -1627,5 +1636,61 @@ public class AdminController {
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+    // THÔNG BÁO 
+        // 📨 Hiển thị danh sách thông báo
+    @GetMapping("/notifications")
+    public String hienThiThongBao(Model model, Principal principal) {
+        List<ThongBao> thongBaos = thongBaoService.layTatCaThongBaoMoiNhat();
+        model.addAttribute("thongBaos", thongBaos);
+
+        //Lấy thông tin người đang đăng nhập
+        DoiTuong user = null;
+        if (principal != null) {
+            user = doiTuongDAO.findByCccd(principal.getName()).orElse(null);
+        }
+        model.addAttribute("user", user);
+
+        return "notification-admin";
+    }
+
+    // Gửi thông báo mới
+    @PostMapping("/notifications/send")
+    public String guiThongBao(
+            @RequestParam("tieuDe") String tieuDe,
+            @RequestParam("noiDung") String noiDung,
+            Principal principal
+    ) {
+        //Lấy người gửi thật từ tài khoản đang đăng nhập
+        DoiTuong nguoiTao = null;
+        if (principal != null) {
+            nguoiTao = doiTuongDAO.findByCccd(principal.getName()).orElse(null);
+        }
+
+        // Nếu không có người đăng nhập (trường hợp test), dùng giả lập
+        if (nguoiTao == null) {
+            nguoiTao = new DoiTuong();
+            nguoiTao.setCccd("BQT");
+            nguoiTao.setHoVaTen("Ban Quản Trị");
+        }
+
+        //Gọi service để lưu thông báo
+        thongBaoService.taoVaGuiThongBao(tieuDe, noiDung, nguoiTao);
+
+        return "redirect:/admin/notifications?success=true";
+    }
+    /**
+     * Endpoint REST API: Lấy danh sách phản hồi của một thông báo
+     * URL: GET /admin/notifications/{maThongBao}/replies
+     */
+    @GetMapping("/notifications/{maThongBao}/replies")
+    public ResponseEntity<List<PhanHoiThongBaoDTO>> getNotificationReplies(@PathVariable Integer maThongBao) {
+        
+        // 1. Lấy dữ liệu từ Service
+        List<PhanHoiThongBaoDTO> replies = phanHoiThongBaoService.getRepliesByMaThongBao(maThongBao);
+        
+        // 2. Trả về JSON
+        // Nếu không có phản hồi, trả về List rỗng (status 200)
+        return ResponseEntity.ok(replies);
     }
 }

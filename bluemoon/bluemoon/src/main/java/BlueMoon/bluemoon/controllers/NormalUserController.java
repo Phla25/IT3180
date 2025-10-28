@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import BlueMoon.bluemoon.entities.DangKyDichVu;
@@ -24,13 +26,16 @@ import BlueMoon.bluemoon.entities.DichVu;
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.entities.HoGiaDinh;
 import BlueMoon.bluemoon.entities.HoaDon;
+import BlueMoon.bluemoon.entities.ThongBao;
 import BlueMoon.bluemoon.models.ApartmentReportDTO;
 import BlueMoon.bluemoon.models.DichVuStatsDTO;
 import BlueMoon.bluemoon.models.HoGiaDinhDTO;
 import BlueMoon.bluemoon.models.HoaDonStatsDTO;
 import BlueMoon.bluemoon.models.HouseholdReportDTO;
 import BlueMoon.bluemoon.models.InvoiceReportDTO;
+import BlueMoon.bluemoon.models.PhanHoiThongBaoDTO;
 import BlueMoon.bluemoon.models.SuCoStatsDTO;
+import BlueMoon.bluemoon.models.ThongBaoDTO;
 import BlueMoon.bluemoon.models.ThongBaoStatsDTO;
 import BlueMoon.bluemoon.services.DangKyDichVuService;
 import BlueMoon.bluemoon.services.DichVuService;
@@ -39,6 +44,7 @@ import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
 import BlueMoon.bluemoon.services.ReportService;
 import BlueMoon.bluemoon.services.ThanhVienHoService;
+import BlueMoon.bluemoon.services.ThongBaoService;
 
 @Controller
 public class NormalUserController {
@@ -48,12 +54,13 @@ public class NormalUserController {
 
     @Autowired
     private ThanhVienHoService thanhVienHoService;
-    
     @Autowired private HoaDonService hoaDonService;
     @Autowired private DichVuService dichVuService;
     @Autowired private DangKyDichVuService dangKyDichVuService;
     @Autowired private ReportService reportService;
     @Autowired private ExportService exportService;
+    @Autowired private ThongBaoService thongBaoService;
+
     /**
      * Helper: Lấy đối tượng DoiTuong hiện tại
      * Giả sử username của principal là CCCD (đã được cấu hình trong UserDetailsService)
@@ -647,5 +654,70 @@ public class NormalUserController {
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+        @GetMapping("/resident/notifications")
+    public String hienThiThongBaoChoCuDan(Model model, Authentication auth) {
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+            return "redirect:/login?error=auth";
+        }
+
+        // Thêm thông tin người dùng vào model
+        model.addAttribute("user", currentUser);
+
+        // Lấy danh sách thông báo Entity từ service
+        List<ThongBao> thongBaos = thongBaoService.layTatCaThongBaoMoiNhat();
+        
+        // ✅ CHUYỂN ĐỔI Entity sang DTO
+        List<ThongBaoDTO> thongBaoDTOs = thongBaos.stream()
+            .map(ThongBaoDTO::new) // Sử dụng constructor DTO
+            .collect(Collectors.toList());
+            
+        // Truyền danh sách DTO vào model
+        model.addAttribute("thongBaos", thongBaoDTOs);
+
+        return "notifications-resident"; 
+    }
+    
+    @GetMapping("/resident/notifications/{maThongBao}/replies")
+    @ResponseBody
+    public List<PhanHoiThongBaoDTO> layDanhSachPhanHoi(@PathVariable Integer maThongBao) {
+        return thongBaoService.layPhanHoiTheoThongBao(maThongBao)
+                .stream()
+                .map(PhanHoiThongBaoDTO::new)
+                .collect(Collectors.toList());
+    }
+
+
+
+    // B. Phương thức POST: Xử lý việc gửi phản hồi từ cư dân
+    @PostMapping("/resident/notifications/reply")
+    public String guiPhanHoi(@RequestParam("maThongBao") Integer maThongBao,
+                             @RequestParam("noiDungPhanHoi") String noiDung,
+                             Authentication auth,
+                             RedirectAttributes redirectAttributes) {
+
+        DoiTuong currentUser = getCurrentUser(auth);
+        if (currentUser == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực người dùng.");
+            return "redirect:/resident/notifications";
+        }
+
+        if (noiDung.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Nội dung phản hồi không được để trống.");
+            return "redirect:/resident/notifications"; // hoặc quay lại trang modal
+        }
+
+        try {
+            thongBaoService.themPhanHoi(maThongBao, currentUser, noiDung);
+            redirectAttributes.addFlashAttribute("successMessage", "Phản hồi đã được gửi thành công!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống khi gửi phản hồi.");
+        }
+        
+        // Quay lại trang danh sách thông báo
+        return "redirect:/resident/notifications"; 
     }
 }
