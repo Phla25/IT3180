@@ -69,12 +69,12 @@ public class HoaDonDAO {
     public Optional<HoaDon> findById(Integer maHoaDon) {
         // Sử dụng Integer cho maHoaDon
         String jpql = "SELECT hd FROM HoaDon hd "
-                    + "JOIN FETCH hd.hoGiaDinh h " 
-                    // Tải người thực hiện giao dịch (cccd_thanh_vien)
-                    + "LEFT JOIN FETCH hd.nguoiThucHienGiaoDich ntdg " 
-                    // Tải người thanh toán/xác nhận (cccd_nguoi_thanh_toan)
-                    + "LEFT JOIN FETCH hd.nguoiThanhToanHoacXacNhan nttx "
-                    + "WHERE hd.maHoaDon = :maHoaDon";
+                + "JOIN FETCH hd.hoGiaDinh h " 
+                // SỬA: Dùng tên thuộc tính mới cho Người tạo HĐ/Người đăng ký
+                + "LEFT JOIN FETCH hd.nguoiDangKyDichVu ndkdv " 
+                // SỬA: Dùng tên thuộc tính mới cho Người Thanh Toán/Xác nhận
+                + "LEFT JOIN FETCH hd.nguoiThanhToan ntt "
+                + "WHERE hd.maHoaDon = :maHoaDon";
         try {
              HoaDon hoaDon = entityManager.createQuery(jpql, HoaDon.class)
                 .setParameter("maHoaDon", maHoaDon)

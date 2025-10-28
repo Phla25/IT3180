@@ -23,6 +23,39 @@
         .highlight-overdue {
             background-color: #FEF2F2;
         }
+        .btn-export {
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-export-excel {
+            background-color: #10B981;
+            color: white;
+        }
+        
+        .btn-export-pdf {
+            background-color: #EF4444;
+            color: white;
+        }
+        
+        .btn-export:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            transition: all 0.2s;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
@@ -123,7 +156,14 @@
                 </h2>
                 <p style="opacity: 0.9; margin: 0;">Quản lý và thanh toán các khoản phí của hộ gia đình</p>
             </div>
-
+            <div style="display: flex; gap: 10px;">
+                    <a th:href="@{/resident/export/invoices}" class="btn-export btn-export-excel" title="Xuất Excel">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </a>
+                    <a th:href="@{/resident/export/invoices/pdf}" class="btn-export btn-export-pdf" title="Xuất PDF">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
+            </div>
             <div class="content-card">
                 <div class="table-container">
                     <table class="data-table">

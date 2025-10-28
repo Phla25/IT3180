@@ -36,6 +36,39 @@
         .badge-success { background-color: #D1FAE5; color: #065F46; }
         .badge-warning { background-color: #FEF3C7; color: #B45309; }
         .badge-danger { background-color: #FEE2E2; color: #991B1B; }
+        .btn-export {
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-export-excel {
+            background-color: #10B981;
+            color: white;
+        }
+        
+        .btn-export-pdf {
+            background-color: #EF4444;
+            color: white;
+        }
+        
+        .btn-export:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            transition: all 0.2s;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }        
     </style>
 </head>
 <body>
@@ -123,6 +156,12 @@
                 <a th:href="@{/accountant/fee-form}" class="btn-add">
                     <i class="fas fa-plus"></i> Tạo Hóa Đơn Mới
                 </a>
+                    <a th:href="@{/accountant/export/invoices}" class="btn-export btn-export-excel" title="Xuất Excel">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+                <a th:href="@{/accountant/export/invoices/pdf}" class="btn-export btn-export-pdf" title="Xuất PDF">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>                
             </div>
 
             <div class="content-card">

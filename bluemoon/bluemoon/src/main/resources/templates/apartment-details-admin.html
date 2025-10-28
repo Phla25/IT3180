@@ -87,6 +87,44 @@
             align-items: center;
             gap: 5px;
         }
+                .btn-export {
+            padding: 8px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-export-excel {
+            background-color: #10B981;
+            color: white;
+        }
+        
+        .btn-export-excel:hover {
+            background-color: #059669;
+        }
+        
+        .btn-export-pdf {
+            background-color: #6366F1;
+            color: white;
+        }
+        
+        .btn-export-pdf:hover {
+            background-color: #4F46E5;
+        }
+        .feature-badge {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: auto;
+            animation: pulse 2s infinite;
+        }
     </style>
 </head>
 
@@ -160,6 +198,12 @@
                     <a th:href="@{/admin/apartment-delete(maTaiSan=${apartment.maTaiSan})}" class="btn-delete" title="Xóa Căn Hộ" 
                        onclick="return confirm('Bạn có chắc chắn muốn XÓA căn hộ này không? Đây là hành động không thể hoàn tác!')">
                         <i class="fas fa-trash"></i> Xóa Căn Hộ
+                    </a>
+                    <a th:href="@{/admin/export/apartment/{maTaiSan}(maTaiSan=${apartment.maTaiSan})}" class="btn-export btn-export-excel" title="Xuất Excel">
+                        <i class="fas fa-file-excel"></i> Xuất Excel
+                    </a>
+                    <a th:href="@{/admin/export/apartment/{maTaiSan}/pdf(maTaiSan=${apartment.maTaiSan})}" class="btn-export btn-export-pdf" title="Xuất PDF">
+                        <i class="fas fa-file-pdf"></i> Xuất PDF
                     </a>
                 </div>
 

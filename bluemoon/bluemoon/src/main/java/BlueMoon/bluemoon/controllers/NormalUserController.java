@@ -1,15 +1,20 @@
 package BlueMoon.bluemoon.controllers;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -19,15 +24,20 @@ import BlueMoon.bluemoon.entities.DichVu;
 import BlueMoon.bluemoon.entities.DoiTuong;
 import BlueMoon.bluemoon.entities.HoGiaDinh;
 import BlueMoon.bluemoon.entities.HoaDon;
+import BlueMoon.bluemoon.models.ApartmentReportDTO;
 import BlueMoon.bluemoon.models.DichVuStatsDTO;
 import BlueMoon.bluemoon.models.HoGiaDinhDTO;
 import BlueMoon.bluemoon.models.HoaDonStatsDTO;
+import BlueMoon.bluemoon.models.HouseholdReportDTO;
+import BlueMoon.bluemoon.models.InvoiceReportDTO;
 import BlueMoon.bluemoon.models.SuCoStatsDTO;
 import BlueMoon.bluemoon.models.ThongBaoStatsDTO;
 import BlueMoon.bluemoon.services.DangKyDichVuService;
 import BlueMoon.bluemoon.services.DichVuService;
+import BlueMoon.bluemoon.services.ExportService;
 import BlueMoon.bluemoon.services.HoaDonService;
 import BlueMoon.bluemoon.services.NguoiDungService;
+import BlueMoon.bluemoon.services.ReportService;
 import BlueMoon.bluemoon.services.ThanhVienHoService;
 
 @Controller
@@ -42,7 +52,8 @@ public class NormalUserController {
     @Autowired private HoaDonService hoaDonService;
     @Autowired private DichVuService dichVuService;
     @Autowired private DangKyDichVuService dangKyDichVuService;
-
+    @Autowired private ReportService reportService;
+    @Autowired private ExportService exportService;
     /**
      * Helper: Lấy đối tượng DoiTuong hiện tại
      * Giả sử username của principal là CCCD (đã được cấu hình trong UserDetailsService)
@@ -417,5 +428,224 @@ public class NormalUserController {
         }
         
         return "redirect:/resident/my-services";
+    }
+        // ========== EXPORT REPORTS ==========
+    
+    /**
+     * Xuất báo cáo căn hộ của cư dân ra file Excel
+     */
+    @GetMapping("/resident/export/apartments")
+    public ResponseEntity<byte[]> exportResidentApartments(Authentication auth) {
+        try {
+            DoiTuong currentUser = getCurrentUser(auth);
+            if (currentUser == null) {
+                return ResponseEntity.status(401).build();
+            }
+            
+            List<ApartmentReportDTO> apartments = reportService.getApartmentReportForResident(currentUser.getCccd());
+            byte[] excelData = exportService.exportApartmentsToExcel(apartments);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "BaoCao_CanHo_CuDan_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo hóa đơn của cư dân ra file Excel
+     */
+    @GetMapping("/resident/export/invoices")
+    public ResponseEntity<byte[]> exportResidentInvoices(Authentication auth) {
+        try {
+            DoiTuong currentUser = getCurrentUser(auth);
+            if (currentUser == null) {
+                return ResponseEntity.status(401).build();
+            }
+            
+            List<InvoiceReportDTO> invoices = reportService.getInvoiceReportForResident(currentUser.getCccd());
+            byte[] excelData = exportService.exportInvoicesToExcel(invoices);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "BaoCao_HoaDon_CuDan_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo hộ gia đình của cư dân ra file Excel
+     */
+    @GetMapping("/resident/export/household")
+    public ResponseEntity<byte[]> exportResidentHousehold(Authentication auth) {
+        try {
+            DoiTuong currentUser = getCurrentUser(auth);
+            if (currentUser == null) {
+                return ResponseEntity.status(401).build();
+            }
+            
+            List<HouseholdReportDTO> household = reportService.getHouseholdReportForResident(currentUser.getCccd());
+            byte[] excelData = exportService.exportHouseholdsToExcel(household);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "BaoCao_HoGiaDinh_CuDan_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    // ========== PDF EXPORT ENDPOINTS ==========
+    
+    /**
+     * Xuất báo cáo căn hộ của cư dân ra file PDF
+     */
+    @GetMapping("/resident/export/apartments/pdf")
+    public ResponseEntity<byte[]> exportResidentApartmentsPdf(Authentication auth) {
+        try {
+            DoiTuong currentUser = getCurrentUser(auth);
+            if (currentUser == null) {
+                return ResponseEntity.status(401).build();
+            }
+            
+            List<ApartmentReportDTO> apartments = reportService.getApartmentReportForResident(currentUser.getCccd());
+            byte[] pdfData = exportService.exportApartmentsToPdf(apartments);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "BaoCao_CanHo_CuDan_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo hóa đơn của cư dân ra file PDF
+     */
+    @GetMapping("/resident/export/invoices/pdf")
+    public ResponseEntity<byte[]> exportResidentInvoicesPdf(Authentication auth) {
+        try {
+            DoiTuong currentUser = getCurrentUser(auth);
+            if (currentUser == null) {
+                return ResponseEntity.status(401).build();
+            }
+            
+            List<InvoiceReportDTO> invoices = reportService.getInvoiceReportForResident(currentUser.getCccd());
+            byte[] pdfData = exportService.exportInvoicesToPdf(invoices);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "BaoCao_HoaDon_CuDan_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất báo cáo hộ gia đình của cư dân ra file PDF
+     */
+    @GetMapping("/resident/export/household/pdf")
+    public ResponseEntity<byte[]> exportResidentHouseholdPdf(Authentication auth) {
+        try {
+            DoiTuong currentUser = getCurrentUser(auth);
+            if (currentUser == null) {
+                return ResponseEntity.status(401).build();
+            }
+            
+            List<HouseholdReportDTO> household = reportService.getHouseholdReportForResident(currentUser.getCccd());
+            byte[] pdfData = exportService.exportHouseholdsToPdf(household);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "BaoCao_HoGiaDinh_CuDan_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    // ========== EXPORT DETAIL ENDPOINTS ==========
+    
+    /**
+     * Xuất chi tiết hóa đơn ra file Excel
+     */
+    @GetMapping("/resident/export/invoice/{maHoaDon}")
+    public ResponseEntity<byte[]> exportInvoiceDetail(@PathVariable Integer maHoaDon, Authentication auth) {
+        try {
+            DoiTuong currentUser = getCurrentUser(auth);
+            if (currentUser == null) {
+                return ResponseEntity.status(401).build();
+            }
+            
+            List<InvoiceReportDTO> invoice = reportService.getInvoiceDetailReport(maHoaDon);
+            if (invoice.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            byte[] excelData = exportService.exportInvoicesToExcel(invoice);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "ChiTiet_HoaDon_" + maHoaDon + "_" + System.currentTimeMillis() + ".xlsx");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Xuất chi tiết hóa đơn ra file PDF
+     */
+    @GetMapping("/resident/export/invoice/{maHoaDon}/pdf")
+    public ResponseEntity<byte[]> exportInvoiceDetailPdf(@PathVariable Integer maHoaDon, Authentication auth) {
+        try {
+            DoiTuong currentUser = getCurrentUser(auth);
+            if (currentUser == null) {
+                return ResponseEntity.status(401).build();
+            }
+            
+            List<InvoiceReportDTO> invoice = reportService.getInvoiceDetailReport(maHoaDon);
+            if (invoice.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            byte[] pdfData = exportService.exportInvoicesToPdf(invoice);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "ChiTiet_HoaDon_" + maHoaDon + "_" + System.currentTimeMillis() + ".pdf");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

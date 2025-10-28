@@ -45,6 +45,42 @@
         .badge-success { background-color: #D1FAE5; color: #065F46; }
         .badge-warning { background-color: #FEF3C7; color: #B45309; }
         .badge-danger { background-color: #FEE2E2; color: #991B1B; }
+        .btn-export {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        
+        .btn-export-excel {
+            background-color: #10B981;
+            color: white;
+        }
+        
+        .btn-export-excel:hover {
+            background-color: #059669;
+        }
+        
+        .btn-export-pdf {
+            background-color: #EF4444;
+            color: white;
+        }
+        
+        .btn-export-pdf:hover {
+            background-color: #DC2626;
+        }
+        
+        .export-buttons {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #E5E7EB;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -193,6 +229,15 @@
 
                 <div th:unless="${hoaDon.trangThai?.name() == 'chua_thanh_toan' || hoaDon.trangThai?.name() == 'qua_han' || hoaDon.trangThai?.name() == 'cho_xac_nhan'}" style="text-align: center; padding: 20px;">
                     <p style="color: #059669; font-weight: 700;"><i class="fas fa-check-circle"></i> Hóa đơn này đã được <span th:text="${hoaDon.trangThai?.dbValue}">thanh toán</span>.</p>
+                </div>
+                <div class="export-buttons">
+                    <h4 style="color: #4F46E5; margin-bottom: 15px;"><i class="fas fa-download"></i> Xuất Thông Tin Hóa Đơn</h4>
+                    <a th:href="@{/resident/export/invoice/{maHoaDon}(maHoaDon=${hoaDon.maHoaDon})}" class="btn-export btn-export-excel">
+                        <i class="fas fa-file-excel"></i> Xuất Excel
+                    </a>
+                    <a th:href="@{/resident/export/invoice/{maHoaDon}/pdf(maHoaDon=${hoaDon.maHoaDon})}" class="btn-export btn-export-pdf">
+                        <i class="fas fa-file-pdf"></i> Xuất PDF
+                    </a>
                 </div>
             </div>
         </div>

@@ -15,6 +15,16 @@
             align-items: center;
             margin-bottom: 20px;
         }
+        .feature-badge {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: auto;
+            animation: pulse 2s infinite;
+        }        
         .btn-add {
             background-color: #10B981;
             color: white;
@@ -26,6 +36,45 @@
             align-items: center;
             gap: 8px;
         }
+        .btn-add {
+            background-color: #10B981;
+            color: white;
+            padding: 10px 15px;
+        }
+        
+        .btn-export {
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-export-excel {
+            background-color: #10B981;
+            color: white;
+        }
+        
+        .btn-export-pdf {
+            background-color: #EF4444;
+            color: white;
+        }
+        
+        .btn-export:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            transition: all 0.2s;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }        
         .status-badge {
             display: inline-block;
             padding: 4px 8px;
@@ -122,6 +171,12 @@
                 <a th:href="@{/admin/fee-form}" class="btn-add">
                     <i class="fas fa-plus"></i> Tạo Hóa Đơn Mới
                 </a>
+                <a th:href="@{/admin/export/invoices}" class="btn-export btn-export-excel" title="Xuất Excel">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+                <a th:href="@{/admin/export/invoices/pdf}" class="btn-export btn-export-pdf" title="Xuất PDF">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>                
             </div>
 
             <div class="content-card">
